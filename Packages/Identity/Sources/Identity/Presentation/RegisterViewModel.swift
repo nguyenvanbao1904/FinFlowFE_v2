@@ -48,27 +48,37 @@ public class RegisterViewModel: ObservableObject {
         self.sessionManager = sessionManager
     }
 
-    // Mock Send OTP
+    // Send OTP
     public func sendOTP() async {
         guard isEmailValid else { return }
+        
         isSendingOTP = true
-        // Mock API delay
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        isSendingOTP = false
-        showOTPInput = true
+        defer { isSendingOTP = false }
+        
+        do {
+            try await registerUseCase.sendOtp(email: email)
+            // Success
+            showOTPInput = true
+        } catch {
+            Logger.error("Send OTP failed: \(error)", category: "Auth")
+            self.alert = .general(title: "Lỗi", message: error.localizedDescription)
+        }
     }
 
-    // Mock Verify OTP
+    // Verify OTP
     public func verifyOTP() async {
         guard !otpCode.isEmpty else { return }
-        // Mock verification
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        if otpCode == "123456" { // Hardcode for demo
+        
+        do {
+            try await registerUseCase.verifyOtp(email: email, otp: otpCode)
+            
+            // Success
             showOTPInput = false
             isEmailVerified = true
             alert = .general(title: "Thành công", message: "Email đã được xác thực")
-        } else {
-            alert = .general(title: "Lỗi", message: "Mã OTP không đúng (Demo: 123456)")
+        } catch {
+            Logger.error("Verify OTP failed: \(error)", category: "Auth")
+            self.alert = .general(title: "Lỗi", message: "Mã OTP không đúng hoặc đã hết hạn")
         }
     }
 

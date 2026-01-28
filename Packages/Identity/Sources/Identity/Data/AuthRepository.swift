@@ -220,6 +220,28 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         Logger.info("Đăng xuất hoàn tất, đã xóa tokens và cache", category: "Auth")
     }
 
+    public func sendOtp(email: String) async throws {
+        let req = SendOtpRequest(email: email)
+        Logger.info("Gửi OTP đến \(email)...", category: "Auth")
+        let _: [String: String] = try await apiClient.request(
+            endpoint: "/auth/send-otp",
+            method: "POST",
+            body: req,
+            retryOn401: false
+        )
+    }
+
+    public func verifyOtp(email: String, otp: String) async throws {
+        let req = VerifyOtpRequest(email: email, otp: otp)
+        Logger.info("Xác thực OTP cho \(email)...", category: "Auth")
+        let _: [String: String] = try await apiClient.request(
+            endpoint: "/auth/verify-otp",
+            method: "POST",
+            body: req,
+            retryOn401: false
+        )
+    }
+
     // MARK: - Cache Key Helpers
     /// Derive a user-scoped cache key to avoid cross-account leakage.
     /// Prefers passed-in userId from fresh profile; falls back to decoding current token subject.

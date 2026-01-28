@@ -5,6 +5,8 @@ import Foundation
 
 public protocol RegisterUseCaseProtocol: Sendable {
     func execute(request: RegisterRequest) async throws
+    func sendOtp(email: String) async throws
+    func verifyOtp(email: String, otp: String) async throws
 }
 
 public struct RegisterUseCase: RegisterUseCaseProtocol {
@@ -26,7 +28,7 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         let cleanRequest = RegisterRequest(
             username: request.username.trimmingCharacters(in: .whitespacesAndNewlines),
             email: request.email.trimmingCharacters(in: .whitespacesAndNewlines),
-            password: request.password, // Password should potentially not be trimmed or handled carefully
+            password: request.password, 
             firstName: request.firstName?.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: request.lastName?.trimmingCharacters(in: .whitespacesAndNewlines),
             dob: request.dob
@@ -35,5 +37,15 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         Logger.info("Executing register use case", category: "UseCase")
         try await repository.register(req: cleanRequest)
         Logger.info("Register use case completed", category: "UseCase")
+    }
+
+    public func sendOtp(email: String) async throws {
+        Logger.info("Sending OTP to \(email)", category: "UseCase")
+        try await repository.sendOtp(email: email)
+    }
+
+    public func verifyOtp(email: String, otp: String) async throws {
+        Logger.info("Verifying OTP for \(email)", category: "UseCase")
+        try await repository.verifyOtp(email: email, otp: otp)
     }
 }
