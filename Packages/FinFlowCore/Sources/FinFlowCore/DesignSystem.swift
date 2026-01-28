@@ -14,7 +14,7 @@ public enum AppColors {
 
     /// Social media brand colors
     public static let google = Color.red
-    public static let facebook = Color(red: 24 / 255, green: 119 / 255, blue: 242 / 255)
+    public static let apple = Color(red: 24 / 255, green: 119 / 255, blue: 242 / 255)
 
     /// Background gradients
     public static let backgroundDark = [
@@ -86,14 +86,14 @@ public enum AppAssets {
 
     // Social login logos
     public static let googleLogo = "GoogleLogo"  // Add to Assets.xcassets
-    public static let facebookLogo = "FacebookLogo"  // Add to Assets.xcassets
+    public static let appleLogo = "AppleLogo"  // Add to Assets.xcassets
 
     // SF Symbols fallbacks
     public static let personIcon = "person.fill"
     public static let lockIcon = "lock.fill"
     public static let chartIcon = "chart.pie.fill"
     public static let googleIconFallback = "g.circle.fill"
-    public static let facebookIconFallback = "f.circle.fill"
+    public static let appleIconFallback = "f.circle.fill"
 }
 
 // MARK: - Reusable Components
@@ -193,26 +193,26 @@ public struct PrimaryButton: View {
 public struct SocialLoginButton: View {
     public enum Provider {
         case google
-        case facebook
+        case apple
 
         public var color: Color {
             switch self {
             case .google: return AppColors.google
-            case .facebook: return AppColors.facebook
+            case .apple: return AppColors.apple
             }
         }
 
         public var logoAsset: String {
             switch self {
             case .google: return AppAssets.googleLogo
-            case .facebook: return AppAssets.facebookLogo
+            case .apple: return AppAssets.appleLogo
             }
         }
 
         public var iconFallback: String {
             switch self {
             case .google: return AppAssets.googleIconFallback
-            case .facebook: return AppAssets.facebookIconFallback
+            case .apple: return AppAssets.appleIconFallback
             }
         }
     }

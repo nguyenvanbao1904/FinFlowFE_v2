@@ -95,6 +95,10 @@ public class LoginViewModel: ObservableObject {
         }
     }
 
+    public func handleAppleLogin() {
+        self.alert = .general(title: "Thông báo", message: "Tính năng đăng nhập bằng Apple sẽ sớm được cập nhật.")
+    }
+
     public func clearForm() {
         username = ""
         password = ""

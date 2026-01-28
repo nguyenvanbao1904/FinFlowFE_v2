@@ -136,9 +136,8 @@ public struct LoginView: View {
                         }
                     }
 
-                    SocialLoginButton(provider: .facebook) {
-                        // TODO: Handle Facebook login
-                        print("Facebook login tapped")
+                    SocialLoginButton(provider: .apple) {
+                        viewModel.handleAppleLogin()
                     }
                 }
             }

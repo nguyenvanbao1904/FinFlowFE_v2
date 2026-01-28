@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "icons8-facebook-logo-48.png",
+      "filename" : "icons8-apple-50.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "icons8-facebook-logo-96.png",
+      "filename" : "icons8-apple-100.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "icons8-facebook-logo-144.png",
+      "filename" : "icons8-apple-150.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
