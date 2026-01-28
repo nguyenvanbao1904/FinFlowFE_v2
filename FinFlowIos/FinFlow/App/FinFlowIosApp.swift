@@ -61,8 +61,7 @@ struct FinFlowIosApp: App {
         case .login:
             makeLoginView()
         case .register:
-            Text("Register View - Coming Soon")
-                .navigationTitle("Đăng ký")
+            makeRegisterView()
         case .forgotPassword:
             Text("Forgot Password View - Coming Soon")
                 .navigationTitle("Quên mật khẩu")
@@ -115,6 +114,12 @@ struct FinFlowIosApp: App {
     private func makeDashboardView() -> some View {
         DashboardView(
             viewModel: container.makeDashboardViewModel(router: router)
+        )
+    }
+
+    private func makeRegisterView() -> some View {
+        RegisterView(
+            viewModel: container.makeRegisterViewModel()
         )
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-public enum AppErrorAlert: AppAlert, Equatable, Sendable {
+public enum AppErrorAlert: AppAlert, Equatable, Sendable, Identifiable {
     case network(onRetry: @Sendable () -> Void)
     case general(title: String, message: String)
     case auth(message: String)
@@ -17,6 +17,12 @@ public enum AppErrorAlert: AppAlert, Equatable, Sendable {
         case .data:
             return "Lỗi dữ liệu"
         }
+    }
+
+    public var id: String { title + (subtitle ?? "") }
+
+    public var message: String {
+        return subtitle ?? ""
     }
 
     public var subtitle: String? {

@@ -78,6 +78,22 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         }
     }
 
+    public func register(req: RegisterRequest) async throws {
+        do {
+            Logger.info("Gửi request đăng ký...", category: "Auth")
+            let _: RegisterResponse = try await apiClient.request(
+                endpoint: "/auth/register",
+                method: "POST",
+                body: req, 
+                retryOn401: false
+            )
+            Logger.info("Đăng ký thành công", category: "Auth")
+        } catch {
+            Logger.error("Đăng ký thất bại: \(error)", category: "Auth")
+            throw error
+        }
+    }
+
     public func updateProfile(request: UpdateProfileRequest) async throws -> UserProfile {
         do {
             Logger.info("Updating user profile...", category: "Auth")

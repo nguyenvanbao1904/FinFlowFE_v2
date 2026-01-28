@@ -91,18 +91,17 @@ public struct LoginView: View {
 
     private var loginForm: some View {
         VStack(spacing: 18) {
-            GlassyTextField(
-                icon: AppAssets.personIcon,
+            GlassTextField(
+                text: $viewModel.username,
                 placeholder: "Tên đăng nhập hoặc Email",
-                text: $viewModel.username
+                icon: AppAssets.personIcon
             )
 
             VStack(alignment: .trailing, spacing: 8) {
-                GlassyTextField(
-                    icon: AppAssets.lockIcon,
-                    placeholder: "Mật khẩu",
+                GlassSecureField(
                     text: $viewModel.password,
-                    isSecure: true
+                    placeholder: "Mật khẩu",
+                    icon: AppAssets.lockIcon
                 )
 
                 Button("Quên mật khẩu?") {
@@ -143,14 +142,13 @@ public struct LoginView: View {
             }
         }
     }
-
     private var footerSection: some View {
         HStack {
             Text("Chưa có tài khoản?")
                 .foregroundColor(.secondary)
 
             Button("Đăng ký ngay") {
-                // TODO: Navigate to register screen
+                viewModel.navigateToRegister()
             }
             .fontWeight(.bold)
             .foregroundStyle(AppColors.primary)

@@ -101,3 +101,28 @@ public struct GoogleLoginRequest: Codable, Sendable {
         self.idToken = idToken
     }
 }
+
+public struct RegisterRequest: Codable, Sendable {
+    public let username: String
+    public let email: String
+    public let password: String
+    public let firstName: String?
+    public let lastName: String?
+    public let dob: String?
+
+    public init(
+        username: String, email: String, password: String, firstName: String?, lastName: String?,
+        dob: String?
+    ) {
+        self.username = username
+        self.email = email
+        self.password = password
+        self.firstName = firstName
+        self.lastName = lastName
+        self.dob = dob
+    }
+}
+
+public struct RegisterResponse: Codable, Sendable {
+    public let message: String
+}

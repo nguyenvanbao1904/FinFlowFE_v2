@@ -99,6 +99,10 @@ public class LoginViewModel: ObservableObject {
         self.alert = .general(title: "Thông báo", message: "Tính năng đăng nhập bằng Apple sẽ sớm được cập nhật.")
     }
 
+    public func navigateToRegister() {
+        router.navigate(to: .register)
+    }
+
     public func clearForm() {
         username = ""
         password = ""

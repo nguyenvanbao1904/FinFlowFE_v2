@@ -98,25 +98,53 @@ public enum AppAssets {
 
 // MARK: - Reusable Components
 
+// MARK: - Color Extensions
+
+extension Color {
+    public init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
+
+// MARK: - Reusable Components
+
 /// Modern glassmorphism-styled text field with icon
-public struct GlassyTextField: View {
+public struct GlassTextField: View {
     public let icon: String
     public let placeholder: String
     @Binding public var text: String
-    public var isSecure: Bool
     public var keyboardType: UIKeyboardType
 
     public init(
-        icon: String,
-        placeholder: String,
         text: Binding<String>,
-        isSecure: Bool = false,
+        placeholder: String,
+        icon: String,
         keyboardType: UIKeyboardType = .default
     ) {
-        self.icon = icon
-        self.placeholder = placeholder
         self._text = text
-        self.isSecure = isSecure
+        self.placeholder = placeholder
+        self.icon = icon
         self.keyboardType = keyboardType
     }
 
@@ -126,12 +154,59 @@ public struct GlassyTextField: View {
                 .foregroundColor(.secondary)
                 .frame(width: 25)
 
-            if isSecure {
+            TextField(placeholder, text: $text)
+                .textInputAutocapitalization(.none)
+                .keyboardType(keyboardType)
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, Spacing.sm)
+        .background(.ultraThinMaterial)
+        .cornerRadius(CornerRadius.medium)
+        .overlay(
+            RoundedRectangle(cornerRadius: CornerRadius.medium)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+        )
+    }
+}
+
+/// Modern glassmorphism-styled secure field with icon
+public struct GlassSecureField: View {
+    public let icon: String
+    public let placeholder: String
+    @Binding public var text: String
+    @State private var isSecured: Bool = true
+
+    public init(
+        text: Binding<String>,
+        placeholder: String,
+        icon: String
+    ) {
+        self._text = text
+        self.placeholder = placeholder
+        self.icon = icon
+    }
+
+    public var body: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: icon)
+                .foregroundColor(.secondary)
+                .frame(width: 25)
+
+            if isSecured {
                 SecureField(placeholder, text: $text)
+                    .textContentType(.password)
             } else {
                 TextField(placeholder, text: $text)
-                    .textInputAutocapitalization(.none)
-                    .keyboardType(keyboardType)
+                    .textContentType(.password)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+            }
+            
+            Button(action: {
+                isSecured.toggle()
+            }) {
+                Image(systemName: isSecured ? "eye.slash" : "eye")
+                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 16)

@@ -32,9 +32,12 @@ public class DependencyContainer {
     private let loginUseCase: LoginUseCaseProtocol
     private let logoutUseCase: LogoutUseCaseProtocol
     private let getProfileUseCase: GetProfileUseCaseProtocol
+    private let registerUseCase: RegisterUseCaseProtocol
 
     private init() {
         let config = AppConfig.shared
+        // ... (existing helper setup)
+        
         let networkConfig = config.networkConfig
         self.networkConfig = networkConfig
 
@@ -70,8 +73,6 @@ public class DependencyContainer {
         self.authRepository = concreteAuthRepository
 
         // 🔗 Config Auth Hooks (Break Circular Dependency)
-        // Sử dụng Task để gọi vào actor APIClient (thread-safe, clean architecture)
-        // Capture local variables (concreteAuthRepository, tokenStore) to avoid self reference
         Task { [weak concreteAuthRepository, tokenStore] in
             await apiClient.configureAuthHooks(
                 refreshHandler: { [weak concreteAuthRepository] in
@@ -97,6 +98,7 @@ public class DependencyContainer {
         self.loginUseCase = LoginUseCase(repository: concreteAuthRepository)
         self.logoutUseCase = LogoutUseCase(repository: concreteAuthRepository)
         self.getProfileUseCase = GetProfileUseCase(repository: concreteAuthRepository)
+        self.registerUseCase = RegisterUseCase(repository: concreteAuthRepository)
     }
 
     // MARK: - ViewModel Factories
@@ -106,6 +108,14 @@ public class DependencyContainer {
             loginUseCase: loginUseCase,
             sessionManager: sessionManager,
             router: router
+        )
+    }
+
+    func makeRegisterViewModel() -> RegisterViewModel {
+        return RegisterViewModel(
+            registerUseCase: registerUseCase,
+            loginUseCase: loginUseCase,
+            sessionManager: sessionManager
         )
     }
 
