@@ -78,13 +78,14 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         }
     }
 
-    public func register(req: RegisterRequest) async throws {
+    public func register(req: RegisterRequest, token: String) async throws {
         do {
             Logger.info("Gửi request đăng ký...", category: "Auth")
             let _: RegisterResponse = try await apiClient.request(
                 endpoint: "/auth/register",
                 method: "POST",
-                body: req, 
+                body: req,
+                headers: ["X-Registration-Token": token],
                 retryOn401: false
             )
             Logger.info("Đăng ký thành công", category: "Auth")
@@ -231,15 +232,16 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         )
     }
 
-    public func verifyOtp(email: String, otp: String) async throws {
+    public func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse {
         let req = VerifyOtpRequest(email: email, otp: otp)
         Logger.info("Xác thực OTP cho \(email)...", category: "Auth")
-        let _: [String: String] = try await apiClient.request(
+        let response: VerifyOtpResponse = try await apiClient.request(
             endpoint: "/auth/verify-otp",
             method: "POST",
             body: req,
             retryOn401: false
         )
+        return response
     }
 
     // MARK: - Cache Key Helpers

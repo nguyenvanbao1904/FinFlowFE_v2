@@ -6,6 +6,7 @@ public protocol HTTPClientProtocol: Sendable {
         endpoint: String,
         method: String,
         body: (any Encodable & Sendable)?,
+        headers: [String: String]?,
         version: String?
     ) async throws -> T
 }
@@ -17,13 +18,13 @@ public extension HTTPClientProtocol {
         method: String,
         body: (any Encodable & Sendable)?
     ) async throws -> T {
-        try await request(endpoint: endpoint, method: method, body: body, version: nil)
+        try await request(endpoint: endpoint, method: method, body: body, headers: nil, version: nil)
     }
 
     func request<T: Codable & Sendable>(
         endpoint: String,
         method: String
     ) async throws -> T {
-        try await request(endpoint: endpoint, method: method, body: nil, version: nil)
+        try await request(endpoint: endpoint, method: method, body: nil, headers: nil, version: nil)
     }
 }

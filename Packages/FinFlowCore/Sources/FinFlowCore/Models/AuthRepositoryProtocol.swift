@@ -6,7 +6,7 @@ public protocol AuthRepositoryProtocol: Sendable {
     func getMyProfile() async throws -> UserProfile
     func refreshToken() async throws -> RefreshTokenResponse
     func logout() async throws
-    func register(req: RegisterRequest) async throws
+    func register(req: RegisterRequest, token: String) async throws
     func sendOtp(email: String) async throws
-    func verifyOtp(email: String, otp: String) async throws
+    func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse
 }

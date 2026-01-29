@@ -126,3 +126,8 @@ public struct RegisterRequest: Codable, Sendable {
 public struct RegisterResponse: Codable, Sendable {
     public let message: String
 }
+
+public struct VerifyOtpResponse: Codable, Sendable {
+    public let message: String
+    public let registrationToken: String
+}

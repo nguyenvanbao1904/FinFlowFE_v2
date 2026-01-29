@@ -38,12 +38,14 @@ public actor APIClient: HTTPClientProtocol {
         endpoint: String,
         method: String,
         body: (any Encodable & Sendable)?,
+        headers: [String: String]? = nil,
         version: String?
     ) async throws -> T {
         try await request(
             endpoint: endpoint,
             method: method,
             body: body,
+            headers: headers,
             version: version,
             retryOn401: true
         )
@@ -54,6 +56,7 @@ public actor APIClient: HTTPClientProtocol {
         endpoint: String,
         method: String = "GET",
         body: (any Encodable & Sendable)? = nil,
+        headers: [String: String]? = nil,
         version: String? = nil,  // Override version cho request cụ thể
         retryOn401: Bool = true  // Cho phép tắt retry khi gọi refresh token
     ) async throws -> T {
@@ -68,6 +71,11 @@ public actor APIClient: HTTPClientProtocol {
             request.httpMethod = method
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(version ?? apiVersion, forHTTPHeaderField: "API-Version")
+            
+            // Add custom headers
+            headers?.forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
 
             // Đính kèm Authorization nếu có token (hoặc token override sau refresh)
             let bearer: String?

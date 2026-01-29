@@ -4,9 +4,9 @@ import Foundation
 // MARK: - Register Use Case
 
 public protocol RegisterUseCaseProtocol: Sendable {
-    func execute(request: RegisterRequest) async throws
+    func execute(request: RegisterRequest, registrationToken: String) async throws
     func sendOtp(email: String) async throws
-    func verifyOtp(email: String, otp: String) async throws
+    func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse
 }
 
 public struct RegisterUseCase: RegisterUseCaseProtocol {
@@ -16,7 +16,7 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         self.repository = repository
     }
 
-    public func execute(request: RegisterRequest) async throws {
+    public func execute(request: RegisterRequest, registrationToken: String) async throws {
         // Validation logic
         guard !request.username.isEmpty, 
               !request.password.isEmpty, 
@@ -35,7 +35,7 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         )
 
         Logger.info("Executing register use case", category: "UseCase")
-        try await repository.register(req: cleanRequest)
+        try await repository.register(req: cleanRequest, token: registrationToken)
         Logger.info("Register use case completed", category: "UseCase")
     }
 
@@ -44,8 +44,8 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         try await repository.sendOtp(email: email)
     }
 
-    public func verifyOtp(email: String, otp: String) async throws {
+    public func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse {
         Logger.info("Verifying OTP for \(email)", category: "UseCase")
-        try await repository.verifyOtp(email: email, otp: otp)
+        return try await repository.verifyOtp(email: email, otp: otp)
     }
 }

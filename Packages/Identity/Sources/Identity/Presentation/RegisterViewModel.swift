@@ -21,6 +21,7 @@ public class RegisterViewModel: ObservableObject {
     @Published public var showOTPInput = false
     @Published public var isEmailVerified = false
     @Published public var isSendingOTP = false
+    @Published public var registrationToken = ""
     
     // Computed property for validation UI
     public var isEmailValid: Bool {
@@ -70,11 +71,12 @@ public class RegisterViewModel: ObservableObject {
         guard !otpCode.isEmpty else { return }
         
         do {
-            try await registerUseCase.verifyOtp(email: email, otp: otpCode)
+            let response = try await registerUseCase.verifyOtp(email: email, otp: otpCode)
             
             // Success
             showOTPInput = false
             isEmailVerified = true
+            registrationToken = response.registrationToken
             alert = .general(title: "Thành công", message: "Email đã được xác thực")
         } catch {
             Logger.error("Verify OTP failed: \(error)", category: "Auth")
@@ -120,7 +122,7 @@ public class RegisterViewModel: ObservableObject {
 
         // 3. Call UseCase
         do {
-            try await registerUseCase.execute(request: request)
+            try await registerUseCase.execute(request: request, registrationToken: registrationToken)
             Logger.info("Registration API success, attempting auto-login...", category: "Auth")
             
             // 4. Auto Login
