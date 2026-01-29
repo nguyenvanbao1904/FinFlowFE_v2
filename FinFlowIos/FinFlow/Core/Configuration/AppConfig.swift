@@ -27,7 +27,7 @@ struct AppConfig {
     var networkConfig: NetworkConfig {
         switch environment {
         case .development:
-            return NetworkConfig(baseURL: "http://10.221.29.126:8080/api")
+            return NetworkConfig(baseURL: "http://192.168.1.5:8080/api")
         case .production:
             return NetworkConfig(baseURL: "https://api.finflow.com/api")
         }

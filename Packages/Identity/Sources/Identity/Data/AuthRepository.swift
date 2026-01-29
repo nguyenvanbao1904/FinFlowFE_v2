@@ -221,9 +221,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         Logger.info("Đăng xuất hoàn tất, đã xóa tokens và cache", category: "Auth")
     }
 
-    public func sendOtp(email: String) async throws {
-        let req = SendOtpRequest(email: email)
-        Logger.info("Gửi OTP đến \(email)...", category: "Auth")
+    public func sendOtp(email: String, purpose: OtpPurpose) async throws {
+        let req = SendOtpRequest(email: email, purpose: purpose)
+        Logger.info("Gửi OTP đến \(email) cho mục đích \(purpose.rawValue)...", category: "Auth")
         let _: [String: String] = try await apiClient.request(
             endpoint: "/auth/send-otp",
             method: "POST",
@@ -232,9 +232,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         )
     }
 
-    public func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse {
-        let req = VerifyOtpRequest(email: email, otp: otp)
-        Logger.info("Xác thực OTP cho \(email)...", category: "Auth")
+    public func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws -> VerifyOtpResponse {
+        let req = VerifyOtpRequest(email: email, otp: otp, purpose: purpose)
+        Logger.info("Xác thực OTP cho \(email) với mục đích \(purpose.rawValue)...", category: "Auth")
         let response: VerifyOtpResponse = try await apiClient.request(
             endpoint: "/auth/verify-otp",
             method: "POST",
@@ -242,6 +242,29 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             retryOn401: false
         )
         return response
+    }
+    
+    public func resetPassword(req: ResetPasswordRequest, token: String) async throws {
+         Logger.info("Gửi request đặt lại mật khẩu...", category: "Auth")
+         let _: [String: String] = try await apiClient.request(
+             endpoint: "/auth/reset-password",
+             method: "POST",
+             body: req,
+             headers: ["X-Reset-Token": token],
+             retryOn401: false
+         )
+         Logger.info("Đặt lại mật khẩu thành công", category: "Auth")
+    }
+
+    public func checkUserExistence(email: String) async throws -> Bool {
+        let req = CheckUserExistenceRequest(email: email)
+        let response: CheckUserExistenceResponse = try await apiClient.request(
+            endpoint: "/auth/check-user-existence",
+            method: "POST",
+            body: req,
+            retryOn401: false
+        )
+        return response.exists
     }
 
     // MARK: - Cache Key Helpers

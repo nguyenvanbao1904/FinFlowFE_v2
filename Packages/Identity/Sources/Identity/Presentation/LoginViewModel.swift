@@ -103,6 +103,10 @@ public class LoginViewModel: ObservableObject {
         router.navigate(to: .register)
     }
 
+    public func navigateToForgotPassword() {
+        router.navigate(to: .forgotPassword)
+    }
+
     public func clearForm() {
         username = ""
         password = ""

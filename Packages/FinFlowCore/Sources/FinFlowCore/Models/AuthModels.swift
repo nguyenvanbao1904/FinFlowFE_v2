@@ -131,3 +131,52 @@ public struct VerifyOtpResponse: Codable, Sendable {
     public let message: String
     public let registrationToken: String
 }
+
+public enum OtpPurpose: String, Codable, Sendable {
+    case register = "REGISTER"
+    case resetPassword = "RESET_PASSWORD"
+}
+
+public struct ResetPasswordRequest: Codable, Sendable {
+    public let password: String
+    public let confirmPassword: String
+    
+    public init(password: String, confirmPassword: String) {
+        self.password = password
+        self.confirmPassword = confirmPassword
+    }
+}
+
+public struct SendOtpRequest: Codable, Sendable {
+    public let email: String
+    public let purpose: OtpPurpose
+    
+    public init(email: String, purpose: OtpPurpose) {
+        self.email = email
+        self.purpose = purpose
+    }
+}
+
+public struct VerifyOtpRequest: Codable, Sendable {
+    public let email: String
+    public let otp: String
+    public let purpose: OtpPurpose
+    
+    public init(email: String, otp: String, purpose: OtpPurpose) {
+        self.email = email
+        self.otp = otp
+        self.purpose = purpose
+    }
+}
+
+public struct CheckUserExistenceRequest: Codable, Sendable {
+    public let email: String
+    
+    public init(email: String) {
+        self.email = email
+    }
+}
+
+public struct CheckUserExistenceResponse: Codable, Sendable {
+    public let exists: Bool
+}

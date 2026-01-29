@@ -14,6 +14,7 @@ public enum AppError: Error, LocalizedError, Sendable {
     case serverError(Int, String)  // Error code và message từ backend
     case decodingError
     case unauthorized(String)  // 401 - Token invalid/expired with server message
+    case validationError(String) // Local validation error
     case unknown
 
     public var errorDescription: String? {
@@ -25,6 +26,8 @@ public enum AppError: Error, LocalizedError, Sendable {
         case .decodingError:
             return "Lỗi xử lý dữ liệu"
         case .unauthorized(let msg):
+            return msg
+        case .validationError(let msg):
             return msg
         case .unknown:
             return "Lỗi không xác định"

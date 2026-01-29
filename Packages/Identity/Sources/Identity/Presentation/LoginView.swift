@@ -105,7 +105,7 @@ public struct LoginView: View {
                 )
 
                 Button("Quên mật khẩu?") {
-                    // TODO: Handle forgot password
+                    viewModel.navigateToForgotPassword()
                 }
                 .font(AppTypography.buttonTitle)
                 .foregroundStyle(AppColors.primary)

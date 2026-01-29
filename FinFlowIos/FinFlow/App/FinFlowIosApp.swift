@@ -63,8 +63,8 @@ struct FinFlowIosApp: App {
         case .register:
             makeRegisterView()
         case .forgotPassword:
-            Text("Forgot Password View - Coming Soon")
-                .navigationTitle("Quên mật khẩu")
+            makeForgotPasswordView()
+                .navigationTitle("Quên Mật Khẩu") // Optional title
         case .verifyOTP(let email):
             Text("Verify OTP for \(email)")
                 .navigationTitle("Xác thực OTP")
@@ -120,6 +120,12 @@ struct FinFlowIosApp: App {
     private func makeRegisterView() -> some View {
         RegisterView(
             viewModel: container.makeRegisterViewModel()
+        )
+    }
+
+    private func makeForgotPasswordView() -> some View {
+        ForgotPasswordView(
+            viewModel: container.makeForgotPasswordViewModel()
         )
     }
 }

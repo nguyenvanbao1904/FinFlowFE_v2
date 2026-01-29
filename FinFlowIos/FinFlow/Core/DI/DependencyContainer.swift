@@ -33,6 +33,7 @@ public class DependencyContainer {
     private let logoutUseCase: LogoutUseCaseProtocol
     private let getProfileUseCase: GetProfileUseCaseProtocol
     private let registerUseCase: RegisterUseCaseProtocol
+    private let forgotPasswordUseCase: ForgotPasswordUseCaseProtocol
 
     private init() {
         let config = AppConfig.shared
@@ -99,6 +100,7 @@ public class DependencyContainer {
         self.logoutUseCase = LogoutUseCase(repository: concreteAuthRepository)
         self.getProfileUseCase = GetProfileUseCase(repository: concreteAuthRepository)
         self.registerUseCase = RegisterUseCase(repository: concreteAuthRepository)
+        self.forgotPasswordUseCase = ForgotPasswordUseCase(repository: concreteAuthRepository)
     }
 
     // MARK: - ViewModel Factories
@@ -117,6 +119,10 @@ public class DependencyContainer {
             loginUseCase: loginUseCase,
             sessionManager: sessionManager
         )
+    }
+
+    func makeForgotPasswordViewModel() -> ForgotPasswordViewModel {
+        return ForgotPasswordViewModel(useCase: forgotPasswordUseCase)
     }
 
     func makeDashboardViewModel(router: any AppRouterProtocol) -> DashboardViewModel {

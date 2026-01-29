@@ -41,11 +41,11 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
 
     public func sendOtp(email: String) async throws {
         Logger.info("Sending OTP to \(email)", category: "UseCase")
-        try await repository.sendOtp(email: email)
+        try await repository.sendOtp(email: email, purpose: .register)
     }
 
     public func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse {
         Logger.info("Verifying OTP for \(email)", category: "UseCase")
-        return try await repository.verifyOtp(email: email, otp: otp)
+        return try await repository.verifyOtp(email: email, otp: otp, purpose: .register)
     }
 }
