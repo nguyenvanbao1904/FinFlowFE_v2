@@ -15,10 +15,10 @@ public class DependencyContainer {
     public static let shared = DependencyContainer()
 
     // 1. Hạ tầng (Infrastructure)
-    private let networkConfig: any NetworkConfigProtocol
-    private let tokenStore: any TokenStoreProtocol
-    private let httpClient: any HTTPClientProtocol
-    private let cacheService: any CacheServiceProtocol
+    let networkConfig: any NetworkConfigProtocol
+    let tokenStore: any TokenStoreProtocol
+    let httpClient: any HTTPClientProtocol
+    let cacheService: any CacheServiceProtocol
 
     // 2. Services
 
@@ -26,14 +26,9 @@ public class DependencyContainer {
     public let sessionManager: SessionManager
 
     // 3. (Repositories)
-    private let authRepository: AuthRepositoryProtocol
+    let authRepository: AuthRepositoryProtocol
 
-    // 4. Use Cases
-    private let loginUseCase: LoginUseCaseProtocol
-    private let logoutUseCase: LogoutUseCaseProtocol
-    private let getProfileUseCase: GetProfileUseCaseProtocol
-    private let registerUseCase: RegisterUseCaseProtocol
-    private let forgotPasswordUseCase: ForgotPasswordUseCaseProtocol
+    // 4. Use Cases - Created on demand (Transient) to avoid Container bloat
 
     private init() {
         let config = AppConfig.shared
@@ -95,60 +90,13 @@ public class DependencyContainer {
             authRepository: concreteAuthRepository
         )
 
-        // Khởi tạo Use Cases với Repository
-        self.loginUseCase = LoginUseCase(repository: concreteAuthRepository)
-        self.logoutUseCase = LogoutUseCase(repository: concreteAuthRepository)
-        self.getProfileUseCase = GetProfileUseCase(repository: concreteAuthRepository)
-        self.registerUseCase = RegisterUseCase(repository: concreteAuthRepository)
-        self.forgotPasswordUseCase = ForgotPasswordUseCase(repository: concreteAuthRepository)
     }
 
     // MARK: - ViewModel Factories
-
-    func makeLoginViewModel(router: any AppRouterProtocol) -> LoginViewModel {
-        return LoginViewModel(
-            loginUseCase: loginUseCase,
-            sessionManager: sessionManager,
-            router: router
-        )
-    }
-
-    func makeRegisterViewModel() -> RegisterViewModel {
-        return RegisterViewModel(
-            registerUseCase: registerUseCase,
-            loginUseCase: loginUseCase,
-            sessionManager: sessionManager
-        )
-    }
-
-    func makeForgotPasswordViewModel() -> ForgotPasswordViewModel {
-        return ForgotPasswordViewModel(useCase: forgotPasswordUseCase)
-    }
-
-    func makeDashboardViewModel(router: any AppRouterProtocol) -> DashboardViewModel {
-        return DashboardViewModel(
-            getProfileUseCase: getProfileUseCase,
-            authRepository: authRepository,
-            logoutUseCase: logoutUseCase,
-            sessionManager: sessionManager,
-            router: router
-        )
-    }
-
-    // MARK: - Use Case Factories (để Coordinators có thể tạo fresh instances)
-    func makeLoginUseCase() -> LoginUseCaseProtocol {
-        return loginUseCase
-    }
-
-    func makeLogoutUseCase() -> LogoutUseCaseProtocol {
-        return logoutUseCase
-    }
-
-    // MARK: - Repository Factories
-
-    func makeAuthRepository() -> AuthRepositoryProtocol {
-        return authRepository
-    }
+    
+    // Factories are now modularized in extensions:
+    // - DependencyContainer+Identity.swift
+    // - DependencyContainer+Dashboard.swift
 
     // MARK: - Auth State
 
