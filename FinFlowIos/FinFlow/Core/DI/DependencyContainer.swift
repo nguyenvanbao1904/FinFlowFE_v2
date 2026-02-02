@@ -37,8 +37,8 @@ public class DependencyContainer {
         let networkConfig = config.networkConfig
         self.networkConfig = networkConfig
 
-        // Dùng KeychainTokenStore thay vì InMemoryTokenStore cho production
-        let tokenStore = KeychainTokenStore()
+        // Dùng AuthTokenStore mới (gộp cả Access & Refresh Token)
+        let tokenStore = AuthTokenStore()
         self.tokenStore = tokenStore
 
         // Khởi tạo cache service

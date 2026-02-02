@@ -8,19 +8,17 @@ import Foundation
 
 public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     private let apiClient: APIClient
-    private let tokenStore: (any TokenStoreProtocol)?
-    private let refreshTokenStore: RefreshTokenStore
+    // We use concrete AuthTokenStore internally to access both AT and RT methods
+    private let tokenStore: AuthTokenStore? 
     internal let cacheService: (any CacheServiceProtocol)?
 
     public init(
         apiClient: APIClient,
-        tokenStore: (any TokenStoreProtocol)? = nil,
-        refreshTokenStore: RefreshTokenStore = RefreshTokenStore(),
+        tokenStore: AuthTokenStore? = nil,
         cacheService: (any CacheServiceProtocol)? = nil
     ) {
         self.apiClient = apiClient
         self.tokenStore = tokenStore
-        self.refreshTokenStore = refreshTokenStore
         self.cacheService = cacheService
     }
 
@@ -39,7 +37,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
 
             // Lưu refresh token nếu có
             if let refreshToken = response.refreshToken {
-                await refreshTokenStore.setRefreshToken(refreshToken)
+                await tokenStore?.setRefreshToken(refreshToken)
 
             }
 
@@ -67,7 +65,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
 
             await tokenStore?.setToken(response.token)
             if let refreshToken = response.refreshToken {
-                await refreshTokenStore.setRefreshToken(refreshToken)
+                await tokenStore?.setRefreshToken(refreshToken)
             }
             
             Logger.info("Đăng nhập Google thành công", category: "Auth")
@@ -163,7 +161,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     }
 
     public func refreshToken() async throws -> RefreshTokenResponse {
-        guard let refreshToken = await refreshTokenStore.getRefreshToken() else {
+        guard let refreshToken = await tokenStore?.getRefreshToken() else {
             Logger.error("Không có refresh token", category: "Auth")
             throw AppError.unauthorized("Không tìm thấy refresh token")
         }
@@ -181,7 +179,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             // Cập nhật tokens mới
             await tokenStore?.setToken(response.token)
             if let newRefreshToken = response.refreshToken {
-                await refreshTokenStore.setRefreshToken(newRefreshToken)
+                await tokenStore?.setRefreshToken(newRefreshToken)
             }
 
             Logger.info("Refresh token thành công", category: "Auth")
@@ -214,8 +212,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         }
 
         // 2. Clear local tokens and cache
-        await tokenStore?.clearToken()
-        await refreshTokenStore.clearRefreshToken()
+        await tokenStore?.clearAll()
         try? await cacheService?.clear()
 
         Logger.info("Đăng xuất hoàn tất, đã xóa tokens và cache", category: "Auth")
