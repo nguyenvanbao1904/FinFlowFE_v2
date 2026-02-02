@@ -9,15 +9,17 @@ import FinFlowCore
 import SwiftUI
 
 public struct LoginView: View {
-    @StateObject private var viewModel: LoginViewModel
+    @State private var viewModel: LoginViewModel
     @Environment(\.colorScheme) var colorScheme
 
     public init(viewModel: LoginViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {
-        ZStack {
+        @Bindable var vm = viewModel
+        
+        return ZStack {
             // Background gradient
             backgroundLayer
                 .ignoresSafeArea()
@@ -42,7 +44,7 @@ public struct LoginView: View {
             }
             .padding(.horizontal)
         }
-        .showCustomAlert(alert: $viewModel.alert)
+        .showCustomAlert(alert: $vm.alert)
     }
 
     // MARK: - Sub-components
@@ -90,16 +92,17 @@ public struct LoginView: View {
     }
 
     private var loginForm: some View {
-        VStack(spacing: 18) {
+        @Bindable var vm = viewModel
+        return VStack(spacing: 18) {
             GlassTextField(
-                text: $viewModel.username,
+                text: $vm.username,
                 placeholder: "Tên đăng nhập hoặc Email",
                 icon: AppAssets.personIcon
             )
 
             VStack(alignment: .trailing, spacing: 8) {
                 GlassSecureField(
-                    text: $viewModel.password,
+                    text: $vm.password,
                     placeholder: "Mật khẩu",
                     icon: AppAssets.lockIcon
                 )

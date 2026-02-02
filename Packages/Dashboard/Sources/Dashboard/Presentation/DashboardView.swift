@@ -4,61 +4,64 @@
 //
 
 import FinFlowCore
-import SwiftUI
 import Identity
+import SwiftUI
 
 public struct DashboardView: View {
-    @StateObject private var viewModel: DashboardViewModel
+    @State private var viewModel: DashboardViewModel
 
     public init(viewModel: DashboardViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    if let p = viewModel.profile {
-                        Text("Chào mừng, \(p.firstName ?? "") \(p.lastName ?? "")!")
-                            .font(.title)
-                            .bold()
+        @Bindable var vm = viewModel
 
-                        Text("Email: \(p.email)")
-                            .font(.body)
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if let p = viewModel.profile {
+                    Text("Chào mừng, \(p.firstName ?? "") \(p.lastName ?? "")!")
+                        .font(.title)
+                        .bold()
 
-                        Text("Vai trò: \(p.roles.joined(separator: ", "))")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    Text("Email: \(p.email)")
+                        .font(.body)
 
-                        Spacer()
+                    Text("Vai trò: \(p.roles.joined(separator: ", "))")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                        Button("Đăng xuất") {
-                            Task {
-                                await viewModel.logout()
-                            }
+                    Spacer()
+
+                    Button("Đăng xuất") {
+                        Task {
+                            await viewModel.logout()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
                 }
             }
-            .padding()
-            .task {
-                await viewModel.loadProfile()
-            }
-            .refreshable {
-                await viewModel.refresh()
-            }
-            .navigationTitle("Dashboard")
-            .sheet(isPresented: $viewModel.shouldShowUpdateProfile, onDismiss: {
+        }
+        .padding()
+        .task {
+            await viewModel.loadProfile()
+        }
+        .refreshable {
+            await viewModel.refresh()
+        }
+        .navigationTitle("Dashboard")
+        .sheet(
+            isPresented: $vm.shouldShowUpdateProfile,
+            onDismiss: {
                 Task {
                     await viewModel.refresh()
                 }
-            }) {
-                UpdateProfileView(viewModel: viewModel.makeUpdateProfileViewModel())
-                    .interactiveDismissDisabled()
             }
-            .showCustomAlert(alert: $viewModel.alert)
+        ) {
+            UpdateProfileView(viewModel: viewModel.makeUpdateProfileViewModel())
+                .interactiveDismissDisabled()
         }
+        .showCustomAlert(alert: $vm.alert)
     }
 }

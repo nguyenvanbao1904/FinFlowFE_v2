@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "FinFlowCore",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(name: "FinFlowCore", targets: ["FinFlowCore"]),

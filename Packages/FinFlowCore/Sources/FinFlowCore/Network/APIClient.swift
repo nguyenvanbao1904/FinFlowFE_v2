@@ -33,7 +33,6 @@ public actor APIClient: HTTPClientProtocol {
             }()
     }
 
-    // Entry point matching HTTPClientProtocol
     public func request<T: Codable & Sendable>(
         endpoint: String,
         method: String,
@@ -72,12 +71,10 @@ public actor APIClient: HTTPClientProtocol {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(version ?? apiVersion, forHTTPHeaderField: "API-Version")
             
-            // Add custom headers
             headers?.forEach { key, value in
                 request.setValue(value, forHTTPHeaderField: key)
             }
 
-            // Đính kèm Authorization nếu có token (hoặc token override sau refresh)
             let bearer: String?
             if let override = tokenOverride {
                 bearer = override
@@ -112,7 +109,6 @@ public actor APIClient: HTTPClientProtocol {
 
             logResponse(httpResponse, data: data)
 
-            // Handle error responses (4xx, 5xx)
             guard (200...299).contains(httpResponse.statusCode) else {
                 if httpResponse.statusCode == 401, retryOn401 {
                     do {
@@ -151,12 +147,21 @@ public actor APIClient: HTTPClientProtocol {
                     throw AppError.serverError(errorResponse.code, errorMessage)
                 }
 
-                // Fallback to raw response body
                 let serverMessage = String(data: data, encoding: .utf8) ?? "Lỗi máy chủ"
                 throw AppError.serverError(httpResponse.statusCode, serverMessage)
             }
 
             do {
+                if data.isEmpty {
+                    if let emptyValue = EmptyResponse() as? T {
+                         return emptyValue
+                    }
+                    // If T is NOT EmptyResponse but data IS empty, let JSONDecoder fail naturally or throw specific error?
+                    // Usually JSONDecoder will fail. We let it proceed to fail naturally or we could handle Void? 
+                    // Swift doesn't allow `as? Void`.
+                    // But if T is optional, `nil`? JSONDecoder handles `null` but not empty.
+                }
+
                 return try JSONDecoder().decode(T.self, from: data)
             } catch {
                 Logger.error("Decoding error: \(error)", category: "Network")

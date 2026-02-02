@@ -3,15 +3,17 @@
 //  FinFlowCore
 //
 
-import Combine
 import Foundation
+import Observation
 
 @MainActor
-public final class SessionManager: ObservableObject {
-    @Published public private(set) var state: SessionState = .loading
-    @Published public private(set) var currentUser: UserProfile?
 
-    public enum SessionState: Equatable {
+@Observable
+public final class SessionManager {
+    public private(set) var state: SessionState = .loading
+    public private(set) var currentUser: UserProfile?
+
+    public enum SessionState: Equatable, Sendable {
         case loading
         case authenticated(token: String)
         case unauthenticated
@@ -99,6 +101,44 @@ public final class SessionManager: ObservableObject {
             Logger.info("✅ Profile loaded", category: "Session")
         } catch {
             Logger.error("❌ Failed to load profile: \(error)", category: "Session")
+        }
+    }
+    // MARK: - Async Streams
+
+    /// Dòng dữ liệu trạng thái (State Stream) - Phiên bản Fix Lỗi Timing
+    public var stateStream: AsyncStream<SessionState> {
+        AsyncStream { continuation in
+            let task = Task { @MainActor [weak self] in
+                guard let self = self else { return }
+
+                // 1. Yield giá trị đầu tiên ngay lập tức
+                continuation.yield(self.state)
+
+                // 2. Vòng lặp lắng nghe thay đổi
+                while !Task.isCancelled {
+                    // Tạo một "điểm chờ" (Signal)
+                    await withCheckedContinuation {
+                        (innerContinuation: CheckedContinuation<Void, Never>) in
+                        // Đăng ký theo dõi
+                        withObservationTracking {
+                            _ = self.state  // "Chạm" vào biến để đăng ký
+                        } onChange: {
+                            // Khi biến SẮP thay đổi (willSet), ta resume task
+                            // Việc resume này sẽ đẩy Task ra hàng đợi sau khi việc gán hoàn tất
+                            Task { @MainActor in
+                                innerContinuation.resume()
+                            }
+                        }
+                    }
+
+                    // 3. Sau khi "tỉnh dậy", giá trị đã được update xong -> Yield giá trị mới
+                    continuation.yield(self.state)
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
         }
     }
 }

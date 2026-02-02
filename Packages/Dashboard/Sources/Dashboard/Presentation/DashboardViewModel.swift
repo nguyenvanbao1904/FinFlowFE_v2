@@ -8,12 +8,13 @@ import FinFlowCore
 import Identity
 
 @MainActor
-public class DashboardViewModel: ObservableObject {
-    @Published public var profile: UserProfile?
-    @Published public var alert: AppErrorAlert?
-    @Published public var isLoading = false
-    @Published public var isRefreshing = false
-    @Published public var shouldShowUpdateProfile = false
+@Observable
+public class DashboardViewModel {
+    public var profile: UserProfile?
+    public var alert: AppErrorAlert?
+    public var isLoading = false
+    public var isRefreshing = false
+    public var shouldShowUpdateProfile = false
 
     private let getProfileUseCase: GetProfileUseCaseProtocol
     private let authRepository: AuthRepositoryProtocol

@@ -2,17 +2,19 @@ import FinFlowCore
 import SwiftUI
 
 public struct RegisterView: View {
-    @StateObject private var viewModel: RegisterViewModel
+    @State private var viewModel: RegisterViewModel
     // Environment dismiss to close view or we rely on Router navigation (here usually Router)
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
 
     public init(viewModel: RegisterViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {
-        ZStack {
+        @Bindable var vm = viewModel
+        
+        return ZStack {
             // Background Gradient
             backgroundLayer
                 .ignoresSafeArea()
@@ -27,12 +29,11 @@ public struct RegisterView: View {
                     VStack(spacing: Spacing.md) {
                         // Username
                         GlassTextField(
-                            text: $viewModel.username,
+                            text: $vm.username,
                             placeholder: "Tên đăng nhập",
                             icon: "person"
                         )
                         .textContentType(.username)
-                        .textInputAutocapitalization(.never)
 
                         // Email with Verification
                         VStack(spacing: 12) {
@@ -41,7 +42,7 @@ public struct RegisterView: View {
                                     .foregroundColor(.secondary)
                                     .frame(width: 25)
 
-                                TextField("Email", text: $viewModel.email)
+                                TextField("Email", text: $vm.email)
                                     .textInputAutocapitalization(.never)
                                     .keyboardType(.emailAddress)
                                 
@@ -83,7 +84,7 @@ public struct RegisterView: View {
                                         .foregroundColor(.secondary)
                                         .frame(width: 25)
 
-                                    TextField("Nhập mã OTP (123456)", text: $viewModel.otpCode)
+                                    TextField("Nhập mã OTP (123456)", text: $vm.otpCode)
                                         .keyboardType(.numberPad)
                                     
                                     Button("Xác nhận") {
@@ -107,12 +108,12 @@ public struct RegisterView: View {
                         // Names
                         HStack(spacing: Spacing.sm) {
                             GlassTextField(
-                                text: $viewModel.firstName,
+                                text: $vm.firstName,
                                 placeholder: "Họ",
                                 icon: "person.fill"
                             )
                             GlassTextField(
-                                text: $viewModel.lastName,
+                                text: $vm.lastName,
                                 placeholder: "Tên",
                                 icon: "person"
                             )
@@ -124,7 +125,7 @@ public struct RegisterView: View {
                                 .foregroundColor(.secondary)
                                 .frame(width: 25)
                             
-                            DatePicker("Ngày sinh", selection: $viewModel.dob, displayedComponents: .date)
+                            DatePicker("Ngày sinh", selection: $vm.dob, displayedComponents: .date)
                                 .tint(AppColors.primary)
                         }
                         .padding(.vertical, 16)
@@ -138,7 +139,7 @@ public struct RegisterView: View {
 
                         // Password
                         GlassSecureField(
-                            text: $viewModel.password,
+                            text: $vm.password,
                             placeholder: "Mật khẩu",
                             icon: "lock"
                         )
@@ -146,7 +147,7 @@ public struct RegisterView: View {
 
                         // Password Confirm
                         GlassSecureField(
-                            text: $viewModel.passwordConfirmation,
+                            text: $vm.passwordConfirmation,
                             placeholder: "Xác nhận mật khẩu",
                             icon: "lock.fill"
                         )
@@ -172,7 +173,7 @@ public struct RegisterView: View {
         }
         .toolbarBackground(.hidden, for: .navigationBar)
         .navigationBarTitleDisplayMode(.inline)
-        .alert(item: $viewModel.alert) { appAlert in
+        .alert(item: $vm.alert) { appAlert in
             Alert(
                 title: Text(appAlert.title),
                 message: Text(appAlert.message),

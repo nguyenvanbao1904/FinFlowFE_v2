@@ -2,22 +2,24 @@ import FinFlowCore
 import SwiftUI
 
 public struct UpdateProfileView: View {
-    @StateObject private var viewModel: UpdateProfileViewModel
+    @State private var viewModel: UpdateProfileViewModel
     @Environment(\.dismiss) private var dismiss
 
     public init(viewModel: UpdateProfileViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     public var body: some View {
-        NavigationView {
+        @Bindable var vm = viewModel
+        
+        return NavigationView {
             Form {
                 Section(header: Text("Thông tin cá nhân")) {
-                    TextField("Họ", text: $viewModel.lastName)
-                    TextField("Tên", text: $viewModel.firstName)
+                    TextField("Họ", text: $vm.lastName)
+                    TextField("Tên", text: $vm.firstName)
                     DatePicker(
                         "Ngày sinh",
-                        selection: $viewModel.dob,
+                        selection: $vm.dob,
                         displayedComponents: .date
                     )
                 }
@@ -47,7 +49,7 @@ public struct UpdateProfileView: View {
                 }
             }
             .navigationTitle("Cập nhật hồ sơ")
-            .onChange(of: viewModel.isSuccess) { success in
+            .onChange(of: viewModel.isSuccess) { _, success in
                 if success {
                     dismiss()
                 }

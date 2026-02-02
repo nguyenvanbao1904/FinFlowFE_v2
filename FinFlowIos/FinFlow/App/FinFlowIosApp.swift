@@ -13,47 +13,46 @@ import SwiftUI
 @main
 @MainActor
 struct FinFlowIosApp: App {
-    // 1. Dependency Container (includes SessionManager)
     private let container = DependencyContainer.shared
-
-    // 2. Central Router - Observes SessionManager for automatic navigation
-    @StateObject private var router: AppRouter
-
-    init() {
-        // Initialize router with SessionManager
-        let sessionManager = DependencyContainer.shared.sessionManager
-        _router = StateObject(wrappedValue: AppRouter(sessionManager: sessionManager))
-    }
+    
+    @State private var router = AppRouter(sessionManager: DependencyContainer.shared.sessionManager)
 
     var body: some Scene {
         WindowGroup {
-            // 3. NavigationStack binds to router's path
-            NavigationStack(path: $router.path) {
-                // 4. Root view based on authentication state
-                Group {
-                    if router.isAuthenticated {
-                        // Main app flow
-                        makeDashboardView()
-                    } else {
-                        // Authentication flow
-                        makeLoginView()
-                    }
+            AppRootView(router: router, container: container)
+                .task {
+                    // Restore session on app launch
+                    await container.sessionManager.restoreSession()
                 }
-                // 5. Navigation destination mapping (Router Factory)
-                .navigationDestination(for: AppRoute.self) { route in
-                    makeDestination(for: route)
-                }
-            }
-            .environmentObject(router)
-            .task {
-                // 🆕 Restore session on app launch
-                await container.sessionManager.restoreSession()
-            }
         }
     }
+}
 
+// ✅ Dedicated Root View to handle Navigation and Binding
+struct AppRootView: View {
+    @Bindable var router: AppRouter
+    let container: DependencyContainer
+    
+    var body: some View {
+        NavigationStack(path: $router.path) {
+            ZStack {
+                if router.isAuthenticated {
+                    makeDashboardView()
+                } else {
+                    makeLoginView()
+                }
+            }
+            .navigationDestination(for: AppRoute.self) { route in
+                makeDestination(for: route)
+            }
+        }
+        .environment(router)
+        // Trick: Recreate stack when auth state changes to prevent navigation bugs
+        .id(router.isAuthenticated)
+    }
+    
     // MARK: - View Factories (Router Factory Pattern)
-
+    
     @ViewBuilder
     private func makeDestination(for route: AppRoute) -> some View {
         switch route {
@@ -64,11 +63,11 @@ struct FinFlowIosApp: App {
             makeRegisterView()
         case .forgotPassword:
             makeForgotPasswordView()
-                .navigationTitle("Quên Mật Khẩu") // Optional title
+                .navigationTitle("Quên Mật Khẩu")
         case .verifyOTP(let email):
             Text("Verify OTP for \(email)")
                 .navigationTitle("Xác thực OTP")
-
+        
         // Main Flow
         case .dashboard:
             makeDashboardView()
@@ -102,30 +101,22 @@ struct FinFlowIosApp: App {
                 .navigationTitle("Tạo ngân sách")
         }
     }
-
-    // MARK: - Root Views
-
+    
+    // MARK: - Helper Methods
+    
     private func makeLoginView() -> some View {
-        LoginView(
-            viewModel: container.makeLoginViewModel(router: router)
-        )
+        LoginView(viewModel: container.makeLoginViewModel(router: router))
     }
-
+    
     private func makeDashboardView() -> some View {
-        DashboardView(
-            viewModel: container.makeDashboardViewModel(router: router)
-        )
+        DashboardView(viewModel: container.makeDashboardViewModel(router: router))
     }
-
+    
     private func makeRegisterView() -> some View {
-        RegisterView(
-            viewModel: container.makeRegisterViewModel()
-        )
+        RegisterView(viewModel: container.makeRegisterViewModel())
     }
-
+    
     private func makeForgotPasswordView() -> some View {
-        ForgotPasswordView(
-            viewModel: container.makeForgotPasswordViewModel()
-        )
+        ForgotPasswordView(viewModel: container.makeForgotPasswordViewModel())
     }
 }

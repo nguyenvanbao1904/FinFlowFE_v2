@@ -16,7 +16,7 @@ import SwiftUI
 /// - FinFlowIos implements the protocol (AppRouter)
 /// - Feature modules (Identity, Dashboard, ...) depend only on the protocol
 @MainActor
-public protocol AppRouterProtocol: ObservableObject {
+public protocol AppRouterProtocol {
     /// Navigate to a specific route
     func navigate(to route: AppRoute)
 

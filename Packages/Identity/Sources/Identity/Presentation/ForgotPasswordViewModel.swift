@@ -4,27 +4,28 @@ import Foundation
 import SwiftUI
 
 @MainActor
-public class ForgotPasswordViewModel: ObservableObject {
+@Observable
+public class ForgotPasswordViewModel {
     // Form Data
-    @Published public var email = ""
-    @Published public var otpCode = ""
-    @Published public var password = ""
-    @Published public var confirmPassword = ""
+    public var email = "" {
+        didSet { validateEmailDebounced() }
+    }
+    public var otpCode = ""
+    public var password = ""
+    public var confirmPassword = ""
     
     // UI State
-    @Published public var step: ForgotPasswordStep = .inputEmail
-    @Published public var isLoading = false
-    @Published public var alert: AppErrorAlert? = nil
-    @Published public var isSuccess = false
+    public var step: ForgotPasswordStep = .inputEmail
+    public var isLoading = false
+    public var alert: AppErrorAlert? = nil
+    public var isSuccess = false
     
     // Data
     private var resetToken = ""
     
-    // State
-    @Published public var isEmailExistenceVerified = false
-    @Published public var emailValidationMessage: String? = nil
+    public var isEmailExistenceVerified = false
+    public var emailValidationMessage: String? = nil
     
-    // Dependencies
     private let useCase: ForgotPasswordUseCaseProtocol
     private var cancellables = Set<AnyCancellable>()
     
@@ -34,16 +35,17 @@ public class ForgotPasswordViewModel: ObservableObject {
     }
     
     private func setupEmailDebounce() {
-        $email
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // Debounce 500ms
-            .removeDuplicates()
-            .sink { [weak self] email in
-                guard let self = self else { return }
-                Task {
-                    await self.checkEmail(email)
-                }
-            }
-            .store(in: &cancellables)
+        // No-op or removed, logic moved to didSet
+    }
+
+    private var emailValidationTask: Task<Void, Never>?
+    private func validateEmailDebounced() {
+        emailValidationTask?.cancel()
+        emailValidationTask = Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            if Task.isCancelled { return }
+            await checkEmail(email)
+        }
     }
     
     private func checkEmail(_ email: String) async {
@@ -53,7 +55,6 @@ public class ForgotPasswordViewModel: ObservableObject {
             return
         }
         
-        // Basic Regex Validation First
         let emailRegEx = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         guard emailPred.evaluate(with: email) else {

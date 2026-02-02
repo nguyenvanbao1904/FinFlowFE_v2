@@ -3,13 +3,14 @@ import FinFlowCore
 import Foundation
 
 @MainActor
-public class UpdateProfileViewModel: ObservableObject {
-    @Published public var firstName: String = ""
-    @Published public var lastName: String = ""
-    @Published public var dob: Date = Date()
-    @Published public var isLoading: Bool = false
-    @Published public var error: AppError? = nil
-    @Published public var isSuccess: Bool = false
+@Observable
+public class UpdateProfileViewModel {
+    public var firstName: String = ""
+    public var lastName: String = ""
+    public var dob: Date = Date()
+    public var isLoading: Bool = false
+    public var error: AppError? = nil
+    public var isSuccess: Bool = false
 
     private let authRepository: AuthRepositoryProtocol
 

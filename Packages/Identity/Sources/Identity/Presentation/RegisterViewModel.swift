@@ -4,36 +4,35 @@ import Foundation
 import SwiftUI
 
 @MainActor
-public class RegisterViewModel: ObservableObject {
+@Observable
+public class RegisterViewModel {
     // Form fields
-    @Published public var username = ""
-    @Published public var email = ""
-    @Published public var password = ""
-    @Published public var passwordConfirmation = ""
-    @Published public var firstName = ""
-    @Published public var lastName = ""
-    @Published public var dob = Date()
+    public var username = ""
+    public var email = ""
+    public var password = ""
+    public var passwordConfirmation = ""
+    public var firstName = ""
+    public var lastName = ""
+    public var dob = Date()
 
     // State
 
     // Email Verification State
-    @Published public var otpCode = ""
-    @Published public var showOTPInput = false
-    @Published public var isEmailVerified = false
-    @Published public var isSendingOTP = false
-    @Published public var registrationToken = ""
+    public var otpCode = ""
+    public var showOTPInput = false
+    public var isEmailVerified = false
+    public var isSendingOTP = false
+    public var registrationToken = ""
     
-    // Computed property for validation UI
     public var isEmailValid: Bool {
         let emailRegEx = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
     }
 
-    // State
-    @Published public var isLoading = false
-    @Published public var alert: AppErrorAlert? = nil
-    @Published public var isRegistrationSuccess = false
+    public var isLoading = false
+    public var alert: AppErrorAlert? = nil
+    public var isRegistrationSuccess = false
 
     private let registerUseCase: RegisterUseCaseProtocol
     private let loginUseCase: LoginUseCaseProtocol
@@ -85,7 +84,6 @@ public class RegisterViewModel: ObservableObject {
     }
 
     public func register() async {
-        // 1. Basic UI Validation
         guard !username.isEmpty, !email.isEmpty, !password.isEmpty, !passwordConfirmation.isEmpty else {
             self.alert = .general(title: "Thông báo", message: "Vui lòng điền đầy đủ thông tin bắt buộc")
             return

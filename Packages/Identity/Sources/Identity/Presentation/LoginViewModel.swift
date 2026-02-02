@@ -9,11 +9,12 @@ import SwiftUI
 import GoogleSignIn
 
 @MainActor
-public class LoginViewModel: ObservableObject {
-    @Published public var username = ""
-    @Published public var password = ""
-    @Published public var isLoading = false
-    @Published public var alert: AppErrorAlert? = nil // New Alert State
+@Observable
+public class LoginViewModel {
+    public var username = ""
+    public var password = ""
+    public var isLoading = false
+    public var alert: AppErrorAlert? = nil
 
     private let loginUseCase: LoginUseCaseProtocol
     private let sessionManager: SessionManager
@@ -39,7 +40,6 @@ public class LoginViewModel: ObservableObject {
      - Router navigation happens automatically via SessionManager observer
      */
     public func login() async {
-        // Basic UI validation
         guard !username.isEmpty, !password.isEmpty else {
             self.alert = .general(title: "Thông báo", message: "Vui lòng nhập đầy đủ thông tin")
             return
@@ -66,11 +66,13 @@ public class LoginViewModel: ObservableObject {
     }
 
     public func handleGoogleLogin() async {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootViewController = windowScene.windows.first?.rootViewController else {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .filter({ $0.activationState == .foregroundActive })
+            .first(where: { $0 is UIWindowScene }) as? UIWindowScene,
+              let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
             return
         }
-
+        
         isLoading = true
         defer { isLoading = false }
 

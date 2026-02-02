@@ -2,16 +2,18 @@ import FinFlowCore
 import SwiftUI
 
 public struct ForgotPasswordView: View {
-    @StateObject private var viewModel: ForgotPasswordViewModel
+    @State private var viewModel: ForgotPasswordViewModel
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     
     public init(viewModel: ForgotPasswordViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
     
     public var body: some View {
-        ZStack {
+        @Bindable var vm = viewModel
+        
+        return ZStack {
             // Background Gradient
             LinearGradient(
                 colors: colorScheme == .dark ? AppColors.backgroundDark : AppColors.backgroundLight,
@@ -55,10 +57,10 @@ public struct ForgotPasswordView: View {
                     .scaleEffect(1.5)
             }
         }
-        .alert(item: $viewModel.alert) { alert in
+        .alert(item: $vm.alert) { alert in
             Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
         }
-        .onChange(of: viewModel.isSuccess) { success in
+        .onChange(of: viewModel.isSuccess) { _, success in
             if success {
                 dismiss() // Go back to Login
             }
@@ -67,17 +69,17 @@ public struct ForgotPasswordView: View {
     
     // MARK: - Step 1: Input Email
     private var emailInputView: some View {
-        VStack(spacing: 25) {
+        @Bindable var vm = viewModel
+        return VStack(spacing: 25) {
             Text("Nhập email của bạn để nhận mã xác thực OTP")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             
             VStack(alignment: .leading, spacing: 5) {
-                GlassTextField(text: $viewModel.email, placeholder: "Email", icon: "envelope.fill")
+                GlassTextField(text: $vm.email, placeholder: "Email", icon: "envelope.fill", keyboardType: .emailAddress)
                     .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
+                    .textInputAutocapitalization(.never)
                 
                 if let errorMsg = viewModel.emailValidationMessage {
                     Text(errorMsg)
@@ -100,15 +102,15 @@ public struct ForgotPasswordView: View {
     
     // MARK: - Step 2: Input OTP
     private var otpInputView: some View {
-        VStack(spacing: 25) {
+        @Bindable var vm = viewModel
+        return VStack(spacing: 25) {
             Text("Mã OTP đã được gửi đến")
                 .foregroundColor(.secondary)
             Text(viewModel.email)
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            GlassTextField(text: $viewModel.otpCode, placeholder: "Nhập mã OTP (6 số)", icon: "lock.shield.fill")
-                .keyboardType(.numberPad)
+            GlassTextField(text: $vm.otpCode, placeholder: "Nhập mã OTP (6 số)", icon: "lock.shield.fill", keyboardType: .numberPad)
                 .textContentType(.oneTimeCode)
             
             PrimaryButton(title: "Xác Thực") {
@@ -128,13 +130,14 @@ public struct ForgotPasswordView: View {
     
     // MARK: - Step 3: Reset Password
     private var resetPasswordView: some View {
-        VStack(spacing: 25) {
+        @Bindable var vm = viewModel
+        return VStack(spacing: 25) {
             Text("Thiết lập mật khẩu mới")
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            GlassSecureField(text: $viewModel.password, placeholder: "Mật khẩu mới", icon: "lock.fill")
-            GlassSecureField(text: $viewModel.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation")
+            GlassSecureField(text: $vm.password, placeholder: "Mật khẩu mới", icon: "lock.fill")
+            GlassSecureField(text: $vm.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation")
             
             PrimaryButton(title: "Đổi Mật Khẩu") {
                 Task {
