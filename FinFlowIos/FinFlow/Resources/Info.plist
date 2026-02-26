@@ -20,5 +20,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>FinFlow cần sử dụng Face ID để xác thực đăng nhập nhanh và bảo mật</string>
 </dict>
 </plist>

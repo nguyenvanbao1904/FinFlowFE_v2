@@ -7,13 +7,13 @@ public protocol ForgotPasswordUseCaseProtocol: Sendable {
     func sendOtp(email: String) async throws
     func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse
     func resetPassword(password: String, confirmPassword: String, token: String) async throws
-    func checkUserExistence(email: String) async throws -> Bool
+    func checkUserExistence(email: String) async throws -> CheckUserExistenceResponse
 }
 
 public struct ForgotPasswordUseCase: ForgotPasswordUseCaseProtocol {
-    private let repository: AuthRepositoryProtocol
+    private let repository: OTPRepositoryProtocol & AccountRepositoryProtocol
 
-    public init(repository: AuthRepositoryProtocol) {
+    public init(repository: OTPRepositoryProtocol & AccountRepositoryProtocol) {
         self.repository = repository
     }
 
@@ -42,7 +42,8 @@ public struct ForgotPasswordUseCase: ForgotPasswordUseCaseProtocol {
         try await repository.resetPassword(req: request, token: token)
     }
 
-    public func checkUserExistence(email: String) async throws -> Bool {
-        return try await repository.checkUserExistence(email: email)
+    public func checkUserExistence(email: String) async throws -> CheckUserExistenceResponse {
+        let response = try await repository.checkUserExistence(email: email, username: nil)
+        return response
     }
 }

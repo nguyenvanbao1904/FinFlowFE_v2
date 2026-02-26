@@ -14,109 +14,161 @@ import SwiftUI
 @MainActor
 struct FinFlowIosApp: App {
     private let container = DependencyContainer.shared
-    
-    @State private var router = AppRouter(sessionManager: DependencyContainer.shared.sessionManager)
+    private let router: AppRouter
+
+
+    @State private var isFirstLaunch = true
+
+    init() {
+        self.router = AppRouter(sessionManager: DependencyContainer.shared.sessionManager)
+    }
 
     var body: some Scene {
         WindowGroup {
             AppRootView(router: router, container: container)
                 .task {
-                    // Restore session on app launch
-                    await container.sessionManager.restoreSession()
+                    if isFirstLaunch {
+                        await container.sessionManager.restoreSession()
+                        isFirstLaunch = false
+                    }
                 }
+                }
+        }
+}
+
+struct AppRootView: View {
+    let router: AppRouter
+    let container: DependencyContainer
+    
+    // Lifecycle & State
+   @Environment(\.scenePhase) private var scenePhase
+    @State private var lastBackgroundDate: Date?
+    @State private var isPrivacyBlurVisible = false
+
+    // Constants
+    private let backgroundTimeout: TimeInterval = 60 // 1 minute
+
+    var body: some View {
+        @Bindable var observableRouter = router
+
+        ZStack {
+            NavigationStack(path: $observableRouter.path) {
+                // Main Content Switching
+                Group {
+                    switch observableRouter.root {
+                    case .splash:
+                        ProgressView() // Or SplashView
+                    case .authentication:
+                        container.makeAuthenticationView(router: router)
+                    case .welcomeBack:
+                        container.makeAuthenticationView(router: router)
+                    case .dashboard:
+                        container.makeDashboardView(router: router)
+                    case .locked:
+                        if case .locked(let user, let bioAvailable) = container.sessionManager.state {
+                            container.makeLockScreenView(user: user, biometricAvailable: bioAvailable)
+                        } else {
+                            container.makeLoginView(router: router)
+                        }
+                    }
+                }
+                .navigationDestination(for: AppRoute.self) { route in
+                    makeDestination(for: route)
+                }
+            }
+            .id(observableRouter.root)
+            
+            // Privacy Blur Overlay
+            if isPrivacyBlurVisible {
+                PrivacyBlurView()
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(999)
+            }
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            handleScenePhaseChange(newPhase: newPhase)
+        }
+    }
+    
+    // MARK: - Lifecycle Handlers
+    
+    private func handleScenePhaseChange(newPhase: ScenePhase) {
+        switch newPhase {
+        case .active:
+            // Remove blur
+            withAnimation(.easeOut(duration: 0.2)) {
+                isPrivacyBlurVisible = false
+            }
+            // Check timeout
+            if let date = lastBackgroundDate, Date().timeIntervalSince(date) > backgroundTimeout {
+                Task {
+                    await container.sessionManager.lockSession()
+                }
+            }
+            lastBackgroundDate = nil
+            
+        case .inactive:
+            // Fix: Don't show privacy blur if Biometric Auth is in progress
+            if !container.sessionManager.isBiometricAuthenticationInProgress {
+                // Show blur immediately
+                withAnimation(.easeIn(duration: 0.2)) {
+                    isPrivacyBlurVisible = true
+                }
+            } else {
+                 Logger.debug("Privacy Blur suppressed due to Biometric Auth", category: "App")
+            }
+            
+        case .background:
+            // Ensure blur is visible (duplicate check safe)
+            isPrivacyBlurVisible = true
+            // Save timestamp
+            lastBackgroundDate = Date()
+            
+        @unknown default:
+            break
+        }
+    }
+
+    // MARK: - View Factories (Router Factory Pattern)
+
+    @ViewBuilder
+    private func makeDestination(for route: AppRoute) -> some View {
+        switch route {
+        case .login:
+            container.makeLoginView(router: router)
+        case .register:
+            container.makeRegisterView(router: router)
+        case .forgotPassword:
+            container.makeForgotPasswordView(router: router)
+                .navigationTitle("Quên Mật Khẩu")
+        case .dashboard:
+            container.makeDashboardView(router: router)
+        case .profile:
+            Text("Profile View - Coming Soon")
+        case .settings:
+            Text("Settings View - Coming Soon")
+        case .transactionDetail(let id):
+            Text("Transaction Detail: \(id) - Coming Soon")
         }
     }
 }
 
-// ✅ Dedicated Root View to handle Navigation and Binding
-struct AppRootView: View {
-    @Bindable var router: AppRouter
-    let container: DependencyContainer
-    
+// Simple Privacy Blur View
+struct PrivacyBlurView: View {
     var body: some View {
-        NavigationStack(path: $router.path) {
-            ZStack {
-                if router.isAuthenticated {
-                    makeDashboardView()
-                } else {
-                    makeLoginView()
-                }
-            }
-            .navigationDestination(for: AppRoute.self) { route in
-                makeDestination(for: route)
+        ZStack {
+            Color.black.opacity(0.1)
+            Rectangle()
+                .fill(.ultraThinMaterial)
+            VStack(spacing: 16) {
+                Image(systemName: "lock.shield.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.gray)
+                Text("FinFlow Protected")
+                    .font(.headline)
+                    .foregroundColor(.gray)
             }
         }
-        .environment(router)
-        // Trick: Recreate stack when auth state changes to prevent navigation bugs
-        .id(router.isAuthenticated)
-    }
-    
-    // MARK: - View Factories (Router Factory Pattern)
-    
-    @ViewBuilder
-    private func makeDestination(for route: AppRoute) -> some View {
-        switch route {
-        // Authentication
-        case .login:
-            makeLoginView()
-        case .register:
-            makeRegisterView()
-        case .forgotPassword:
-            makeForgotPasswordView()
-                .navigationTitle("Quên Mật Khẩu")
-        case .verifyOTP(let email):
-            Text("Verify OTP for \(email)")
-                .navigationTitle("Xác thực OTP")
-        
-        // Main Flow
-        case .dashboard:
-            makeDashboardView()
-        case .profile:
-            Text("Profile View - Coming Soon")
-                .navigationTitle("Hồ sơ")
-        case .settings:
-            Text("Settings View - Coming Soon")
-                .navigationTitle("Cài đặt")
-
-        // Transactions
-        case .transactions:
-            Text("Transactions View - Coming Soon")
-                .navigationTitle("Giao dịch")
-        case .transactionDetail(let id):
-            Text("Transaction Detail: \(id)")
-                .navigationTitle("Chi tiết")
-        case .createTransaction:
-            Text("Create Transaction - Coming Soon")
-                .navigationTitle("Tạo giao dịch")
-
-        // Budgets
-        case .budgets:
-            Text("Budgets View - Coming Soon")
-                .navigationTitle("Ngân sách")
-        case .budgetDetail(let id):
-            Text("Budget Detail: \(id)")
-                .navigationTitle("Chi tiết ngân sách")
-        case .createBudget:
-            Text("Create Budget - Coming Soon")
-                .navigationTitle("Tạo ngân sách")
-        }
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func makeLoginView() -> some View {
-        LoginView(viewModel: container.makeLoginViewModel(router: router))
-    }
-    
-    private func makeDashboardView() -> some View {
-        DashboardView(viewModel: container.makeDashboardViewModel(router: router))
-    }
-    
-    private func makeRegisterView() -> some View {
-        RegisterView(viewModel: container.makeRegisterViewModel())
-    }
-    
-    private func makeForgotPasswordView() -> some View {
-        ForgotPasswordView(viewModel: container.makeForgotPasswordViewModel())
     }
 }

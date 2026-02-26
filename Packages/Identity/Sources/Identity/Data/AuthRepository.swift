@@ -7,157 +7,91 @@ import FinFlowCore
 import Foundation
 
 public final class AuthRepository: AuthRepositoryProtocol, Sendable {
-    private let apiClient: APIClient
-    // We use concrete AuthTokenStore internally to access both AT and RT methods
-    private let tokenStore: AuthTokenStore? 
+    private let client: any HTTPClientProtocol
+    private let tokenStore: (any TokenStoreProtocol)?
     internal let cacheService: (any CacheServiceProtocol)?
 
     public init(
-        apiClient: APIClient,
-        tokenStore: AuthTokenStore? = nil,
+        client: any HTTPClientProtocol,
+        tokenStore: (any TokenStoreProtocol)? = nil,
         cacheService: (any CacheServiceProtocol)? = nil
     ) {
-        self.apiClient = apiClient
+        self.client = client
         self.tokenStore = tokenStore
         self.cacheService = cacheService
     }
 
     public func login(req: LoginRequest) async throws -> LoginResponse {
-        do {
-            Logger.info("Gửi request đăng nhập...", category: "Auth")
-            let response: LoginResponse = try await apiClient.request(
-                endpoint: "/auth/login",
-                method: "POST",
-                body: req,
-                retryOn401: false // Login failure should not trigger token refresh
-            )
-
-            // Lưu access token (async operation with proper concurrency)
-            await tokenStore?.setToken(response.token)
-
-            // Lưu refresh token nếu có
-            if let refreshToken = response.refreshToken {
-                await tokenStore?.setRefreshToken(refreshToken)
-
-            }
-
-            Logger.info("Đăng nhập thành công, token đã lưu", category: "Auth")
-            return response
-        } catch let error as AppError {
-            Logger.error("Login failed with AppError: \(error)", category: "Auth")
-            throw error 
-        } catch {
-            Logger.error("Login failed with unknown error: \(error)", category: "Auth")
-            throw AppError.unknown
-        }
+        Logger.info("Gửi request đăng nhập...", category: "Auth")
+        return try await client.request(
+            endpoint: "/auth/login",
+            method: "POST",
+            body: req,
+            headers: nil,
+            version: nil,
+            retryOn401: false // 401 = sai mật khẩu, không retry refresh; giữ message từ backend
+        )
     }
 
     public func loginGoogle(idToken: String) async throws -> LoginResponse {
-        do {
-            Logger.info("Gửi request đăng nhập Google...", category: "Auth")
-            let req = GoogleLoginRequest(idToken: idToken)
-            let response: LoginResponse = try await apiClient.request(
-                endpoint: "/auth/google",
-                method: "POST",
-                body: req,
-                retryOn401: false
-            )
-
-            await tokenStore?.setToken(response.token)
-            if let refreshToken = response.refreshToken {
-                await tokenStore?.setRefreshToken(refreshToken)
-            }
-            
-            Logger.info("Đăng nhập Google thành công", category: "Auth")
-            return response
-        } catch {
-            Logger.error("Login Google thất bại: \(error)", category: "Auth")
-            throw error
-        }
+        Logger.info("Gửi request đăng nhập Google...", category: "Auth")
+        let req = GoogleLoginRequest(idToken: idToken)
+        return try await client.request(
+            endpoint: "/auth/google",
+            method: "POST",
+            body: req,
+            headers: nil,
+            version: nil,
+            retryOn401: false
+        )
     }
 
     public func register(req: RegisterRequest, token: String) async throws {
-        do {
-            Logger.info("Gửi request đăng ký...", category: "Auth")
-            let _: RegisterResponse = try await apiClient.request(
-                endpoint: "/auth/register",
-                method: "POST",
-                body: req,
-                headers: ["X-Registration-Token": token],
-                retryOn401: false
-            )
-            Logger.info("Đăng ký thành công", category: "Auth")
-        } catch {
-            Logger.error("Đăng ký thất bại: \(error)", category: "Auth")
-            throw error
-        }
+        Logger.info("Gửi request đăng ký...", category: "Auth")
+        let _: RegisterResponse = try await client.request(
+            endpoint: "/auth/register",
+            method: "POST",
+            body: req,
+            headers: ["X-Registration-Token": token],
+            version: nil
+        )
+        Logger.info("Đăng ký thành công", category: "Auth")
     }
 
     public func updateProfile(request: UpdateProfileRequest) async throws -> UserProfile {
-        do {
-            Logger.info("Updating user profile...", category: "Auth")
-            let profile: UserProfile = try await apiClient.request(
-                endpoint: "/users/my-profile",
-                method: "PUT",
-                body: request
-            )
+        Logger.info("Updating user profile...", category: "Auth")
+        let profile: UserProfile = try await client.request(
+            endpoint: "/users/my-profile",
+            method: "PUT",
+            body: request,
+            headers: nil,
+            version: nil
+        )
 
-            // Update cache
-            if let cacheKey = await currentUserCacheKey(for: profile.id) {
-                try? await cacheService?.save(profile, forKey: cacheKey)
-            }
-
-            Logger.info("Profile updated successfully", category: "Auth")
-            return profile
-        } catch {
-            Logger.error("Update profile failed: \(error)", category: "Auth")
-            throw error
+        if let cacheKey = await currentUserCacheKey(for: profile.id) {
+            try? await cacheService?.save(profile, forKey: cacheKey)
         }
+
+        Logger.info("Profile updated successfully", category: "Auth")
+        return profile
     }
 
     public func getMyProfile() async throws -> UserProfile {
-        // Fetch từ server (cache logic được handle trong extension)
-        do {
-            Logger.info("Lấy thông tin profile từ server...", category: "Auth")
-            let profile: UserProfile = try await apiClient.request(
-                endpoint: "/users/my-profile",
-                method: "GET"
-            )
+        Logger.info("Lấy thông tin profile từ server...", category: "Auth")
+        let profile: UserProfile = try await client.request(
+            endpoint: "/users/my-profile",
+            method: "GET",
+            body: nil,
+            headers: nil,
+            version: nil
+        )
 
-            // Lưu vào cache
-            if let cacheKey = await currentUserCacheKey(for: profile.id) {
-                try? await cacheService?.save(profile, forKey: cacheKey)
-            }
-
-            Logger.info("Lấy profile thành công và đã cache", category: "Auth")
-            return profile
-        } catch let error as AppError {
-            // Nếu lỗi 401, thử refresh token
-            if case .serverError(let code, _) = error, code == 401 {
-                Logger.warning("Token hết hạn, thử refresh...", category: "Auth")
-                do {
-                    _ = try await refreshToken()
-                    // Retry sau khi refresh thành công
-                    let profile: UserProfile = try await apiClient.request(
-                        endpoint: "/users/my-profile",
-                        method: "GET"
-                    )
-                    if let cacheKey = await currentUserCacheKey(for: profile.id) {
-                        try? await cacheService?.save(profile, forKey: cacheKey)
-                    }
-                    return profile
-                } catch {
-                    Logger.error("Refresh token thất bại", category: "Auth")
-                    throw AppError.unauthorized("Phiên đăng nhập hết hạn")
-                }
-            }
-
-            Logger.error("Get profile failed: \(error)", category: "Auth")
-            throw error
-        } catch {
-            Logger.error("Get profile failed with unknown error: \(error)", category: "Auth")
-            throw AppError.unknown
+        if let cacheKey = await currentUserCacheKey(for: profile.id) {
+            try? await cacheService?.save(profile, forKey: cacheKey)
         }
+
+        Logger.info("Lấy profile thành công và đã cache", category: "Auth")
+        return profile
     }
 
     public func refreshToken() async throws -> RefreshTokenResponse {
@@ -169,25 +103,47 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         do {
             Logger.info("Đang refresh token...", category: "Auth")
             let request = RefreshTokenRequest(refreshToken: refreshToken)
-            let response: RefreshTokenResponse = try await apiClient.request(
+            let response: RefreshTokenResponse = try await client.request(
                 endpoint: "/auth/refresh",
                 method: "POST",
                 body: request,
-                retryOn401: false  // tránh vòng lặp refresh
+                headers: nil,
+                version: nil,
+                retryOn401: false // ⛔️ Prevent infinite loop
             )
-
-            // Cập nhật tokens mới
-            await tokenStore?.setToken(response.token)
-            if let newRefreshToken = response.refreshToken {
-                await tokenStore?.setRefreshToken(newRefreshToken)
-            }
 
             Logger.info("Refresh token thành công", category: "Auth")
             return response
         } catch {
             Logger.error("Refresh token thất bại: \(error)", category: "Auth")
-            // Xóa tokens khi refresh thất bại
-            try? await logout()
+            throw AppError.unauthorized("Lỗi làm mới phiên đăng nhập")
+        }
+    }
+
+    /// Refresh token nhưng không logout/clear token khi lỗi (dùng cho silent flows)
+    public func refreshTokenSilent() async throws -> RefreshTokenResponse {
+        guard let refreshToken = await tokenStore?.getRefreshToken() else {
+            Logger.error("Không có refresh token", category: "Auth")
+            throw AppError.unauthorized("Không tìm thấy refresh token")
+        }
+
+        do {
+            Logger.info("Đang refresh token (silent)...", category: "Auth")
+            let request = RefreshTokenRequest(refreshToken: refreshToken)
+            let response: RefreshTokenResponse = try await client.request(
+                endpoint: "/auth/refresh",
+                method: "POST",
+                body: request,
+                headers: nil,
+                version: nil,
+                retryOn401: false // ⛔️ Prevent infinite loop
+            )
+
+            Logger.info("Refresh token (silent) thành công", category: "Auth")
+            return response
+        } catch {
+            Logger.error("Refresh token (silent) thất bại: \(error)", category: "Auth")
+            // KHÔNG logout/clear token ở đây, để caller xử lý UI/alert
             throw AppError.unauthorized("Lỗi làm mới phiên đăng nhập")
         }
     }
@@ -198,10 +154,12 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         // 1. Call backend API to invalidate token on server
         // This prevents the token from being used again even if stolen
         do {
-            let _: EmptyResponse = try await apiClient.request(
+            let _: EmptyResponse = try await client.request(
                 endpoint: "/auth/logout",
                 method: "POST",
-                retryOn401: false
+                body: nil,
+                headers: nil,
+                version: nil
             )
             Logger.info("Token đã được invalidate trên server", category: "Auth")
         } catch {
@@ -210,58 +168,60 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             Logger.warning(
                 "Không thể logout trên server: \(error), tiếp tục xóa local", category: "Auth")
         }
-
-        // 2. Clear local tokens and cache
-        await tokenStore?.clearAll()
-        try? await cacheService?.clear()
-
-        Logger.info("Đăng xuất hoàn tất, đã xóa tokens và cache", category: "Auth")
     }
 
     public func sendOtp(email: String, purpose: OtpPurpose) async throws {
         let req = SendOtpRequest(email: email, purpose: purpose)
         Logger.info("Gửi OTP đến \(email) cho mục đích \(purpose.rawValue)...", category: "Auth")
-        let _: [String: String] = try await apiClient.request(
+        let _: [String: String] = try await client.request(
             endpoint: "/auth/send-otp",
             method: "POST",
             body: req,
-            retryOn401: false
+            headers: nil,
+            version: nil
         )
     }
 
-    public func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws -> VerifyOtpResponse {
+    public func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws
+        -> VerifyOtpResponse
+    {
         let req = VerifyOtpRequest(email: email, otp: otp, purpose: purpose)
-        Logger.info("Xác thực OTP cho \(email) với mục đích \(purpose.rawValue)...", category: "Auth")
-        let response: VerifyOtpResponse = try await apiClient.request(
+        Logger.info(
+            "Xác thực OTP cho \(email) với mục đích \(purpose.rawValue)...", category: "Auth")
+        let response: VerifyOtpResponse = try await client.request(
             endpoint: "/auth/verify-otp",
             method: "POST",
             body: req,
-            retryOn401: false
+            headers: nil,
+            version: nil
         )
         return response
     }
-    
+
     public func resetPassword(req: ResetPasswordRequest, token: String) async throws {
-         Logger.info("Gửi request đặt lại mật khẩu...", category: "Auth")
-         let _: [String: String] = try await apiClient.request(
-             endpoint: "/auth/reset-password",
-             method: "POST",
-             body: req,
-             headers: ["X-Reset-Token": token],
-             retryOn401: false
-         )
-         Logger.info("Đặt lại mật khẩu thành công", category: "Auth")
+        Logger.info("Gửi request đặt lại mật khẩu...", category: "Auth")
+        let _: [String: String] = try await client.request(
+            endpoint: "/auth/reset-password",
+            method: "POST",
+            body: req,
+            headers: ["X-Reset-Token": token],
+            version: nil
+        )
+        Logger.info("Đặt lại mật khẩu thành công", category: "Auth")
     }
 
-    public func checkUserExistence(email: String) async throws -> Bool {
-        let req = CheckUserExistenceRequest(email: email)
-        let response: CheckUserExistenceResponse = try await apiClient.request(
+    public func checkUserExistence(email: String?, username: String?) async throws
+        -> CheckUserExistenceResponse
+    {
+        let req = CheckUserExistenceRequest(email: email, username: username)
+        let response: CheckUserExistenceResponse = try await client.request(
             endpoint: "/auth/check-user-existence",
             method: "POST",
             body: req,
-            retryOn401: false
+            headers: nil,
+            version: nil
         )
-        return response.exists
+        return response
     }
 
     // MARK: - Cache Key Helpers
@@ -299,5 +259,56 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
         }
 
         return (json["sub"] as? String) ?? (json["username"] as? String)
+    }
+
+    public func toggleBiometric(enabled: Bool) async throws {
+        struct ToggleBiometricRequest: Codable {
+            let enabled: Bool
+        }
+
+        let req = ToggleBiometricRequest(enabled: enabled)
+        let _: [String: String] = try await client.request(
+            endpoint: "/auth/toggle-biometric",
+            method: "POST",
+            body: req,
+            headers: nil,
+            version: nil
+        )
+        Logger.info("Biometric toggled: \(enabled)", category: "Auth")
+    }
+
+    public func changePassword(req: ChangePasswordRequest) async throws {
+        Logger.info("Changing password...", category: "Auth")
+        let _: [String: String] = try await client.request(
+            endpoint: "/auth/change-password",
+            method: "POST",
+            body: req,
+            headers: nil,
+            version: nil
+        )
+        Logger.info("Password changed successfully", category: "Auth")
+    }
+
+    public func deleteAccount(password: String?, token: String) async throws {
+        Logger.info("Deleting account...", category: "Auth")
+
+        /// Request body cho API xóa tài khoản.
+        /// - password: Có thể nil với user social (không có mật khẩu).
+        /// - verificationToken: Token nhận được sau khi verify OTP.
+        struct DeleteAccountRequest: Encodable {
+            let password: String?
+            let verificationToken: String
+        }
+
+        let request = DeleteAccountRequest(password: password, verificationToken: token)
+
+        let _: EmptyResponse = try await client.request(
+            endpoint: "/auth/delete-account",
+            method: "DELETE",
+            body: request,
+            headers: nil,
+            version: nil
+        )
+        Logger.info("Account deleted successfully", category: "Auth")
     }
 }

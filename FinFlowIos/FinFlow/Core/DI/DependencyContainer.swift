@@ -15,15 +15,17 @@ public class DependencyContainer {
     public static let shared = DependencyContainer()
 
     // 1. Hạ tầng (Infrastructure)
-    let networkConfig: any NetworkConfigProtocol
     let tokenStore: any TokenStoreProtocol
-    let httpClient: any HTTPClientProtocol
     let cacheService: any CacheServiceProtocol
 
     // 2. Services
+    let keychainService: KeychainService
+    let pinManager: any PINManagerProtocol
+    let userDefaultsManager: any UserDefaultsManagerProtocol
+    let otpHandler: OTPInputHandler
 
-    // 🆕 Global State Management
-    public let sessionManager: SessionManager
+    // Global State Management
+    public let sessionManager: any SessionManagerProtocol
 
     // 3. (Repositories)
     let authRepository: AuthRepositoryProtocol
@@ -32,14 +34,14 @@ public class DependencyContainer {
 
     private init() {
         let config = AppConfig.shared
-        // ... (existing helper setup)
-        
-        let networkConfig = config.networkConfig
-        self.networkConfig = networkConfig
 
-        // Dùng AuthTokenStore mới (gộp cả Access & Refresh Token)
-        let tokenStore = AuthTokenStore()
-        self.tokenStore = tokenStore
+        let networkConfig = config.networkConfig
+
+        // Initialize core services
+        self.keychainService = KeychainService()
+        self.pinManager = PINManager(keychain: keychainService)
+        self.userDefaultsManager = UserDefaultsManager()
+        self.tokenStore = AuthTokenStore(keychain: keychainService)
 
         // Khởi tạo cache service
         let cacheService: any CacheServiceProtocol
@@ -57,16 +59,16 @@ public class DependencyContainer {
             config: networkConfig,
             tokenStore: tokenStore,
             apiVersion: config.apiVersion
-            // refreshHandler và onUnauthorized sẽ được config sau để tránh vòng phụ thuộc
+                // refreshHandler và onUnauthorized sẽ được config sau để tránh vòng phụ thuộc
         )
-        self.httpClient = apiClient
 
         let concreteAuthRepository = AuthRepository(
-            apiClient: apiClient,
+            client: apiClient,
             tokenStore: tokenStore,
             cacheService: cacheService
         )
         self.authRepository = concreteAuthRepository
+        self.otpHandler = OTPInputHandler(repository: concreteAuthRepository)
 
         // 🔗 Config Auth Hooks (Break Circular Dependency)
         Task { [weak concreteAuthRepository, tokenStore] in
@@ -87,16 +89,12 @@ public class DependencyContainer {
         // Initialize SessionManager (Centralized State)
         self.sessionManager = SessionManager(
             tokenStore: tokenStore,
-            authRepository: concreteAuthRepository
+            authRepository: concreteAuthRepository,
+            userDefaultsManager: userDefaultsManager,
+            pinManager: pinManager
         )
 
     }
-
-    // MARK: - ViewModel Factories
-    
-    // Factories are now modularized in extensions:
-    // - DependencyContainer+Identity.swift
-    // - DependencyContainer+Dashboard.swift
 
     // MARK: - Auth State
 

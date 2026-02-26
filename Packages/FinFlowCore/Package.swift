@@ -16,6 +16,9 @@ let package = Package(
                 .enableUpcomingFeature("ExistentialAny")
             ]
         ),
-//        .testTarget(name: "FinFlowCoreTests", dependencies: ["FinFlowCore"]),
+        .testTarget(
+            name: "FinFlowCoreTests",
+            dependencies: ["FinFlowCore"]
+        ),
     ]
 )

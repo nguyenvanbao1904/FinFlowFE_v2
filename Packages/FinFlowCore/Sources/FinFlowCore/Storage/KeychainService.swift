@@ -1,8 +1,6 @@
 import Foundation
 import Security
 
-/// Actor chịu trách nhiệm giao tiếp low-level với Keychain
-/// Viết gọn gàng, tổng quát để tái sử dụng cho bất kỳ việc lưu chuỗi bảo mật nào.
 public actor KeychainService {
     // Singleton pattern
     public static let shared = KeychainService()

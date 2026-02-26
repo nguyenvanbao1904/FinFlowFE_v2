@@ -13,9 +13,9 @@ public protocol GetProfileUseCaseProtocol: Sendable {
 }
 
 public struct GetProfileUseCase: GetProfileUseCaseProtocol {
-    private let repository: AuthRepositoryProtocol
+    private let repository: ProfileRepositoryProtocol
 
-    public init(repository: AuthRepositoryProtocol) {
+    public init(repository: ProfileRepositoryProtocol) {
         self.repository = repository
     }
 

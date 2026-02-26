@@ -1,52 +1,72 @@
 //
 //  DependencyContainer+Identity.swift
 //  FinFlowIos
-//
-//  Created by FinFlow Agent on 03/02/26.
-//
 
 import FinFlowCore
-import Identity
 import Foundation
+import Identity
 
 // MARK: - Identity Feature Factories
 extension DependencyContainer {
-    
+
     // MARK: - ViewModels
-    
+
     func makeLoginViewModel(router: any AppRouterProtocol) -> LoginViewModel {
         return LoginViewModel(
             loginUseCase: LoginUseCase(repository: authRepository),
             sessionManager: sessionManager,
-            router: router
+            router: router,
+            pinManager: pinManager,
+            userDefaults: userDefaultsManager,
+            biometricAuth: BiometricAuthHandler()
         )
     }
 
-    func makeRegisterViewModel() -> RegisterViewModel {
+    func makeRegisterViewModel(
+        onSuccess: @escaping () -> Void,
+        onNavigateToLogin: @escaping () -> Void
+    ) -> RegisterViewModel {
         return RegisterViewModel(
             registerUseCase: RegisterUseCase(repository: authRepository),
             loginUseCase: LoginUseCase(repository: authRepository),
-            sessionManager: sessionManager
+            sessionManager: sessionManager,
+            otpHandler: otpHandler,
+            onRegistrationSuccess: onSuccess,
+            onNavigateToLogin: onNavigateToLogin
         )
     }
 
-    func makeForgotPasswordViewModel() -> ForgotPasswordViewModel {
-        return ForgotPasswordViewModel(useCase: ForgotPasswordUseCase(repository: authRepository))
-    }
-    
-    // MARK: - Use Cases
-    
-    func makeLoginUseCase() -> LoginUseCaseProtocol {
-        return LoginUseCase(repository: authRepository)
+    func makeForgotPasswordViewModel(onSuccess: @escaping (String) -> Void) -> ForgotPasswordViewModel {
+        return ForgotPasswordViewModel(
+            useCase: ForgotPasswordUseCase(repository: authRepository),
+            otpHandler: otpHandler,
+            onSuccess: onSuccess
+        )
     }
 
-    func makeLogoutUseCase() -> LogoutUseCaseProtocol {
-        return LogoutUseCase(repository: authRepository)
+    func makeWelcomeBackViewModel(
+        email: String,
+        firstName: String?,
+        lastName: String?,
+        onSwitchAccount: @escaping () -> Void
+    ) -> WelcomeBackViewModel {
+        return WelcomeBackViewModel(
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            sessionManager: sessionManager,
+            authRepository: authRepository,
+            otpHandler: otpHandler,
+            onSwitchAccount: onSwitchAccount
+        )
     }
-    
-    // MARK: - Repositories
-    
-    func makeAuthRepository() -> AuthRepositoryProtocol {
-        return authRepository
+
+    func makeLockScreenViewModel(user: UserProfile, biometricAvailable: Bool) -> LockScreenViewModel {
+        return LockScreenViewModel(
+            sessionManager: sessionManager,
+            pinManager: pinManager,
+            user: user,
+            biometricAvailable: biometricAvailable
+        )
     }
 }

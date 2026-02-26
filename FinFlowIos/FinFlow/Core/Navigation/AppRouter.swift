@@ -1,42 +1,58 @@
-import FinFlowCore
 import SwiftUI
+import Observation
+import FinFlowCore
+import OSLog
+
+
 
 @MainActor
 @Observable
 public final class AppRouter: AppRouterProtocol {
     public var path = NavigationPath()
-    public var isAuthenticated = false
+    public var root: AppRoot = .splash
+    
+    // Legacy support (computed)
+    public var isAuthenticated: Bool {
+        root == .dashboard
+    }
 
-    private let sessionManager: SessionManager
+    private let sessionManager: any SessionManagerProtocol
 
-    public init(sessionManager: SessionManager) {
+    public init(sessionManager: any SessionManagerProtocol) {
         self.sessionManager = sessionManager
-        Logger.info("🧭 AppRouter initialized", category: "Navigation")
+        Logger.info("AppRouter initialized", category: "Navigation")
         startSessionObservation()
     }
 
     private func startSessionObservation() {
-        Task { [weak self] in
-            guard let self = self else { return }
-            
-            // ✅ Clean, strict concurrency consistent observation
-            // Using the AsyncStream exposed by SessionManager
-            for await state in self.sessionManager.stateStream {
-                self.handleStateChange(state)
+        withObservationTracking {
+            // Register observation by accessing the property
+            self.handleStateChange(self.sessionManager.state)
+        } onChange: { [weak self] in
+            // Schedule re-observation on change
+            Task { @MainActor [weak self] in
+                self?.startSessionObservation()
             }
         }
     }
-    
-    private func handleStateChange(_ state: SessionManager.SessionState) {
-        Logger.info("🧭 Session: \(state)", category: "Navigation")
+
+    private func handleStateChange(_ state: SessionState) {
+        Logger.info("Session: \(state)", category: "Navigation")
 
         switch state {
         case .authenticated:
-            if !self.isAuthenticated { self.showMainFlow() }
+            root = .dashboard
+            path = NavigationPath()
+        case .welcomeBack:
+            root = .welcomeBack
+            path = NavigationPath()
         case .unauthenticated, .sessionExpired:
-            if self.isAuthenticated { self.showAuthFlow() }
+            root = .authentication
+            path = NavigationPath()
         case .loading, .refreshing:
-            break
+            root = .splash
+        case .locked:
+            root = .locked
         }
     }
 
@@ -55,16 +71,6 @@ public final class AppRouter: AppRouterProtocol {
 
     public func replacePath(with routes: [AppRoute]) {
         path = NavigationPath(routes)
-    }
-
-    public func showMainFlow() {
-        isAuthenticated = true
-        path = NavigationPath()
-    }
-
-    public func showAuthFlow() {
-        isAuthenticated = false
-        path = NavigationPath()
     }
 
     public func navigateToDeepLink(_ routes: [AppRoute]) {

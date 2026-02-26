@@ -152,14 +152,20 @@ public actor APIClient: HTTPClientProtocol {
             }
 
             do {
-                if data.isEmpty {
-                    if let emptyValue = EmptyResponse() as? T {
-                         return emptyValue
+                // ✅ SECURITY & SAFETY FIX: Handle Empty Body / 204
+                if data.isEmpty || httpResponse.statusCode == 204 {
+                    // 1. If T is explicitly EmptyResponse, return it
+                    if T.self == EmptyResponse.self {
+                        return EmptyResponse() as! T
                     }
-                    // If T is NOT EmptyResponse but data IS empty, let JSONDecoder fail naturally or throw specific error?
-                    // Usually JSONDecoder will fail. We let it proceed to fail naturally or we could handle Void? 
-                    // Swift doesn't allow `as? Void`.
-                    // But if T is optional, `nil`? JSONDecoder handles `null` but not empty.
+                    // 2. If T is Optional, return nil (safe)
+                    if let optionalType = T.self as? any AnyOptional.Type {
+                        if let validNil = optionalType.validNil as? T {
+                            return validNil
+                        }
+                    }
+                    // 3. If T is mandatory but data is empty -> Error
+                    throw AppError.decodingError
                 }
 
                 return try JSONDecoder().decode(T.self, from: data)
@@ -223,4 +229,13 @@ public actor APIClient: HTTPClientProtocol {
         defer { refreshTask = nil }
         return try await task.value
     }
+}
+
+// MARK: - Helper Protocol for Optional Handling (Private)
+fileprivate protocol AnyOptional {
+    static var validNil: Any? { get }
+}
+
+extension Optional: AnyOptional {
+    static var validNil: Any? { nil }
 }

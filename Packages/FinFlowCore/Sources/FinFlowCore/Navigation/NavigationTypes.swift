@@ -1,22 +1,15 @@
 //
 //  NavigationTypes.swift
 //  FinFlowCore
-//
-//  Centralized navigation contracts to avoid circular dependencies.
-//  Parent app knows children, but children never know the parent.
-//  Protocol + enum live in Core so every module can depend on them safely.
-//
+
 
 import SwiftUI
 
-/// Router Protocol for Dependency Injection
-///
-/// Dependency Inversion:
-/// - FinFlowCore defines the protocol + routes
-/// - FinFlowIos implements the protocol (AppRouter)
-/// - Feature modules (Identity, Dashboard, ...) depend only on the protocol
 @MainActor
-public protocol AppRouterProtocol {
+public protocol AppRouterProtocol: AnyObject {
+    var path: NavigationPath { get set }
+    var root: AppRoot { get }
+    
     /// Navigate to a specific route
     func navigate(to route: AppRoute)
 
@@ -29,14 +22,16 @@ public protocol AppRouterProtocol {
     /// Replace entire navigation stack
     func replacePath(with routes: [AppRoute])
 
-    /// Switch to authenticated state (show main app)
-    func showMainFlow()
-
-    /// Switch to unauthenticated state (show login)
-    func showAuthFlow()
-
     /// Navigate to specific screen with multiple routes (for deep linking)
     func navigateToDeepLink(_ routes: [AppRoute])
+}
+
+public enum AppRoot: Equatable, Sendable {
+    case splash
+    case authentication
+    case welcomeBack
+    case dashboard
+    case locked
 }
 
 /// Centralized enum for all navigation destinations.
@@ -46,21 +41,10 @@ public enum AppRoute: Hashable, Sendable {
     case login
     case register
     case forgotPassword
-    case verifyOTP(email: String)
-
+    
     // MARK: - Main Flow
     case dashboard
     case profile
     case settings
-
-    // MARK: - Transactions
-    case transactions
     case transactionDetail(id: String)
-    case createTransaction
-
-    // MARK: - Budgets
-    case budgets
-    case budgetDetail(id: String)
-    case createBudget
 }
-
