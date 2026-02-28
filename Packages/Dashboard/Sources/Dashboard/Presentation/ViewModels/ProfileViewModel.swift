@@ -17,6 +17,8 @@ public class ProfileViewModel {
     public var isLoading = false
     public var isRefreshing = false
     public var shouldShowUpdateProfile = false
+    public var hasLoadError = false
+    public var hasAuthExpiredError = false
     
     // MARK: - Dependencies
     private let getProfileUseCase: GetProfileUseCaseProtocol
@@ -61,12 +63,23 @@ public class ProfileViewModel {
             profile = fetchedProfile
             sessionManager.updateCurrentUser(fetchedProfile)
             checkProfileForCompletion(fetchedProfile)
+            hasLoadError = false
+            hasAuthExpiredError = false
         } catch {
             Logger.error("Lỗi tải profile: \(error)", category: "ProfileVM")
             
-            // Nếu token hết hạn/401, chuyển sang flow đăng nhập (welcome/login)
+            // Nếu token hết hạn/401, yêu cầu user đăng nhập lại
             if let appError = error as? AppError, case .unauthorized = appError {
-                await sessionManager.handleSessionExpired()
+                // Dừng trạng thái loading để UI chuyển sang màn hình chờ
+                isLoading = false
+                isRefreshing = false
+                hasAuthExpiredError = true
+                
+                alert = .authWithAction(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.") { [sessionManager] in
+                    Task { @MainActor in
+                        await sessionManager.clearExpiredSession()
+                    }
+                }
                 return
             }
             
@@ -77,6 +90,8 @@ public class ProfileViewModel {
                     self.alert = .general(
                         title: "Lỗi tải dữ liệu", message: error.localizedDescription)
                 }
+                hasLoadError = true
+                hasAuthExpiredError = false
             } else {
                 Logger.warning("Không thể refresh, hiển thị dữ liệu đã lưu", category: "ProfileVM")
             }
@@ -88,7 +103,12 @@ public class ProfileViewModel {
     
     /// Refresh profile (force reload)
     public func refresh() async {
+        // Tránh bấm Thử lại nhiều lần khi đang gọi API
+        if isLoading || isRefreshing { return }
         isRefreshing = true
+        isLoading = true
+        hasLoadError = false
+        hasAuthExpiredError = false
         await loadProfile()
     }
     

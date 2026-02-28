@@ -92,9 +92,7 @@ public class WelcomeBackViewModel {
 
             // Nếu refresh token hỏng (401), hiển thị alert và chỉ khi bấm OK mới chuyển về login
             if let appError = error as? AppError, case .unauthorized = appError {
-                alert = .authWithAction(
-                    message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại."
-                ) { [weak self] in
+                alert = .authWithAction(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.") { [weak self] in
                     Task { @MainActor in
                         guard let self else { return }
                         // ✅ Fix: Clear expired tokens so we go to Login

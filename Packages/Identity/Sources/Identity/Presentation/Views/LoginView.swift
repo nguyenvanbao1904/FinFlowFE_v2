@@ -54,6 +54,12 @@ public struct LoginView: View {
         .task {
             await viewModel.refreshSavedUserInfo()
             await viewModel.checkBiometricAvailability()
+            
+            // Nếu phiên trước vừa hết hạn (sessionExpired -> Login), hiển thị alert một lần
+            if viewModel.isSessionExpired, viewModel.alert == nil {
+                viewModel.alert = .auth(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.")
+                viewModel.isSessionExpired = false
+            }
         }
     }
 

@@ -20,18 +20,51 @@ public struct DashboardView: View {
         @Bindable var profileVM = container.profileVM
         @Bindable var securityVM = container.securityVM
         @Bindable var accountVM = container.accountVM
-
-        return ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                if let profile = container.profileVM.profile {
-                    ProfileHeaderCard(profile: profile)
-
+        
+        // Hiển thị loading/full-screen placeholder khi chưa có profile và đang tải
+        return Group {
+            if profileVM.isLoading && container.profileVM.profile == nil {
+                VStack(spacing: Spacing.md) {
                     Spacer()
-
-                    securitySection(securityVM: securityVM)
-                    accountSection(accountVM: accountVM)
-
-                    logoutButton
+                    ProgressView("Đang tải dữ liệu...")
+                        .tint(AppColors.primary)
+                    Spacer()
+                }
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        if let profile = container.profileVM.profile {
+                            ProfileHeaderCard(profile: profile)
+                            
+                            Spacer()
+                            
+                            securitySection(securityVM: securityVM)
+                            accountSection(accountVM: accountVM)
+                            
+                            logoutButton
+                        } else if profileVM.hasAuthExpiredError {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+                        } else if profileVM.hasLoadError {
+                            Spacer()
+                            VStack(spacing: Spacing.sm) {
+                                Text("Không thể tải dữ liệu")
+                                    .font(AppTypography.headline)
+                                Text("Vui lòng kiểm tra kết nối mạng và thử lại.")
+                                    .font(AppTypography.body)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                                Button("Thử lại") {
+                                    Task { await container.profileVM.refresh() }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(profileVM.isLoading)
+                            }
+                            .frame(maxWidth: .infinity)
+                            Spacer()
+                        }
+                    }
                 }
             }
         }
@@ -56,16 +89,30 @@ public struct DashboardView: View {
             verificationPIN: $verificationPIN,
             container: container
         )
-        .alertHandler($profileVM.alert)
-        // Handle account alerts khi không có sheet nào đang mở (sheet có alertHandler riêng)
-        .alertHandler(Binding(
-            get: { !accountVM.showOTPInput && !accountVM.showDeletePasswordConfirmation ? accountVM.alert : nil },
-            set: { _ in accountVM.alert = nil }
-        ))
-        // Handle security alerts (e.g. "Device not supported") when PIN sheet is not showing
-        .alertHandler(Binding(
-            get: { !securityVM.showPINVerification ? securityVM.pinAlert : nil },
-            set: { _ in securityVM.pinAlert = nil }
+        // Gộp chung Alert Handler để tránh xung đột (SwiftUI chỉ nhận 1 alert modifier trên cùng 1 view ở một số phiên bản)
+        .alertHandler(Binding<AppErrorAlert?>(
+            get: {
+                // Ưu tiên hiển thị alert theo thứ tự quan trọng
+                if let alert = profileVM.alert { return alert }
+                
+                // Account alerts (trừ khi đang nhập OTP/Pass)
+                if !accountVM.showOTPInput && !accountVM.showDeletePasswordConfirmation, let alert = accountVM.alert {
+                    return alert
+                }
+                
+                // Security alerts (trừ khi đang verify PIN)
+                if !securityVM.showPINVerification, let alert = securityVM.pinAlert {
+                    return alert
+                }
+                
+                return nil
+            },
+            set: { newValue in
+                // Reset alert tương ứng
+                if profileVM.alert != nil { profileVM.alert = newValue }
+                else if accountVM.alert != nil { accountVM.alert = newValue }
+                else if securityVM.pinAlert != nil { securityVM.pinAlert = newValue }
+            }
         ))
         .onAppear {
             if case let .authenticated(_, isRestored) = container.sessionManager.state, isRestored {

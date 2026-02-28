@@ -120,7 +120,16 @@ public class SecuritySettingsViewModel {
             
             Logger.info("✅ Biometric toggled: \(enabled)", category: "SecurityVM")
         } catch {
-            pinAlert = error.toAppAlert(defaultTitle: "Lỗi")
+            // Nếu session hết hạn/refresh token hỏng -> yêu cầu user đăng nhập lại
+            if let appError = error as? AppError, case .unauthorized = appError {
+                pinAlert = .authWithAction(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.") { [sessionManager] in
+                    Task { @MainActor in
+                        await sessionManager.clearExpiredSession()
+                    }
+                }
+            } else {
+                pinAlert = error.toAppAlert(defaultTitle: "Lỗi")
+            }
         }
     }
     
