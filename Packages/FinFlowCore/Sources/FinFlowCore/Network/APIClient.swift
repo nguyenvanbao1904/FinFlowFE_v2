@@ -100,6 +100,12 @@ public actor APIClient: HTTPClientProtocol {
             do {
                 (data, response) = try await session.data(for: request)
             } catch {
+                if error is CancellationError {
+                    throw error
+                }
+                if let urlErr = error as? URLError, urlErr.code == .cancelled {
+                    throw CancellationError()
+                }
                 throw AppError.networkError(error.localizedDescription)
             }
 

@@ -67,6 +67,14 @@ public class ProfileViewModel {
             hasLoadError = false
             hasAuthExpiredError = false
         } catch {
+            if error is CancellationError {
+                // Ignore task cancellation gracefully without showing an alert
+                Logger.info("Profile tải bị huỷ do chuyển trang", category: "ProfileVM")
+                isLoading = false
+                isRefreshing = false
+                return
+            }
+            
             Logger.error("Lỗi tải profile: \(error)", category: "ProfileVM")
             
             // Nếu token hết hạn/401, yêu cầu user đăng nhập lại
