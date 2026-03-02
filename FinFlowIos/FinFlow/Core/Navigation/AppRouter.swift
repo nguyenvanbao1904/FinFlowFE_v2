@@ -10,6 +10,7 @@ import OSLog
 public final class AppRouter: AppRouterProtocol {
     public var path = NavigationPath()
     public var root: AppRoot = .splash
+    public var presentedSheet: AppRoute?
     
     // Legacy support (computed)
     public var isAuthenticated: Bool {
@@ -75,5 +76,13 @@ public final class AppRouter: AppRouterProtocol {
 
     public func navigateToDeepLink(_ routes: [AppRoute]) {
         path = NavigationPath(routes)
+    }
+    
+    public func presentSheet(_ route: AppRoute) {
+        presentedSheet = route
+    }
+    
+    public func dismissSheet() {
+        presentedSheet = nil
     }
 }

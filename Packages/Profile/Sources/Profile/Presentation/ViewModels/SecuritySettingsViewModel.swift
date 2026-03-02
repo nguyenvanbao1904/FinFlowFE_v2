@@ -2,6 +2,7 @@
 //  SecuritySettingsViewModel.swift
 //  Dashboard
 //
+//
 
 import FinFlowCore
 import LocalAuthentication
@@ -13,7 +14,6 @@ import LocalAuthentication
 public class SecuritySettingsViewModel {
     // MARK: - State
     public var pinAlert: AppErrorAlert?
-    public var shouldShowCreatePIN = false
     public var showPINVerification = false
     public var isBiometricEnabled = false
     public var pendingBiometricToggle: Bool?
@@ -29,6 +29,7 @@ public class SecuritySettingsViewModel {
     // MARK: - Dependencies
     private let pinManager: any PINManagerProtocol
     private let authRepository: AuthRepositoryProtocol
+    private let router: any AppRouterProtocol
     public let sessionManager: any SessionManagerProtocol
     private let otpHandler: OTPInputHandler
     private var userEmail: String
@@ -38,12 +39,14 @@ public class SecuritySettingsViewModel {
         userEmail: String,
         pinManager: any PINManagerProtocol,
         authRepository: AuthRepositoryProtocol,
+        router: any AppRouterProtocol,
         sessionManager: any SessionManagerProtocol,
         otpHandler: OTPInputHandler
     ) {
         self.userEmail = userEmail
         self.pinManager = pinManager
         self.authRepository = authRepository
+        self.router = router
         self.sessionManager = sessionManager
         self.otpHandler = otpHandler
     }
@@ -60,18 +63,10 @@ public class SecuritySettingsViewModel {
         let hasPIN = await pinManager.hasPIN(for: userEmail)
         if !hasPIN {
             Logger.info("Chưa có PIN, yêu cầu tạo mới", category: "SecurityVM")
-            shouldShowCreatePIN = true
+            // Navigate to Create PIN screen
+            router.navigate(to: .createPIN(email: userEmail))
         } else {
             Logger.info("Đã có PIN", category: "SecurityVM")
-            shouldShowCreatePIN = false
-        }
-    }
-    
-    public func makeCreatePINViewModel() -> CreatePINViewModel {
-        return CreatePINViewModel(email: userEmail, pinManager: pinManager) { [weak self] in
-            Task { @MainActor in
-                self?.shouldShowCreatePIN = false
-            }
         }
     }
     
@@ -176,7 +171,7 @@ public class SecuritySettingsViewModel {
             resetPinOtpCode = ""
             
             // 4. Trigger Create PIN flow
-            shouldShowCreatePIN = true
+            router.navigate(to: .createPIN(email: userEmail))
             
             pinAlert = .general(title: "Thành công", message: "Mã PIN đã được xóa. Vui lòng tạo mã PIN mới.")
             

@@ -4,7 +4,6 @@
 //
 
 import FinFlowCore
-import Identity
 
 /// ViewModel cho Account Management section
 /// Responsibility: Quản lý password change và account deletion
@@ -14,7 +13,6 @@ public class AccountManagementViewModel {
     // MARK: - State
     public var alert: AppErrorAlert?
     public var otpAlert: AppErrorAlert?
-    public var shouldShowChangePassword = false
     public var showDeleteAccountConfirmation = false
     
     // Xác nhận mật khẩu trước khi xoá tài khoản (dành cho user có password)
@@ -70,20 +68,10 @@ public class AccountManagementViewModel {
     
     /// Navigate to change password screen
     public func navigateToChangePassword() {
-        shouldShowChangePassword = true
-    }
-    
-    /// Make ChangePasswordViewModel/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Dashboard/Sources/Dashboard/Presentation/ViewModels/AccountManagementViewModel.swift:74:67 Cannot find type 'ChangePasswordViewModel' in scope
-
-    public func makeChangePasswordViewModel(hasPassword: Bool) -> ChangePasswordViewModel {
-        let isCreating = !hasPassword
-        return ChangePasswordViewModel(
-            authRepository: authRepository,
-            sessionManager: sessionManager,
-            isCreatingPassword: isCreating
-        ) { [weak self] in
-            Task { @MainActor in
-                self?.shouldShowChangePassword = false
+        Task {
+            let hasPassword = await sessionManager.hasPassword()
+            await MainActor.run {
+                router.navigate(to: .changePassword(hasPassword: hasPassword))
             }
         }
     }
@@ -207,6 +195,27 @@ public class AccountManagementViewModel {
         } catch {
             // Sai mật khẩu -> hiển thị qua alertHandler
             alert = error.toAppAlert(defaultTitle: "Lỗi xác thực")
+        }
+    }
+    
+    /// Logout (keep refresh token)
+    public func logout() async {
+        Logger.info("Người dùng đăng xuất (Soft Logout)", category: "AccountVM")
+        // We only clear access token locally.
+        await sessionManager.logout()
+        Logger.info("Soft Logout completed", category: "AccountVM")
+    }
+    
+    /// Logout completely (clear refresh token)
+    public func logoutCompletely() async {
+        Logger.info("Người dùng đăng xuất hoàn toàn (switch account)", category: "AccountVM")
+        do {
+            try await authRepository.logout()
+            await sessionManager.logoutCompletely()
+            Logger.info("Complete logout finished", category: "AccountVM")
+        } catch {
+            Logger.error("Lỗi khi complete logout: \(error)", category: "AccountVM")
+            await sessionManager.logoutCompletely()
         }
     }
 }

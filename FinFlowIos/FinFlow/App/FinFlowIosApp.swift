@@ -63,7 +63,7 @@ struct AppRootView: View {
                     case .welcomeBack:
                         container.makeAuthenticationView(router: router)
                     case .dashboard:
-                        container.makeDashboardView(router: router)
+                        container.makeMainTabView(router: router)
                     case .locked:
                         if case .locked(let user, let bioAvailable) = container.sessionManager.state {
                             container.makeLockScreenView(user: user, biometricAvailable: bioAvailable)
@@ -77,6 +77,9 @@ struct AppRootView: View {
                 }
             }
             .id(observableRouter.root)
+            .sheet(item: $observableRouter.presentedSheet) { route in
+                makeDestination(for: route)
+            }
             
             // Privacy Blur Overlay
             if isPrivacyBlurVisible {
@@ -143,13 +146,19 @@ struct AppRootView: View {
             container.makeForgotPasswordView(router: router)
                 .navigationTitle("Quên Mật Khẩu")
         case .dashboard:
-            container.makeDashboardView(router: router)
+            container.makeMainTabView(router: router)
         case .profile:
             Text("Profile View - Coming Soon")
         case .settings:
             Text("Settings View - Coming Soon")
         case .transactionDetail(let id):
             Text("Transaction Detail: \(id) - Coming Soon")
+        case .updateProfile(let profile):
+            container.makeUpdateProfileView(profile: profile, router: router)
+        case .changePassword(let hasPassword):
+            container.makeChangePasswordView(hasPassword: hasPassword, router: router)
+        case .createPIN(let email):
+            container.makeCreatePINView(email: email, router: router)
         }
     }
 }

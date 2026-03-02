@@ -9,6 +9,7 @@ import SwiftUI
 public protocol AppRouterProtocol: AnyObject {
     var path: NavigationPath { get set }
     var root: AppRoot { get }
+    var presentedSheet: AppRoute? { get set }
     
     /// Navigate to a specific route
     func navigate(to route: AppRoute)
@@ -24,6 +25,12 @@ public protocol AppRouterProtocol: AnyObject {
 
     /// Navigate to specific screen with multiple routes (for deep linking)
     func navigateToDeepLink(_ routes: [AppRoute])
+    
+    /// Present a global sheet
+    func presentSheet(_ route: AppRoute)
+    
+    /// Dismiss the global sheet
+    func dismissSheet()
 }
 
 public enum AppRoot: Equatable, Sendable {
@@ -47,4 +54,11 @@ public enum AppRoute: Hashable, Sendable {
     case profile
     case settings
     case transactionDetail(id: String)
+    case updateProfile(UserProfile)
+    case changePassword(hasPassword: Bool)
+    case createPIN(email: String)
+}
+
+extension AppRoute: Identifiable {
+    public var id: Int { hashValue }
 }

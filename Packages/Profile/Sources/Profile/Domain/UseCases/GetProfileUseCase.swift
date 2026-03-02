@@ -1,6 +1,6 @@
 //
 //  GetProfileUseCase.swift
-//  Identity
+//  Profile
 //
 //  Use Case for retrieving the authenticated user's profile.
 //

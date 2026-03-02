@@ -4,7 +4,6 @@
 //
 
 import FinFlowCore
-import Identity
 
 /// ViewModel cho Profile section
 /// Responsibility: Quản lý hiển thị và cập nhật profile
@@ -16,23 +15,25 @@ public class ProfileViewModel {
     public var alert: AppErrorAlert?
     public var isLoading = false
     public var isRefreshing = false
-    public var shouldShowUpdateProfile = false
     public var hasLoadError = false
     public var hasAuthExpiredError = false
     
     // MARK: - Dependencies
     private let getProfileUseCase: GetProfileUseCaseProtocol
     private let authRepository: AuthRepositoryProtocol
+    private let router: any AppRouterProtocol
     public let sessionManager: any SessionManagerProtocol
     
     // MARK: - Initialization
     public init(
         getProfileUseCase: GetProfileUseCaseProtocol,
         authRepository: AuthRepositoryProtocol,
+        router: any AppRouterProtocol,
         sessionManager: any SessionManagerProtocol
     ) {
         self.getProfileUseCase = getProfileUseCase
         self.authRepository = authRepository
+        self.router = router
         self.sessionManager = sessionManager
     }
     
@@ -112,31 +113,20 @@ public class ProfileViewModel {
         await loadProfile()
     }
     
-    /// Make UpdateProfileViewModel
-    public func makeUpdateProfileViewModel() -> UpdateProfileViewModel {
-        return UpdateProfileViewModel(
-            authRepository: self.authRepository,
-            sessionManager: self.sessionManager,
-            currentProfile: self.profile
-        ) { [weak self] in
-            Task { @MainActor in
-                guard let self else { return }
-                // Close sheet and force reload to refresh completeness flags
-                self.shouldShowUpdateProfile = false
-                self.isRefreshing = true
-                await self.loadProfile()
-            }
+    /// Navigate to Update Profile
+    public func navigateToUpdateProfile() {
+        if let profile = profile {
+            router.navigate(to: .updateProfile(profile))
         }
     }
     
     // MARK: - Private Methods
     
-    /// Check if profile is complete, show update sheet if needed
+    /// Check if profile is complete, navigate to update if needed
     private func checkProfileForCompletion(_ profile: UserProfile) {
         if profile.firstName == nil || profile.lastName == nil || profile.dob == nil {
-            shouldShowUpdateProfile = true
-        } else {
-            shouldShowUpdateProfile = false
+            // Force Update Profile
+            router.navigate(to: .updateProfile(profile))
         }
     }
 }

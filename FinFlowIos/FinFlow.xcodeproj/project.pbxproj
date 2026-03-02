@@ -17,6 +17,7 @@
 /* Begin PBXFileReference section */
 		A475D9732EFDB02A002AE968 /* Identity */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Identity; path = ../Packages/Identity; sourceTree = SOURCE_ROOT; };
 		A475D9792EFDB1FF002AE968 /* Dashboard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Dashboard; path = ../Packages/Dashboard; sourceTree = SOURCE_ROOT; };
+		A475D9802EFDB300002AE968 /* Profile */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Profile; path = ../Packages/Profile; sourceTree = SOURCE_ROOT; };
 		A4AD53C42EFDA7CA0070A2E4 /* FinFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4AD53D22EFDA8B90070A2E4 /* FinFlowCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FinFlowCore; path = ../Packages/FinFlowCore; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -70,6 +71,7 @@
 			children = (
 				A475D9732EFDB02A002AE968 /* Identity */,
 				A475D9792EFDB1FF002AE968 /* Dashboard */,
+				A475D9802EFDB300002AE968 /* Profile */,
 				A4AD53D22EFDA8B90070A2E4 /* FinFlowCore */,
 				A4AD53C62EFDA7CA0070A2E4 /* FinFlow */,
 				A475D9742EFDB0C8002AE968 /* Frameworks */,

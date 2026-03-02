@@ -1,12 +1,15 @@
 //
 //  DependencyContainer+AppViews.swift
 //  FinFlowIos
-
+//
+//  Created by FinFlow AI.
+//
 
 import Dashboard
 import FinFlowCore
 import Identity
 import SwiftUI
+import Profile
 
 // MARK: - App View Factories
 extension DependencyContainer {
@@ -84,7 +87,82 @@ extension DependencyContainer {
         LockScreenView(viewModel: makeLockScreenViewModel(user: user, biometricAvailable: biometricAvailable))
     }
 
-    func makeDashboardView(router: any AppRouterProtocol) -> some View {
-        DashboardView(viewModel: makeDashboardContainerViewModel(router: router))
+    // Factory cho Main Tab View (Home + Profile)
+    func makeMainTabView(router: any AppRouterProtocol) -> some View {
+        let profileView = makeProfileView(router: router)
+        return MainTabView(profileView: profileView)
+    }
+
+    func makeProfileView(router: any AppRouterProtocol) -> ProfileView {
+        let email = sessionManager.currentUser?.email ?? ""
+        
+        let profileVM = ProfileViewModel(
+            getProfileUseCase: GetProfileUseCase(repository: authRepository),
+            authRepository: authRepository,
+            router: router,
+            sessionManager: sessionManager
+        )
+        
+        let securityVM = SecuritySettingsViewModel(
+            userEmail: email,
+            pinManager: pinManager,
+            authRepository: authRepository,
+            router: router,
+            sessionManager: sessionManager,
+            otpHandler: otpHandler
+        )
+        
+        let accountVM = AccountManagementViewModel(
+            userEmail: email,
+            authRepository: authRepository,
+            otpHandler: otpHandler,
+            router: router,
+            sessionManager: sessionManager,
+            pinManager: pinManager
+        )
+        
+        return ProfileView(
+            profileVM: profileVM,
+            securityVM: securityVM,
+            accountVM: accountVM
+        )
+    }
+
+    func makeUpdateProfileView(profile: UserProfile, router: any AppRouterProtocol) -> some View {
+        UpdateProfileView(
+            viewModel: UpdateProfileViewModel(
+                authRepository: authRepository,
+                sessionManager: sessionManager,
+                currentProfile: profile,
+                onSuccess: {
+                    router.pop()
+                }
+            )
+        )
+    }
+
+    func makeChangePasswordView(hasPassword: Bool, router: any AppRouterProtocol) -> some View {
+        ChangePasswordView(
+            viewModel: ChangePasswordViewModel(
+                authRepository: authRepository,
+                sessionManager: sessionManager,
+                isCreatingPassword: !hasPassword,
+                onSuccess: {
+                    router.pop()
+                }
+            )
+        )
+    }
+
+    func makeCreatePINView(email: String, router: any AppRouterProtocol) -> some View {
+        CreatePINView(
+            viewModel: CreatePINViewModel(
+                email: email,
+                pinManager: pinManager,
+                onCompletion: {
+                    router.pop()
+                }
+            )
+        )
     }
 }
