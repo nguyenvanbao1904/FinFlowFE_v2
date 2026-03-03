@@ -10,6 +10,7 @@ import FinFlowCore
 import Identity
 import SwiftUI
 import Profile
+import Transaction
 
 // MARK: - App View Factories
 extension DependencyContainer {
@@ -90,7 +91,8 @@ extension DependencyContainer {
     // Factory cho Main Tab View (Home + Profile)
     func makeMainTabView(router: any AppRouterProtocol) -> some View {
         let profileView = makeProfileView(router: router)
-        return MainTabView(profileView: profileView)
+        let transactionView = TransactionListView(router: router)
+        return MainTabView(profileView: profileView, transactionView: transactionView)
     }
 
     func makeProfileView(router: any AppRouterProtocol) -> ProfileView {
@@ -164,5 +166,9 @@ extension DependencyContainer {
                 }
             )
         )
+    }
+
+    func makeAddTransactionView(router: any AppRouterProtocol) -> some View {
+        AddTransactionView(router: router)
     }
 }

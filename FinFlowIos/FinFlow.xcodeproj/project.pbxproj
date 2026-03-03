@@ -9,12 +9,15 @@
 /* Begin PBXBuildFile section */
 		A4358F0D2F263FAC00FA1D88 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = A4358F0C2F263FAC00FA1D88 /* GoogleSignIn */; };
 		A4358F0F2F263FAC00FA1D88 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A4358F0E2F263FAC00FA1D88 /* GoogleSignInSwift */; };
+		A46A5DE52F55D4A7005199DD /* Profile in Frameworks */ = {isa = PBXBuildFile; productRef = A46A5DE42F55D4A7005199DD /* Profile */; };
+		A46A5DEA2F55DBD0005199DD /* Transaction in Frameworks */ = {isa = PBXBuildFile; productRef = A46A5DE92F55DBD0005199DD /* Transaction */; };
 		A475D9762EFDB0D7002AE968 /* Identity in Frameworks */ = {isa = PBXBuildFile; productRef = A475D9752EFDB0D7002AE968 /* Identity */; };
 		A475D9782EFDB168002AE968 /* FinFlowCore in Frameworks */ = {isa = PBXBuildFile; productRef = A475D9772EFDB168002AE968 /* FinFlowCore */; };
 		A475D97A2EFDB200002AE968 /* Dashboard in Frameworks */ = {isa = PBXBuildFile; productRef = A475D9792EFDB200002AE968 /* Dashboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A46A5DE82F55D682005199DD /* Transaction */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Transaction; sourceTree = "<group>"; };
 		A475D9732EFDB02A002AE968 /* Identity */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Identity; path = ../Packages/Identity; sourceTree = SOURCE_ROOT; };
 		A475D9792EFDB1FF002AE968 /* Dashboard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Dashboard; path = ../Packages/Dashboard; sourceTree = SOURCE_ROOT; };
 		A475D9802EFDB300002AE968 /* Profile */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Profile; path = ../Packages/Profile; sourceTree = SOURCE_ROOT; };
@@ -48,6 +51,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A46A5DE52F55D4A7005199DD /* Profile in Frameworks */,
+				A46A5DEA2F55DBD0005199DD /* Transaction in Frameworks */,
 				A4358F0F2F263FAC00FA1D88 /* GoogleSignInSwift in Frameworks */,
 				A475D9762EFDB0D7002AE968 /* Identity in Frameworks */,
 				A4358F0D2F263FAC00FA1D88 /* GoogleSignIn in Frameworks */,
@@ -69,6 +74,7 @@
 		A4AD53BB2EFDA7CA0070A2E4 = {
 			isa = PBXGroup;
 			children = (
+				A46A5DE82F55D682005199DD /* Transaction */,
 				A475D9732EFDB02A002AE968 /* Identity */,
 				A475D9792EFDB1FF002AE968 /* Dashboard */,
 				A475D9802EFDB300002AE968 /* Profile */,
@@ -112,6 +118,8 @@
 				A475D9792EFDB200002AE968 /* Dashboard */,
 				A4358F0C2F263FAC00FA1D88 /* GoogleSignIn */,
 				A4358F0E2F263FAC00FA1D88 /* GoogleSignInSwift */,
+				A46A5DE42F55D4A7005199DD /* Profile */,
+				A46A5DE92F55DBD0005199DD /* Transaction */,
 			);
 			productName = FinFlowIos;
 			productReference = A4AD53C42EFDA7CA0070A2E4 /* FinFlow.app */;
@@ -408,6 +416,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A4358F0B2F263FAC00FA1D88 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		A46A5DE42F55D4A7005199DD /* Profile */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Profile;
+		};
+		A46A5DE92F55DBD0005199DD /* Transaction */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Transaction;
 		};
 		A475D9752EFDB0D7002AE968 /* Identity */ = {
 			isa = XCSwiftPackageProductDependency;

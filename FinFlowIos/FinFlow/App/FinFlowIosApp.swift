@@ -159,6 +159,8 @@ struct AppRootView: View {
             container.makeChangePasswordView(hasPassword: hasPassword, router: router)
         case .createPIN(let email):
             container.makeCreatePINView(email: email, router: router)
+        case .addTransaction:
+            container.makeAddTransactionView(router: router)
         }
     }
 }

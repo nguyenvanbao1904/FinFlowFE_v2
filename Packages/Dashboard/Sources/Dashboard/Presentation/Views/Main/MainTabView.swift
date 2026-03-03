@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-public struct MainTabView<ProfileContent: View>: View {
+public struct MainTabView<ProfileContent: View, TransactionContent: View>: View {
     private let profileView: ProfileContent
+    private let transactionView: TransactionContent
     
-    public init(profileView: ProfileContent) {
+    public init(profileView: ProfileContent, transactionView: TransactionContent) {
         self.profileView = profileView
+        self.transactionView = transactionView
     }
     
     public var body: some View {
@@ -19,6 +21,11 @@ public struct MainTabView<ProfileContent: View>: View {
             HomeView()
                 .tabItem {
                     Label("Trang chủ", systemImage: "house.fill")
+                }
+            
+            transactionView
+                .tabItem {
+                    Label("Giao dịch", systemImage: "list.clipboard.fill")
                 }
             
             profileView

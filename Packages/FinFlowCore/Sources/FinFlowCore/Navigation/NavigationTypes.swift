@@ -57,6 +57,7 @@ public enum AppRoute: Hashable, Sendable {
     case updateProfile(UserProfile)
     case changePassword(hasPassword: Bool)
     case createPIN(email: String)
+    case addTransaction
 }
 
 extension AppRoute: Identifiable {
