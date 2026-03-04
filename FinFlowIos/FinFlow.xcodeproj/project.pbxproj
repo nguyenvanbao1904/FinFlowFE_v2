@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A46A5DE82F55D682005199DD /* Transaction */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Transaction; sourceTree = "<group>"; };
+		A42D54962F5898DE00EDD686 /* Transaction */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Transaction; path = ../Packages/Transaction; sourceTree = SOURCE_ROOT; };
 		A475D9732EFDB02A002AE968 /* Identity */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Identity; path = ../Packages/Identity; sourceTree = SOURCE_ROOT; };
 		A475D9792EFDB1FF002AE968 /* Dashboard */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Dashboard; path = ../Packages/Dashboard; sourceTree = SOURCE_ROOT; };
 		A475D9802EFDB300002AE968 /* Profile */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Profile; path = ../Packages/Profile; sourceTree = SOURCE_ROOT; };
@@ -74,7 +74,7 @@
 		A4AD53BB2EFDA7CA0070A2E4 = {
 			isa = PBXGroup;
 			children = (
-				A46A5DE82F55D682005199DD /* Transaction */,
+				A42D54962F5898DE00EDD686 /* Transaction */,
 				A475D9732EFDB02A002AE968 /* Identity */,
 				A475D9792EFDB1FF002AE968 /* Dashboard */,
 				A475D9802EFDB300002AE968 /* Profile */,
@@ -100,6 +100,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A4AD53CF2EFDA7CB0070A2E4 /* Build configuration list for PBXNativeTarget "FinFlow" */;
 			buildPhases = (
+				A42D54942F58959200EDD686 /* SwiftLint */,
 				A4AD53C02EFDA7CA0070A2E4 /* Sources */,
 				A4AD53C12EFDA7CA0070A2E4 /* Frameworks */,
 				A4AD53C22EFDA7CA0070A2E4 /* Resources */,
@@ -171,6 +172,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A42D54942F58959200EDD686 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Export đường dẫn Homebrew để tìm thấy SwiftLint trên Mac M-series\nexport PATH=\"$PATH:/opt/homebrew/bin\"\n\n# Định nghĩa các thư mục cần quét (Sử dụng đường dẫn tương đối từ SRCROOT)\n# SRCROOT của bạn là: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos\nAPP_DIR=\"${SRCROOT}/FinFlow\"\nPACKAGES_DIR=\"${SRCROOT}/../Packages\"\n\nif which swiftlint >/dev/null; then\n  # Chạy swiftlint bằng cách truyền trực tiếp đường dẫn thư mục cần quét vào lệnh\n  swiftlint lint \"$APP_DIR\" \"$PACKAGES_DIR\"\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A4AD53C02EFDA7CA0070A2E4 /* Sources */ = {
