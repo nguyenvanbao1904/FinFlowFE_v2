@@ -3,7 +3,6 @@
 //  Identity
 //
 
-import Combine
 import FinFlowCore
 import LocalAuthentication
 import SwiftUI
@@ -109,7 +108,7 @@ public class LoginViewModel {
         isLoading = false
     }
 
-    public func loginWithGoogle(idToken: String) async {
+    public func handleGoogleLogin(idToken: String) async {
         isLoading = true
         defer { isLoading = false }
 

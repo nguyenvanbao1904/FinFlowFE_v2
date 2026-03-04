@@ -1,4 +1,3 @@
-import Combine
 import FinFlowCore
 import Foundation
 import SwiftUI
@@ -9,7 +8,13 @@ public class RegisterViewModel {
     // Form fields
     public var username = "" {
         didSet {
-            usernameDebounceSubject.send(username)
+            guard username != oldValue else { return }
+            usernameDebounceTask?.cancel()
+            usernameDebounceTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled, let self else { return }
+                await self.checkUsernameAvailability(self.username)
+            }
         }
     }
     public var email = "" {
@@ -24,7 +29,12 @@ public class RegisterViewModel {
             emailValidationMessage = nil
 
             // Trigger debounced validation
-            emailDebounceSubject.send(email)
+            emailDebounceTask?.cancel()
+            emailDebounceTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled, let self else { return }
+                await self.validateEmail(self.email)
+            }
         }
     }
 
@@ -111,11 +121,9 @@ public class RegisterViewModel {
     public var passwordMessage: String?
     public var passwordConfirmationMessage: String?
 
-    // Debounce
-    private let emailDebounceSubject = PassthroughSubject<String, Never>()
-    private let usernameDebounceSubject = PassthroughSubject<String, Never>()
+    private var emailDebounceTask: Task<Void, Never>?
+    private var usernameDebounceTask: Task<Void, Never>?
     private var otpCooldownTask: Task<Void, Never>?
-    private var cancellables = Set<AnyCancellable>()
 
     public init(
         registerUseCase: RegisterUseCaseProtocol,
@@ -131,9 +139,6 @@ public class RegisterViewModel {
         self.otpHandler = otpHandler
         self.onRegistrationSuccess = onRegistrationSuccess
         self.onNavigateToLogin = onNavigateToLogin
-
-        setupEmailDebounce()
-        setupUsernameDebounce()
     }
 
     // MARK: - Field Validation
@@ -171,32 +176,6 @@ public class RegisterViewModel {
                 passwordConfirmationMessage = nil
             }
         }
-    }
-
-    // MARK: - Email Validation with Debounce
-
-    private func setupEmailDebounce() {
-        emailDebounceSubject
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { [weak self] email in
-                Task { @MainActor [weak self] in
-                    await self?.validateEmail(email)
-                }
-            }
-            .store(in: &cancellables)
-    }
-
-    private func setupUsernameDebounce() {
-        usernameDebounceSubject
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { [weak self] username in
-                Task { @MainActor [weak self] in
-                    await self?.checkUsernameAvailability(username)
-                }
-            }
-            .store(in: &cancellables)
     }
 
     private func validateEmail(_ email: String) async {

@@ -1,4 +1,3 @@
-import Combine
 import FinFlowCore
 import Foundation
 import SwiftUI
@@ -13,8 +12,13 @@ public class ForgotPasswordViewModel {
             isEmailExistenceVerified = false
             emailValidationMessage = nil
 
-            // Trigger debounced validation
-            emailDebounceSubject.send(email)
+            // Trigger debounced validation (Task-based, no Combine)
+            emailDebounceTask?.cancel()
+            emailDebounceTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled, let self else { return }
+                await self.validateEmail(self.email)
+            }
         }
     }
     public var otpCode = "" {
@@ -63,9 +67,7 @@ public class ForgotPasswordViewModel {
     private let otpHandler: OTPInputHandler
     private let onSuccess: (String) -> Void
 
-    // Debounce
-    private let emailDebounceSubject = PassthroughSubject<String, Never>()
-    private var cancellables = Set<AnyCancellable>()
+    private var emailDebounceTask: Task<Void, Never>?
 
     public init(
         useCase: ForgotPasswordUseCaseProtocol,
@@ -75,21 +77,6 @@ public class ForgotPasswordViewModel {
         self.useCase = useCase
         self.otpHandler = otpHandler
         self.onSuccess = onSuccess
-        setupEmailDebounce()
-    }
-
-    // MARK: - Email Validation with Debounce
-
-    private func setupEmailDebounce() {
-        emailDebounceSubject
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-            .removeDuplicates()
-            .sink { [weak self] email in
-                Task { @MainActor [weak self] in
-                    await self?.validateEmail(email)
-                }
-            }
-            .store(in: &cancellables)
     }
 
     private func validateEmail(_ email: String) async {

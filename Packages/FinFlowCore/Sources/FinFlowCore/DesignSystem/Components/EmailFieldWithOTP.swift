@@ -87,7 +87,7 @@ public struct EmailFieldWithOTP: View {
                                 .scaleEffect(0.8)
                         } else {
                             Text(cooldownRemaining > 0 ? "\(cooldownRemaining)s" : "Gửi mã")
-                                .font(.system(size: 13, weight: .bold))
+                                .font(AppTypography.labelSmall)
                                 .foregroundColor(
                                     (canSendOTP && cooldownRemaining == 0) ? AppColors.primary
                                         : .gray)
@@ -151,7 +151,7 @@ public struct EmailFieldWithOTP: View {
                                 .scaleEffect(0.8)
                         } else {
                             Text("Xác nhận")
-                                .font(.system(size: 13, weight: .bold))
+                                .font(AppTypography.labelSmall)
                                 .foregroundColor(
                                     otpCode.count == 6 ? AppColors.primary : .gray)
                         }

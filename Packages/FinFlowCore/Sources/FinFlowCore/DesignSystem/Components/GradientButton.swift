@@ -17,9 +17,9 @@ public struct GradientButton: View {
             case .primary:
                 return [AppColors.primary, AppColors.primary.opacity(0.7)]
             case .success:
-                return [Color.green, Color.blue]
+                return [AppColors.success, AppColors.accent]
             case .disabled:
-                return [Color.gray.opacity(0.3), Color.gray.opacity(0.3)]
+                return [AppColors.disabled, AppColors.disabled]
             }
         }
 
@@ -28,7 +28,7 @@ public struct GradientButton: View {
             case .primary:
                 return AppColors.primary.opacity(0.5)
             case .success:
-                return Color.green.opacity(0.5)
+                return AppColors.success.opacity(0.5)
             case .disabled:
                 return .clear
             }

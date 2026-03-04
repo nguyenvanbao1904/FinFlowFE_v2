@@ -66,7 +66,7 @@ public struct LoginView: View {
     // MARK: - Sub-components
 
     private func sessionExpiredMessage(name: String, email: String?) -> some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.xs) {
             Text("Xin chào \(name)!")
                 .font(.title3)
                 .fontWeight(.semibold)
@@ -128,7 +128,7 @@ public struct LoginView: View {
                     Task { await viewModel.loginWithBiometric() }
                 } label: {
                     Image(systemName: viewModel.biometricType == .touchID ? "touchid" : "faceid")
-                        .font(.system(size: 24))
+                        .font(AppTypography.displaySmall)
                         .foregroundStyle(.white)
                         .frame(width: 56, height: 56)
                         .background(
@@ -163,9 +163,9 @@ public struct LoginView: View {
 
     @MainActor
     private func handleGoogleLogin() async {
-        viewModel.isLoading = true
-        defer { viewModel.isLoading = false }
-
+        // The View is responsible for UIKit presentation and Google SDK call only.
+        // It extracts the raw idToken and hands it to the ViewModel — 
+        // no isLoading or error state management here.
         do {
             guard
                 let windowScene = UIApplication.shared.connectedScenes
@@ -173,16 +173,23 @@ public struct LoginView: View {
                     .first(where: { $0.activationState == .foregroundActive }),
                 let presenter = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
             else {
-                throw AppError.validationError("Không tìm thấy cửa sổ hiện tại")
+                viewModel.alert = AppError.validationError("Không tìm thấy cửa sổ hiện tại")
+                    .toAppAlert(defaultTitle: "Lỗi")
+                return
             }
 
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)
             guard let idToken = result.user.idToken?.tokenString else {
-                throw AppError.validationError("Không lấy được Google ID token")
+                viewModel.alert = AppError.validationError("Không lấy được Google ID token")
+                    .toAppAlert(defaultTitle: "Lỗi")
+                return
             }
 
-            await viewModel.loginWithGoogle(idToken: idToken)
+            // Pass only the raw String token — ViewModel handles the rest
+            await viewModel.handleGoogleLogin(idToken: idToken)
         } catch {
+            // Only GIDSignIn-level errors (e.g. user cancelled) are handled here
+            // AppError / network errors are handled inside the ViewModel
             viewModel.alert = error.toAppAlert(defaultTitle: "Lỗi Google Login")
         }
     }

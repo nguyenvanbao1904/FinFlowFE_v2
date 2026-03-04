@@ -104,7 +104,7 @@ private struct PINDigitBox: View {
                 case .numbers:
                     // Hiển thị số thực cho OTP
                     Text(digit)
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .font(AppTypography.pinDigit)
                         .foregroundStyle(AppColors.primary)
                         .transition(.scale.combined(with: .opacity))
                 }
