@@ -33,7 +33,7 @@ public protocol PINManagerProtocol: Sendable {
     /// - Parameter email: User's email address
     /// - Parameter tokenStore: Token store to clear tokens if max attempts reached
     /// - Returns: Tuple containing success status and attempts info
-    func handleFailedPIN(for email: String, tokenStore: any TokenStoreProtocol) async -> (allowed: Bool, attempts: Int, max: Int)
+    func handleFailedPIN(for email: String, tokenStore: any TokenStoreProtocol) async -> (allowed: Bool, attempts: Int, max: Int) // swiftlint:disable:this large_tuple
     
     /// Reset fail counter for email
     /// - Parameter email: User's email address

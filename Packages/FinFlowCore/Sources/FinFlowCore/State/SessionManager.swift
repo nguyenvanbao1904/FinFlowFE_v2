@@ -1,6 +1,7 @@
 //
 //  SessionManager.swift
 //  FinFlowCore
+// swiftlint:disable file_length
 //
 
 import Foundation
@@ -13,7 +14,6 @@ public final class SessionManager: SessionManagerProtocol {
 
     public private(set) var state: SessionState = .loading
     public private(set) var currentUser: UserProfile?
-
 
     // Expose tokenStore for biometric check
     public let tokenStore: any TokenStoreProtocol
@@ -53,7 +53,7 @@ public final class SessionManager: SessionManagerProtocol {
 
     /// Tăng bộ đếm nhập sai PIN, vượt ngưỡng sẽ xóa token và PIN
     /// - Returns: (allowed, attempts, max)
-    public func incrementPINFailCounter(for email: String) async -> (allowed: Bool, attempts: Int, max: Int) {
+    public func incrementPINFailCounter(for email: String) async -> (allowed: Bool, attempts: Int, max: Int) { // swiftlint:disable:this large_tuple
         await pinManager.handleFailedPIN(for: email, tokenStore: tokenStore)
     }
 
@@ -269,7 +269,6 @@ public final class SessionManager: SessionManagerProtocol {
 
         Logger.info("✅ PIN verified successfully", category: "Session")
 
-
         do {
             // NOTE: We don't wrap this in activeRefreshTask because it's a specific user action (PIN verify)
             // But we should still use persistSession
@@ -437,6 +436,4 @@ public final class SessionManager: SessionManagerProtocol {
 
         Logger.debug(String(repeating: "=", count: 50), category: "Storage")
     }
-
-
 }

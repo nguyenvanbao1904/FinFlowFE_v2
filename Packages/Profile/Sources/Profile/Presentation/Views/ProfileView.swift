@@ -65,7 +65,7 @@ public struct ProfileView: View {
                     // SECTION 1: User Info
                     if let profile = profileVM.profile {
                         Section {
-                            HStack(spacing: 16) {
+                            HStack(spacing: Spacing.lg) {
                                 // Avatar
                                 ZStack {
                                     Circle()
@@ -73,11 +73,11 @@ public struct ProfileView: View {
                                         .frame(width: 60, height: 60)
                                     
                                     Text(profile.initials)
-                                        .font(.system(size: 24, weight: .bold))
+                                        .font(AppTypography.displaySmall)
                                         .foregroundStyle(AppColors.primary)
                                 }
                                 
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: Spacing.xs) {
                                     Text(profile.fullName.isEmpty ? profile.email : profile.fullName)
                                         .font(AppTypography.headline)
                                         .foregroundStyle(.primary)
@@ -89,7 +89,7 @@ public struct ProfileView: View {
                                     }
                                 }
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, Spacing.xs)
                         }
                     }
                     
@@ -154,7 +154,7 @@ public struct ProfileView: View {
                                 Spacer()
                                 Text("Đăng xuất")
                                     .font(AppTypography.body)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(AppColors.google)
                                     .fontWeight(.medium)
                                 Spacer()
                             }
@@ -199,9 +199,13 @@ public struct ProfileView: View {
                 return nil
             },
             set: { newValue in
-                if profileVM.alert != nil { profileVM.alert = newValue }
-                else if accountVM.alert != nil { accountVM.alert = newValue }
-                else if securityVM.pinAlert != nil { securityVM.pinAlert = newValue }
+                if profileVM.alert != nil {
+                    profileVM.alert = newValue
+                } else if accountVM.alert != nil {
+                    accountVM.alert = newValue
+                } else if securityVM.pinAlert != nil {
+                    securityVM.pinAlert = newValue
+                }
             }
         ))
         .onAppear {
@@ -209,13 +213,14 @@ public struct ProfileView: View {
                 showRestorationAlert = true
             }
         }
+        // swiftlint:disable:next no_direct_sheet_or_cover
         .sheet(isPresented: $showRestorationAlert) {
             VStack(spacing: Spacing.lg) {
                 Text("Chào mừng quay lại!")
-                    .font(.title2)
+                    .font(AppTypography.title)
                     .fontWeight(.bold)
                 Text("Tài khoản của bạn đã được khôi phục thành công.")
-                    .font(.body)
+                    .font(AppTypography.body)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -260,8 +265,8 @@ struct SettingsRowIcon: View {
                 .frame(width: 28, height: 28)
             
             Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(AppTypography.caption.weight(.semibold))
+                .foregroundStyle(AppColors.backgroundLight[1])
         }
     }
 }

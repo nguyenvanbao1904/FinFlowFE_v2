@@ -2,7 +2,6 @@
 //  NavigationTypes.swift
 //  FinFlowCore
 
-
 import SwiftUI
 
 @MainActor

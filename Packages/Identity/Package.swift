@@ -5,12 +5,12 @@ let package = Package(
     name: "Identity",
     platforms: [.iOS(.v17)],
     products: [
-        .library(name: "Identity", targets: ["Identity"]),
+        .library(name: "Identity", targets: ["Identity"])
     ],
     dependencies: [
         // Chỉ đường cho Identity tìm sang FinFlowCore
         .package(path: "../FinFlowCore"),
-        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.1.0"),
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.1.0")
     ],
     targets: [
         .target(

@@ -25,4 +25,3 @@ public struct ProblemDetail: Codable, Sendable {
         self.code = code
     }
 }
-

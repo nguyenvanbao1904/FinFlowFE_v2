@@ -5,7 +5,7 @@ struct CreatePINWelcomeView: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
 
             // Icon với animation
@@ -16,11 +16,11 @@ struct CreatePINWelcomeView: View {
                     .shadow(color: AppColors.primary.opacity(0.3), radius: 30, x: 0, y: 15)
 
                 Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 70))
+                    .font(AppTypography.displayLarge)
                     .foregroundStyle(AppColors.primary)
             }
 
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.md) {
                 Text("Bảo Mật Tài Khoản")
                     .font(AppTypography.largeTitle)
                     .foregroundStyle(.primary)
@@ -29,10 +29,10 @@ struct CreatePINWelcomeView: View {
                     .font(AppTypography.headline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, Spacing.xl)
             }
 
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
                 FeatureRow(
                     icon: "checkmark.shield.fill",
                     title: "Bảo mật cao",
@@ -51,7 +51,7 @@ struct CreatePINWelcomeView: View {
                     description: "Chỉ cần 6 số đơn giản"
                 )
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, Spacing.lg)
             
             Spacer()
 
@@ -63,7 +63,8 @@ struct CreatePINWelcomeView: View {
                 action: onNext
             )
             .padding(.horizontal, Spacing.md)
-            .padding(.bottom, 60)
+            // swiftlint:disable:next no_hardcoded_padding
+            .padding(.bottom, 60.0)
         }
     }
 }
@@ -75,18 +76,18 @@ private struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Spacing.md) {
             ZStack {
                 Circle()
                     .fill(.ultraThinMaterial)
                     .frame(width: 50, height: 50)
 
                 Image(systemName: icon)
-                    .font(.system(size: 22))
+                    .font(AppTypography.iconMedium)
                     .foregroundStyle(AppColors.primary)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(title)
                     .font(AppTypography.headline)
                     .foregroundStyle(.primary)

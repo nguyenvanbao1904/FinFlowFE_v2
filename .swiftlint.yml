@@ -5,6 +5,7 @@ disabled_rules:
   - type_body_length
   - identifier_name
 
+
 # Trỏ đúng tọa độ code của bạn
 included:
   - FinFlowIos/FinFlow # Quét code của App chính
@@ -94,4 +95,18 @@ custom_rules:
     name: "No Business Logic in View"
     regex: "(?:UseCase|Repository)\\s*\\("
     message: "BANNED: Views must not construct UseCase or Repository directly. Inject them via ViewModel."
+    severity: error
+
+  no_direct_sheet_or_cover:
+    included: ".*View\\.swift"
+    name: "Direct Sheet or FullScreenCover Banned"
+    regex: "\\.(?:sheet|fullScreenCover)\\s*\\(\\s*(?:item|isPresented)"
+    message: "WARNING: Do not use .sheet or .fullScreenCover directly for full feature screens. Delegate to AppRouter. Small local dialogs are exception."
+    severity: warning
+
+  no_cross_module_import:
+    included: ".*Packages/.*\\.swift"
+    name: "Cross Module Import Banned"
+    regex: "import\\s+(?:Identity|Dashboard|Profile|Transaction)\\b"
+    message: "BANNED: Feature modules must not import each other. Only import FinFlowCore."
     severity: error

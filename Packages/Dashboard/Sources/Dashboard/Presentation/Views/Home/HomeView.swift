@@ -15,7 +15,7 @@ public struct HomeView: View {
         NavigationStack {
             VStack {
                 Text("Trang chủ")
-                    .font(.title)
+                    .font(AppTypography.title)
                     .foregroundStyle(.secondary)
             }
             .navigationTitle("Tổng quan")

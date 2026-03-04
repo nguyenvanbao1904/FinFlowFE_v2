@@ -50,8 +50,8 @@ public struct UpdateProfileView: View {
 
                         if let error = viewModel.error {
                             Text(error.localizedDescription)
-                                .foregroundColor(.red)
-                                .font(.caption)
+                                .foregroundColor(AppColors.google)
+                                .font(AppTypography.caption)
                                 .padding(.horizontal)
                         }
 

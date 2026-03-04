@@ -9,7 +9,7 @@ public struct ProfileHeaderCard: View {
     }
 
     public var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Spacing.lg) {
             // Avatar
             ZStack {
                 Circle()
@@ -17,25 +17,25 @@ public struct ProfileHeaderCard: View {
                     .frame(width: 60, height: 60)
                 
                 Text(profile.initials)
-                    .font(.title2)
+                    .font(AppTypography.title)
                     .fontWeight(.bold)
                     .foregroundColor(AppColors.primary)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(profile.fullName)
-                    .font(.headline)
+                    .font(AppTypography.headline)
                     .foregroundColor(.primary)
                 
                 Text(profile.email)
-                    .font(.subheadline)
+                    .font(AppTypography.subheadline)
                     .foregroundColor(.secondary)
             }
             
             Spacer()
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppColors.backgroundLight[1])
         .cornerRadius(12)
     }
 }

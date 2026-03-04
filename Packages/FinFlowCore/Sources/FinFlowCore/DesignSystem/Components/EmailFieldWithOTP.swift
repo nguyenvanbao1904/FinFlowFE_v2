@@ -59,7 +59,7 @@ public struct EmailFieldWithOTP: View {
     }
 
     public var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.sm) {
             // Email Input
             HStack(spacing: Spacing.sm) {
                 Image(systemName: "envelope")
@@ -79,9 +79,9 @@ public struct EmailFieldWithOTP: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(AppColors.primary)
                 } else if showSendButton {
-                    Button(action: {
+                    Button {
                         Task { await onSendOTP() }
-                    }) {
+                    } label: {
                         if isSendingOTP {
                             ProgressView()
                                 .scaleEffect(0.8)
@@ -96,7 +96,7 @@ public struct EmailFieldWithOTP: View {
                     .disabled(!canSendOTP || isSendingOTP || cooldownRemaining > 0)
                 }
             }
-            .padding(.vertical, 16)
+            .padding(.vertical, Spacing.sm2)
             .padding(.horizontal, Spacing.sm)
             .background(.ultraThinMaterial)
             .cornerRadius(CornerRadius.medium)
@@ -112,10 +112,11 @@ public struct EmailFieldWithOTP: View {
             if let message = validationMessage {
                 HStack {
                     Text(message)
-                        .font(.caption)
-                        .foregroundColor(message.contains("✅") ? .green : .red)
+                        .font(AppTypography.caption)
+                        .foregroundColor(message.contains("✅") ? AppColors.success : AppColors.google)
                     Spacer()
                 }
+                // swiftlint:disable:next no_hardcoded_padding
                 .padding(.horizontal, 4)
                 .transition(.opacity)
             }
@@ -158,7 +159,7 @@ public struct EmailFieldWithOTP: View {
                     }
                     .disabled(isVerifyingOTP || otpCode.count != 6)
                 }
-                .padding(.vertical, 16)
+                .padding(.vertical, Spacing.sm2)
                 .padding(.horizontal, Spacing.sm)
                 .background(.ultraThinMaterial)
                 .cornerRadius(CornerRadius.medium)

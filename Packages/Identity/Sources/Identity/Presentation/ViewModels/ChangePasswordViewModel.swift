@@ -9,7 +9,7 @@ public class ChangePasswordViewModel {
     public var newPassword = ""
     public var confirmPassword = ""
     public var isLoading = false
-    public var alert: AppErrorAlert? = nil
+    public var alert: AppErrorAlert?
     public var isSuccess = false
     public let isCreatingPassword: Bool
 

@@ -3,8 +3,6 @@ import Observation
 import FinFlowCore
 import OSLog
 
-
-
 @MainActor
 @Observable
 public final class AppRouter: AppRouterProtocol {

@@ -7,7 +7,7 @@ let package = Package(
         .iOS(.v17)
     ],
     products: [
-        .library(name: "FinFlowCore", targets: ["FinFlowCore"]),
+        .library(name: "FinFlowCore", targets: ["FinFlowCore"])
     ],
     targets: [
         .target(
@@ -19,6 +19,6 @@ let package = Package(
         .testTarget(
             name: "FinFlowCoreTests",
             dependencies: ["FinFlowCore"]
-        ),
+        )
     ]
 )

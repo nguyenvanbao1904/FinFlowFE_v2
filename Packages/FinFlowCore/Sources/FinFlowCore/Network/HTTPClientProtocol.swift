@@ -2,6 +2,7 @@ import Foundation
 
 /// Protocol cho HTTP Client - giúp dễ dàng test và thay thế implementation
 public protocol HTTPClientProtocol: Sendable {
+    // swiftlint:disable:next function_parameter_count
     func request<T: Codable & Sendable>(
         endpoint: String,
         method: String,

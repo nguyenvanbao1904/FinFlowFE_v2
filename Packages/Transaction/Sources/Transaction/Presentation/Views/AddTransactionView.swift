@@ -34,7 +34,8 @@ public struct AddTransactionView: View {
             ZStack {
                 AppBackgroundGradient()
                 
-                VStack(spacing: 0) {
+                // swiftlint:disable:next no_hardcoded_spacing
+                VStack(spacing: .zero) {
                     
                     // 1. The "Brain" - Smart Input Bar (Pinned at top)
                     smartInputBar
@@ -65,7 +66,7 @@ public struct AddTransactionView: View {
                         }
                         .padding(.horizontal)
                         .padding(.top, Spacing.md)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, Spacing.xl)
                     }
                     .scrollDismissesKeyboard(.interactively)
                 }
@@ -98,7 +99,7 @@ public struct AddTransactionView: View {
                     .animation(isAnalyzing ? Animation.linear(duration: 2).repeatForever(autoreverses: false) : .default, value: isAnalyzing)
                 
                 TextField("Ví dụ: Đổ xăng 50 cành...", text: $aiInputText)
-                    .font(.body)
+                    .font(AppTypography.body)
                     .foregroundColor(.primary)
                     .focused($isAiFieldFocused)
                     .onSubmit {
@@ -112,13 +113,13 @@ public struct AddTransactionView: View {
                         triggerAIAnalysis(text: aiInputText)
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.title2)
+                            .font(AppTypography.title)
                             .foregroundColor(AppColors.primary)
                     }
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs)
             .background(.ultraThinMaterial)
             .cornerRadius(100) // Pill shape
             .overlay(
@@ -145,8 +146,8 @@ public struct AddTransactionView: View {
                 triggerVoiceInput()
             } label: {
                 Image(systemName: "mic.fill")
-                    .font(.body)
-                    .foregroundColor(.white)
+                    .font(AppTypography.iconMedium)
+                    .foregroundColor(AppColors.backgroundLight[1])
                     .frame(width: 44, height: 44)
                     .background(
                         isAnalyzing
@@ -162,7 +163,7 @@ public struct AddTransactionView: View {
                 // Trigger Camera UI
             } label: {
                 Image(systemName: "camera.viewfinder")
-                    .font(.body)
+                    .font(AppTypography.iconMedium)
                     .foregroundColor(AppColors.primary)
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial)
@@ -177,24 +178,24 @@ public struct AddTransactionView: View {
     private var amountHeaderSection: some View {
         VStack(spacing: Spacing.xs) {
             Text("Số tiền")
-                .font(.subheadline)
+                .font(AppTypography.subheadline)
                 .foregroundColor(.secondary)
             
             HStack(alignment: .center, spacing: 4) {
                 Text("₫")
-                    .font(.system(size: 32, weight: .bold))
+                    .font(AppTypography.displayMedium)
                     .foregroundColor(.primary)
                 
                 TextField("0", text: $amount)
                     .keyboardType(.numberPad)
-                    .font(.system(size: 60, weight: .bold))
-                    .foregroundColor(isIncome ? .green : .red)
+                    .font(AppTypography.displayXL)
+                    .foregroundColor(isIncome ? AppColors.success : .red)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .frame(height: 70)
                     .blur(radius: isAnalyzing ? 3 : 0)
                     .scaleEffect(showMagicEffect ? 1.05 : 1.0)
-                    .onChange(of: amount) { oldValue, newValue in
+                    .onChange(of: amount) { _, newValue in
                         let formatted = formatCurrency(newValue)
                         if amount != formatted {
                             amount = formatted
@@ -219,34 +220,34 @@ public struct AddTransactionView: View {
     private var detailsFormSection: some View {
         VStack(spacing: Spacing.md) {
             // Category Selector
-            Button(action: {
+            Button {
                 // Open Category Picker
-            }) {
+            } label: {
                 HStack {
                     ZStack {
                         Circle()
-                            .fill(Color.orange.opacity(0.1))
+                            .fill(AppColors.accent.opacity(0.1))
                             .frame(width: 44, height: 44)
                             .scaleEffect(showMagicEffect ? 1.1 : 1.0)
                         Image(systemName: selectedCategory == "Di chuyển" ? "car.fill" : "square.grid.2x2.fill")
-                            .foregroundColor(.orange)
-                            .font(.system(size: 20))
+                            .foregroundColor(AppColors.accent)
+                            .font(AppTypography.iconMedium)
                             .rotationEffect(.degrees(showMagicEffect ? 360 : 0))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Danh mục")
-                            .font(.caption)
+                            .font(AppTypography.caption)
                             .foregroundColor(.secondary)
                         Text(selectedCategory)
-                            .font(.body)
+                            .font(AppTypography.body)
                             .foregroundColor(.primary)
                             .contentTransition(.numericText()) // iOS 16+ fluid text transition
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundColor(.secondary)
-                        .font(.caption)
+                        .font(AppTypography.caption)
                 }
                 .padding()
                 .background(.ultraThinMaterial)
@@ -265,7 +266,7 @@ public struct AddTransactionView: View {
                     .frame(width: 24)
                 
                 TextField("Ví dụ: Ăn sáng tại phở Hùng...", text: $note)
-                    .font(.body)
+                    .font(AppTypography.body)
                     .foregroundColor(.primary)
             }
             .padding()
@@ -299,10 +300,10 @@ public struct AddTransactionView: View {
     private func typeButton(title: String, isSelected: Bool, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.subheadline)
+                .font(AppTypography.subheadline)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, Spacing.sm)
                 .background {
                     if isSelected {
                         color.opacity(0.15)

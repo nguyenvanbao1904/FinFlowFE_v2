@@ -161,7 +161,7 @@ public class SecuritySettingsViewModel {
         
         do {
             // 1. Verify OTP
-            let _ = try await otpHandler.verifyOTP(email: userEmail, code: resetPinOtpCode, purpose: .resetPin)
+            _ = try await otpHandler.verifyOTP(email: userEmail, code: resetPinOtpCode, purpose: .resetPin)
             
             // 2. Delete PIN
             try await pinManager.deletePIN(for: userEmail)

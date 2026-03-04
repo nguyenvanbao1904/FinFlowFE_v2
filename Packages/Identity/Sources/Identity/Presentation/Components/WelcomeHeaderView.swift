@@ -43,12 +43,12 @@ public struct WelcomeHeaderView: View {
 
             // Email
             Text(email)
-                .font(.subheadline)
+                .font(AppTypography.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, Spacing.md)
 
             // Login Buttons
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 PrimaryButton(
                     title: "Đăng nhập",
                     isLoading: false, // Loading handled by parent or specific button state
@@ -60,8 +60,8 @@ public struct WelcomeHeaderView: View {
                     onBiometricLogin()
                 } label: {
                     Image(systemName: biometryType == .faceID ? "faceid" : "touchid")
-                        .font(.system(size: 24))
-                        .foregroundStyle(.white)
+                        .font(AppTypography.displaySmall)
+                        .foregroundStyle(AppColors.backgroundLight[1])
                         .frame(width: 56, height: 56)
                         .background(
                             LinearGradient(

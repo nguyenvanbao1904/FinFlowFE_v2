@@ -40,13 +40,13 @@ public class ForgotPasswordViewModel {
     public var isLoading = false
     public var isSendingOTP = false
     public var isCheckingEmail = false
-    public var alert: AppErrorAlert? = nil
+    public var alert: AppErrorAlert?
     public var isSuccess = false
 
     // Email Validation State
     public var isEmailExistenceVerified = false
     private var emailVerifiedForSession = false  // Track if email was verified once this session
-    public var emailValidationMessage: String? = nil
+    public var emailValidationMessage: String?
 
     // Computed: Có thể gửi OTP không?
     public var canSendOTP: Bool {

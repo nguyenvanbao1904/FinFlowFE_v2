@@ -25,7 +25,8 @@ public struct LoginView: View {
             AppBackgroundGradient()
 
             // Main content with safe area
-            VStack(spacing: 0) {
+            // swiftlint:disable:next no_hardcoded_spacing
+            VStack(spacing: .zero) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Spacing.xl) {
                         AppLogoHeader()
@@ -45,7 +46,7 @@ public struct LoginView: View {
                 Spacer()
 
                 footerSection
-                    .padding(.bottom, 10)
+                    .padding(.bottom, Spacing.sm)
             }
             .padding(.horizontal)
         }
@@ -68,18 +69,18 @@ public struct LoginView: View {
     private func sessionExpiredMessage(name: String, email: String?) -> some View {
         VStack(spacing: Spacing.xs) {
             Text("Xin chào \(name)!")
-                .font(.title3)
+                .font(AppTypography.title)
                 .fontWeight(.semibold)
                 .foregroundStyle(.primary)
 
             if let email {
                 Text(email)
-                    .font(.subheadline)
+                    .font(AppTypography.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             } else {
                 Text("Chào mừng trở lại, vui lòng đăng nhập")
-                    .font(.subheadline)
+                    .font(AppTypography.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -89,14 +90,14 @@ public struct LoginView: View {
 
     private var loginForm: some View {
         @Bindable var vm = viewModel
-        return VStack(spacing: 18) {
+        return VStack(spacing: Spacing.md) {
             GlassTextField(
                 text: $vm.username,
                 placeholder: "Tên đăng nhập hoặc Email",
                 icon: AppAssets.personIcon
             )
 
-            VStack(alignment: .trailing, spacing: 8) {
+            VStack(alignment: .trailing, spacing: Spacing.xs) {
                 GlassSecureField(
                     text: $vm.password,
                     placeholder: "Mật khẩu",
@@ -108,7 +109,7 @@ public struct LoginView: View {
                 }
                 .font(AppTypography.buttonTitle)
                 .foregroundStyle(AppColors.primary)
-                .padding(.trailing, 5)
+                .padding(.trailing, Spacing.xs)
             }
         }
     }
@@ -129,7 +130,7 @@ public struct LoginView: View {
                 } label: {
                     Image(systemName: viewModel.biometricType == .touchID ? "touchid" : "faceid")
                         .font(AppTypography.displaySmall)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(AppColors.backgroundLight[1])
                         .frame(width: 56, height: 56)
                         .background(
                             LinearGradient(

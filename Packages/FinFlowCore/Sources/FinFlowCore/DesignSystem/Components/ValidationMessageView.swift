@@ -39,18 +39,20 @@ public struct ValidationMessageView: View {
     }
     
     public var body: some View {
+        // swiftlint:disable:next no_hardcoded_spacing
         HStack(spacing: 4) {
             if showIcon, let icon = type.icon {
                 Image(systemName: icon)
-                    .font(.caption2)
+                    .font(AppTypography.labelSmall)
             }
             
             Text(message)
-                .font(.caption)
+                .font(AppTypography.caption)
             
             Spacer()
         }
         .foregroundColor(type.color)
+        // swiftlint:disable:next no_hardcoded_padding
         .padding(.horizontal, 4)
     }
 }

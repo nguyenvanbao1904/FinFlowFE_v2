@@ -46,7 +46,7 @@ public struct WelcomeBackView: View {
                 // Switch Account Button
                 Button(action: viewModel.switchAccount) {
                     Text("Đăng nhập tài khoản khác")
-                        .font(.body)
+                        .font(AppTypography.body)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
                 }
@@ -116,6 +116,7 @@ public struct WelcomeBackView: View {
     }
 }
 
+// swiftlint:disable force_try no_business_logic_in_view
 #Preview {
     WelcomeBackView(
         viewModel: WelcomeBackViewModel(
@@ -160,3 +161,4 @@ public struct WelcomeBackView: View {
         )
     )
 }
+// swiftlint:enable force_try no_business_logic_in_view

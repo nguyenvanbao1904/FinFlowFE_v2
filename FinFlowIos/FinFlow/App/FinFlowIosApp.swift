@@ -16,7 +16,6 @@ struct FinFlowIosApp: App {
     private let container = DependencyContainer.shared
     private let router: AppRouter
 
-
     @State private var isFirstLaunch = true
 
     init() {
@@ -89,7 +88,7 @@ struct AppRootView: View {
                     .zIndex(999)
             }
         }
-        .onChange(of: scenePhase) { oldPhase, newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase: newPhase)
         }
     }
@@ -136,6 +135,7 @@ struct AppRootView: View {
     // MARK: - View Factories (Router Factory Pattern)
 
     @ViewBuilder
+    // swiftlint:disable:next cyclomatic_complexity
     private func makeDestination(for route: AppRoute) -> some View {
         switch route {
         case .login:
@@ -172,13 +172,13 @@ struct PrivacyBlurView: View {
             Color.black.opacity(0.1)
             Rectangle()
                 .fill(.ultraThinMaterial)
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.sm2) {
                 Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.gray)
+                    .font(AppTypography.displayXL)
+                    .foregroundColor(AppColors.disabled)
                 Text("FinFlow Protected")
-                    .font(.headline)
-                    .foregroundColor(.gray)
+                    .font(AppTypography.headline)
+                    .foregroundColor(AppColors.disabled)
             }
         }
     }

@@ -49,13 +49,13 @@ public struct PINInputView: View {
             // Title & Subtitle
             VStack(spacing: Spacing.xs) {
                 Text(title)
-                    .font(.title2)
+                    .font(AppTypography.title)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.subheadline)
+                        .font(AppTypography.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.md)
@@ -99,7 +99,7 @@ public struct PINInputView: View {
             if let onForgotPIN = onForgotPIN {
                 Button(action: onForgotPIN) {
                     Text("Quên mã PIN?")
-                        .font(.footnote)
+                        .font(AppTypography.caption)
                         .foregroundStyle(AppColors.primary)
                 }
                 .padding(.top, Spacing.sm)

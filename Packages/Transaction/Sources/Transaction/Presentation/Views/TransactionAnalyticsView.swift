@@ -65,7 +65,7 @@ public struct TransactionAnalyticsView: View {
     private var chartSection: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Biến động Số Dư")
-                .font(.headline)
+                .font(AppTypography.headline)
                 .foregroundColor(.primary)
                 .padding(.horizontal)
             
@@ -93,22 +93,22 @@ public struct TransactionAnalyticsView: View {
                 .chartYAxis {
                     AxisMarks(position: .leading) { value in
                         AxisGridLine().foregroundStyle(Color.primary.opacity(0.1))
-                        AxisValueLabel() {
+                        AxisValueLabel {
                             if let intValue = value.as(Int.self) {
                                 Text("\(intValue / 1_000_000)M")
                                     .foregroundColor(.secondary)
-                                    .font(.caption2)
+                                    .font(AppTypography.caption)
                             }
                         }
                     }
                 }
                 .chartXAxis {
                     AxisMarks { value in
-                        AxisValueLabel() {
+                        AxisValueLabel {
                             if let stringValue = value.as(String.self) {
                                 Text(stringValue)
                                     .foregroundColor(.secondary)
-                                    .font(.caption2)
+                                    .font(AppTypography.caption)
                             }
                         }
                     }
@@ -126,32 +126,32 @@ public struct TransactionAnalyticsView: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Image(systemName: "sparkles")
-                    .foregroundColor(.yellow)
+                    .foregroundColor(AppColors.accent)
                 Text("Trợ lý AI Phân Tích")
-                    .font(.headline)
+                    .font(AppTypography.headline)
                     .foregroundColor(.primary)
             }
             .padding(.horizontal)
             
             VStack(alignment: .leading, spacing: Spacing.md) {
                 // Insight 1
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: Spacing.sm) {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
+                        .fill(AppColors.primary.opacity(0.2))
                         .frame(width: 32, height: 32)
                         .overlay {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.red)
-                                .font(.caption)
+                                .foregroundColor(AppColors.primary)
+                                .font(AppTypography.caption)
                         }
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Cảnh báo chi tiêu")
-                            .font(.subheadline)
+                            .font(AppTypography.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         Text("Bạn đã chi tiêu nhiều hơn 35% cho mục Ăn uống so với tháng trước. Hãy cân nhắc nấu ăn tại nhà để tiết kiệm khoảng 2.000.000 ₫ tháng tới.")
-                            .font(.footnote)
+                            .font(AppTypography.caption)
                             .foregroundColor(.secondary)
                             .lineSpacing(4)
                     }
@@ -160,23 +160,23 @@ public struct TransactionAnalyticsView: View {
                 Divider().background(Color.primary.opacity(0.1))
                 
                 // Insight 2
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: Spacing.sm) {
                     Circle()
-                        .fill(Color.green.opacity(0.2))
+                        .fill(AppColors.success.opacity(0.2))
                         .frame(width: 32, height: 32)
                         .overlay {
                             Image(systemName: "leaf.fill")
-                                .foregroundColor(.green)
-                                .font(.caption)
+                                .foregroundColor(AppColors.success)
+                                .font(AppTypography.caption)
                         }
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Mẹo Tài Chính")
-                            .font(.subheadline)
+                            .font(AppTypography.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         Text("Thu nhập tháng này của bạn rất tốt. Nếu bạn trích 15% (khoảng 3.750.000 ₫) vào quỹ dự phòng khẩn cấp, bạn sẽ đạt mục tiêu an toàn tài chính sớm hơn 2 tháng.")
-                            .font(.footnote)
+                            .font(AppTypography.caption)
                             .foregroundColor(.secondary)
                             .lineSpacing(4)
                     }
@@ -188,22 +188,22 @@ public struct TransactionAnalyticsView: View {
             .padding(.horizontal)
             
             // Generate Detailed Report Button
-            Button(action: {
+            Button {
                 // Trigger AI Report Generation
-            }) {
+            } label: {
                 HStack {
                     Image(systemName: "doc.text.magnifyingglass")
                     Text("Tạo Báo Cáo Chi Tiết")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.blue.opacity(0.2))
-                .foregroundColor(.blue)
+                .padding(.vertical, Spacing.sm)
+                .background(AppColors.primary.opacity(0.2))
+                .foregroundColor(AppColors.primary)
                 .cornerRadius(CornerRadius.medium)
                 .overlay(
                     RoundedRectangle(cornerRadius: CornerRadius.medium)
-                        .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+                        .stroke(AppColors.primary.opacity(0.5), lineWidth: 1)
                 )
             }
             .padding(.horizontal)

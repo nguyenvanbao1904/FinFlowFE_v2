@@ -216,7 +216,7 @@ public class WelcomeBackViewModel {
         
         do {
             // 1. Verify OTP
-            let _ = try await otpHandler.verifyOTP(
+            _ = try await otpHandler.verifyOTP(
                 email: email,
                 code: otpCode,
                 purpose: .resetPin

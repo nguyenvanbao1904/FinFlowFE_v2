@@ -8,7 +8,7 @@ public class UpdateProfileViewModel {
     public var lastName: String = ""
     public var dob: Date = Date()
     public var isLoading: Bool = false
-    public var error: AppError? = nil
+    public var error: AppError?
     public var isSuccess: Bool = false
 
     private let authRepository: AuthRepositoryProtocol

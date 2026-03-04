@@ -22,10 +22,11 @@ public enum Logger {
     public static func log(_ message: String, level: Level = .info, category: String = "App") {
         #if DEBUG
         let timestamp = DateFormatter.logTimestamp.string(from: Date())
+        // swiftlint:disable:next no_print
         print("\(level.emoji) [\(timestamp)] [\(category)] \(message)")
         #endif
         
-        // TODO: Gửi logs lên server/analytics trong production
+        // Analytics integration will go here
     }
     
     /// Log debug - chỉ hiển thị trong DEBUG mode

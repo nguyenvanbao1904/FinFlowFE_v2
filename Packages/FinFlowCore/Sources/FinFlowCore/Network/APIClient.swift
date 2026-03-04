@@ -51,6 +51,7 @@ public actor APIClient: HTTPClientProtocol {
     }
 
     // Internal entry with retry control
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func request<T: Codable & Sendable>(
         endpoint: String,
         method: String = "GET",
@@ -144,8 +145,8 @@ public actor APIClient: HTTPClientProtocol {
 
                 // Legacy ApiResponse fallback (if backend still wraps errors this way)
                 if let errorResponse = try? JSONDecoder().decode(
-                    ApiResponse<String>.self, from: data)
-                {
+                    ApiResponse<String>.self, from: data
+                ) {
                     let errorMessage = errorResponse.message ?? "Lỗi máy chủ"
                     Logger.error(
                         "Server error: Code \(errorResponse.code) - \(errorMessage)",
@@ -162,7 +163,7 @@ public actor APIClient: HTTPClientProtocol {
                 if data.isEmpty || httpResponse.statusCode == 204 {
                     // 1. If T is explicitly EmptyResponse, return it
                     if T.self == EmptyResponse.self {
-                        return EmptyResponse() as! T
+                        return EmptyResponse() as! T // swiftlint:disable:this force_cast
                     }
                     // 2. If T is Optional, return nil (safe)
                     if let optionalType = T.self as? any AnyOptional.Type {
@@ -195,7 +196,7 @@ public actor APIClient: HTTPClientProtocol {
         let url = request.url?.absoluteString ?? ""
         let method = request.httpMethod ?? "GET"
 
-        var bodyString: String? = nil
+        var bodyString: String?
         if let body = body, let data = try? JSONEncoder().encode(body) {
             bodyString = String(data: data, encoding: .utf8)
         }
@@ -238,7 +239,7 @@ public actor APIClient: HTTPClientProtocol {
 }
 
 // MARK: - Helper Protocol for Optional Handling (Private)
-fileprivate protocol AnyOptional {
+private protocol AnyOptional {
     static var validNil: Any? { get }
 }
 

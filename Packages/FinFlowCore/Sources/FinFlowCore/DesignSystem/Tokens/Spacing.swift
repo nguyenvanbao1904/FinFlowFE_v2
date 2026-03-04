@@ -1,6 +1,7 @@
 //
 //  Spacing.swift
 //  FinFlowCore
+// swiftlint:disable:next explicit_top_level_acl
 //
 //  Spacing, Corner Radius, and Shadow tokens
 //
@@ -29,12 +30,14 @@ public enum CornerRadius {
 // MARK: - Shadow
 
 public enum ShadowStyle {
+    // swiftlint:disable:next large_tuple
     public static func primary(opacity: Double = 0.4) -> (
         color: Color, radius: CGFloat, x: CGFloat, y: CGFloat
     ) {
         (color: AppColors.primary.opacity(opacity), radius: 12, x: 0, y: 6)
     }
 
+    // swiftlint:disable:next large_tuple
     public static func soft(opacity: Double = 0.3) -> (
         color: Color, radius: CGFloat, x: CGFloat, y: CGFloat
     ) {

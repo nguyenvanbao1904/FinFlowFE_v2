@@ -66,7 +66,7 @@ public actor PINManager: PINManagerProtocol {
 
     /// Đếm số lần nhập sai PIN và xử lý khóa
     /// - Returns: (allowed, attempts, max) where allowed=false nếu đã vượt giới hạn (đã xóa token/PIN)
-    public func handleFailedPIN(for email: String, tokenStore: any TokenStoreProtocol) async -> (allowed: Bool, attempts: Int, max: Int) {
+    public func handleFailedPIN(for email: String, tokenStore: any TokenStoreProtocol) async -> (allowed: Bool, attempts: Int, max: Int) { // swiftlint:disable:this large_tuple
         let counterKey = counterKey(for: email)
         let current = (await keychain.retrieve(for: counterKey)).flatMap { Int($0) } ?? 0
         let next = current + 1

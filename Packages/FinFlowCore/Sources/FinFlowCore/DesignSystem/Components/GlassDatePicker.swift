@@ -31,7 +31,7 @@ public struct GlassDatePicker: View {
             DatePicker(label, selection: $date, displayedComponents: .date)
                 .tint(AppColors.primary)
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, Spacing.sm2)
         .padding(.horizontal, Spacing.sm)
         .background(.ultraThinMaterial)
         .cornerRadius(CornerRadius.medium)

@@ -103,7 +103,7 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
     }
 
     /// Get full user info
-    public func getUserInfo() async -> (
+    public func getUserInfo() async -> ( // swiftlint:disable:this large_tuple
         firstName: String?, lastName: String?, email: String?, username: String?
     ) {
         return (
@@ -113,8 +113,6 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
             username: await getUsername()
         )
     }
-
-
 
     // MARK: - Refresh Token Expiry Management
 

@@ -20,7 +20,7 @@ public struct DividerWithText: View {
             Divider()
 
             Text(text)
-                .font(.caption)
+                .font(AppTypography.caption)
                 .foregroundStyle(.secondary)
 
             Divider()

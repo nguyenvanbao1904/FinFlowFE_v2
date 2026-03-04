@@ -21,7 +21,7 @@ public struct LockScreenView: View {
                     if let initial = viewModel.user.firstName?.first {
                         Text(String(initial).uppercased())
                             .font(AppTypography.largeTitle)
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.backgroundLight[1])
                             .frame(width: 80, height: 80)
                             .background(Circle().fill(AppColors.primary))
                     } else {
@@ -51,7 +51,7 @@ public struct LockScreenView: View {
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .font(AppTypography.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(AppColors.google)
                         .padding(.top, Spacing.xs)
                 }
                 
@@ -59,14 +59,14 @@ public struct LockScreenView: View {
                 
                 // Biometric Button
                 if viewModel.canUseBiometrics {
-                    Button(action: {
+                    Button {
                         Task {
                             await viewModel.requestBiometricUnlock()
                         }
-                    }) {
+                    } label: {
                         VStack(spacing: Spacing.xs) {
                             Image(systemName: "faceid")
-                                .font(.system(size: 32))
+                                .font(AppTypography.displayLarge)
                             Text("Mở khóa bằng Face ID")
                                 .font(AppTypography.caption)
                         }
@@ -96,7 +96,7 @@ public struct LockScreenView: View {
         .onAppear {
             isFocused = true
         }
-        .onChange(of: viewModel.pin) { oldPin, newPin in
+        .onChange(of: viewModel.pin) { _, newPin in
             Task {
                 await viewModel.handlePINEntry(newPin)
             }

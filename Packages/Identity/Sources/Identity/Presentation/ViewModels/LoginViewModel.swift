@@ -13,7 +13,7 @@ public class LoginViewModel {
     public var username = ""
     public var password = ""
     public var isLoading = false
-    public var alert: AppErrorAlert? = nil
+    public var alert: AppErrorAlert?
     public var isSessionExpired = false
     public var userDisplayName: String?
     public var savedEmail: String?

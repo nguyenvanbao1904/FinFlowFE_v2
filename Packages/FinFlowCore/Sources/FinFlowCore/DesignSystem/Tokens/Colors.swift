@@ -35,11 +35,11 @@ public enum AppColors {
 
     public static let backgroundDark = [
         Color(red: 5 / 255, green: 7 / 255, blue: 10 / 255),
-        Color(red: 10 / 255, green: 16 / 255, blue: 26 / 255),
+        Color(red: 10 / 255, green: 16 / 255, blue: 26 / 255)
     ]
 
     public static let backgroundLight = [
         Color(red: 245 / 255, green: 247 / 255, blue: 250 / 255),
-        Color.white,
+        Color.white
     ]
 }

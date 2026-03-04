@@ -29,7 +29,7 @@ public struct PrimaryButton: View {
         } label: {
             ZStack {
                 if isLoading {
-                    ProgressView().tint(.white)
+                    ProgressView().tint(AppColors.backgroundLight[1])
                 } else {
                     Text(title)
                         .font(AppTypography.headline)
@@ -37,14 +37,14 @@ public struct PrimaryButton: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, Spacing.sm2)
             // Use AnyShapeStyle to unify gradient / color types
             .background(
                 isEnabled
                     ? AnyShapeStyle(AppColors.primary.gradient)
                     : AnyShapeStyle(Color.gray.opacity(0.4))
             )
-            .foregroundStyle(.white)
+            .foregroundStyle(AppColors.backgroundLight[1])
             .cornerRadius(CornerRadius.medium)
             .opacity(isLoading ? 0.7 : 1.0)
         }

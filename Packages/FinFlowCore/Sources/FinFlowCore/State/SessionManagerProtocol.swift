@@ -66,7 +66,7 @@ public protocol SessionManagerProtocol: AnyObject, Sendable {
     func authenticateWithPIN(_ pin: String, email: String) async throws -> Bool
     
     /// Increment PIN fail counter and return status
-    func incrementPINFailCounter(for email: String) async -> (allowed: Bool, attempts: Int, max: Int)
+    func incrementPINFailCounter(for email: String) async -> (allowed: Bool, attempts: Int, max: Int) // swiftlint:disable:this large_tuple
     
     /// Reset PIN fail counter
     func resetPINFailCounter(for email: String) async

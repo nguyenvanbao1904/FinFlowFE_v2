@@ -183,8 +183,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     }
 
     public func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws
-        -> VerifyOtpResponse
-    {
+        -> VerifyOtpResponse {
         let req = VerifyOtpRequest(email: email, otp: otp, purpose: purpose)
         Logger.info(
             "Xác thực OTP cho \(email) với mục đích \(purpose.rawValue)...", category: "Auth")
@@ -211,8 +210,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     }
 
     public func checkUserExistence(email: String?, username: String?) async throws
-        -> CheckUserExistenceResponse
-    {
+        -> CheckUserExistenceResponse {
         let req = CheckUserExistenceRequest(email: email, username: username)
         let response: CheckUserExistenceResponse = try await client.request(
             endpoint: "/auth/check-user-existence",

@@ -57,20 +57,20 @@ public struct GradientButton: View {
 
     public var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 if isLoading {
                     ProgressView()
-                        .tint(.white)
+                        .tint(AppColors.backgroundLight[1])
                 }
                 Text(isLoading ? "Đang xử lý..." : title)
-                    .font(.headline)
+                    .font(AppTypography.headline)
                 if !isLoading, let icon = icon {
                     Image(systemName: icon)
-                        .font(.headline.weight(.semibold))
+                        .font(AppTypography.headline.weight(.semibold))
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
+            .padding(.vertical, Spacing.sm2)
             .background(
                 LinearGradient(
                     colors: style.colors,
@@ -78,7 +78,7 @@ public struct GradientButton: View {
                     endPoint: .trailing
                 )
             )
-            .foregroundStyle(.white)
+            .foregroundStyle(AppColors.backgroundLight[1])
             .cornerRadius(CornerRadius.medium)
             .shadow(color: style.shadowColor, radius: 15, y: 8)
         }

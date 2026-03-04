@@ -121,7 +121,6 @@ public struct ForgotPasswordView: View {
         }
     }
 
-
     // MARK: - Step 3: Reset Password
     private var resetPasswordView: some View {
         @Bindable var vm = viewModel
@@ -142,4 +141,3 @@ public struct ForgotPasswordView: View {
         }
     }
 }
-

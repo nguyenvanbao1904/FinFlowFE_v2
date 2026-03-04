@@ -62,13 +62,13 @@ private struct PasswordConfirmationSheetContent: View {
         VStack(spacing: Spacing.xl) {
             VStack(spacing: Spacing.xs) {
                 Text(title)
-                    .font(.title2)
+                    .font(AppTypography.title)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(.subheadline)
+                        .font(AppTypography.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.md)

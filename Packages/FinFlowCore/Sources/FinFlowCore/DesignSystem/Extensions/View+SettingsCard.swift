@@ -6,9 +6,9 @@ private struct SettingsCardModifier: ViewModifier {
     let title: String
     
     func body(content: Content) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.sm2) {
             Text(title)
-                .font(.headline)
+                .font(AppTypography.headline)
             
             content
         }

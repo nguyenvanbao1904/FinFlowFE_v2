@@ -43,7 +43,6 @@ public protocol AuthRepositoryProtocol:
     ProfileRepositoryProtocol,
     OTPRepositoryProtocol,
     AccountRepositoryProtocol,
-    Sendable 
-{
+    Sendable {
     // All methods inherited from composed protocols
 }

@@ -47,7 +47,7 @@ public struct GlassTextField: View {
                     onFocusChange?(newValue)
                 }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, Spacing.sm2)
         .padding(.horizontal, Spacing.sm)
         .background(.ultraThinMaterial)
         .cornerRadius(CornerRadius.medium)

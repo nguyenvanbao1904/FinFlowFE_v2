@@ -56,13 +56,15 @@ public struct GlassSecureField: View {
                 }
             }
 
-            Button(action: { isSecured.toggle() }) {
+            Button {
+                isSecured.toggle()
+            } label: {
                 Image(systemName: isSecured ? "eye.slash" : "eye")
                     .foregroundStyle(.secondary)
                     .contentTransition(.symbolEffect(.replace))
             }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, Spacing.sm2)
         .padding(.horizontal, Spacing.sm)
         .background(.ultraThinMaterial)
         .cornerRadius(CornerRadius.medium)

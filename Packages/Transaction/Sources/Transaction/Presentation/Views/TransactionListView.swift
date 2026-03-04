@@ -68,7 +68,7 @@ public struct TransactionListView: View {
                                                 .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                                         )
                                     Image(systemName: "line.3.horizontal.decrease.circle")
-                                        .font(.system(size: 20))
+                                        .font(AppTypography.iconMedium)
                                         .foregroundStyle(AppColors.primary)
                                 }
                             }
@@ -125,7 +125,8 @@ public struct TransactionListView: View {
                                 )
                             }
                             .padding(.horizontal)
-                            .padding(.bottom, 100) // Padding for FAB
+                            // swiftlint:disable:next no_hardcoded_padding
+                            .padding(.bottom, 100.0) // Padding for FAB
                         }
                     } else {
                         // Analytics View
@@ -151,8 +152,8 @@ public struct TransactionListView: View {
                     router.presentSheet(.addTransaction)
                 } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
+                        .font(AppTypography.displaySmall)
+                        .foregroundStyle(AppColors.backgroundLight[1])
                         .frame(width: 60, height: 60)
                         .background(
                             LinearGradient(
@@ -178,14 +179,14 @@ public struct TransactionListView: View {
                 .foregroundStyle(.secondary)
             
             Text("24,000,000 ₫")
-                .font(.system(size: 34, weight: .bold))
+                .font(AppTypography.displayLarge)
                 .foregroundStyle(.primary)
             
             HStack(spacing: Spacing.xl) {
-                VStack(spacing: 4) {
+                VStack(spacing: Spacing.xs) {
                     HStack {
                         Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(AppColors.success)
                         Text("Thu nhập")
                             .font(AppTypography.caption)
                             .foregroundStyle(.secondary)
@@ -198,10 +199,10 @@ public struct TransactionListView: View {
                     .frame(height: 40)
                     .background(Color.primary.opacity(0.1))
                 
-                VStack(spacing: 4) {
+                VStack(spacing: Spacing.xs) {
                     HStack {
                         Image(systemName: "arrow.up.circle.fill")
-                            .foregroundStyle(.red)
+                            .foregroundStyle(AppColors.google)
                         Text("Chi tiêu")
                             .font(AppTypography.caption)
                             .foregroundStyle(.secondary)
@@ -210,7 +211,7 @@ public struct TransactionListView: View {
                         .font(AppTypography.headline)
                 }
             }
-            .padding(.top, 8)
+            .padding(.top, Spacing.xs)
         }
         .padding(Spacing.lg)
         // Liquid Glass Effect
@@ -223,6 +224,7 @@ public struct TransactionListView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
     
+    // swiftlint:disable:next function_parameter_count
     private func transactionItem(
         title: String,
         category: String,
@@ -239,11 +241,11 @@ public struct TransactionListView: View {
                     .frame(width: 46, height: 46)
                 
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(AppTypography.iconMedium)
                     .foregroundStyle(color)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(title)
                     .font(AppTypography.headline)
                     .foregroundStyle(.primary)

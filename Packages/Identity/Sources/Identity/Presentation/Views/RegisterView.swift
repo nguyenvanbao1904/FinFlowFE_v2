@@ -31,7 +31,7 @@ public struct RegisterView: View {
                         .padding(.horizontal)
 
                     footerSection
-                        .padding(.bottom, 20)
+                        .padding(.bottom, Spacing.lg)
                 }
             }
         }
@@ -70,8 +70,11 @@ public struct RegisterView: View {
             fieldIdentifier: .username,
             textContentType: .username
         ) { isFocused in
-            if !isFocused { vm.validate(.username) }
-            else { vm.usernameMessage = nil }
+            if !isFocused {
+                vm.validate(.username)
+            } else {
+                vm.usernameMessage = nil
+            }
         }
     }
 
@@ -131,11 +134,17 @@ public struct RegisterView: View {
             passwordFieldIdentifier: .password,
             confirmationFieldIdentifier: .passwordConfirmation
         ) { isFocused in
-            if !isFocused { vm.validate(.password) }
-            else { vm.passwordMessage = nil }
+            if !isFocused {
+                vm.validate(.password)
+            } else {
+                vm.passwordMessage = nil
+            }
         } onConfirmationFocusChange: { isFocused in
-            if !isFocused { vm.validate(.passwordConfirmation) }
-            else { vm.passwordConfirmationMessage = nil }
+            if !isFocused {
+                vm.validate(.passwordConfirmation)
+            } else {
+                vm.passwordConfirmationMessage = nil
+            }
         }
     }
 

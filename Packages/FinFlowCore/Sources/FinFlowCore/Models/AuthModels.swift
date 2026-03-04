@@ -2,7 +2,6 @@ import Foundation
 
 // MARK: - DEPRECATED - For Backward Compatibility Only
 
-
 public struct LoginRequest: Codable, Sendable {
     public let username: String
     public let password: String

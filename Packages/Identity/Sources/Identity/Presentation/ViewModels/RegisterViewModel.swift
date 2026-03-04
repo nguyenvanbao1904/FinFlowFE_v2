@@ -73,7 +73,7 @@ public class RegisterViewModel {
 
     // Email Validation State
     public var isCheckingEmail = false
-    public var emailValidationMessage: String? = nil
+    public var emailValidationMessage: String?
     public var isEmailAvailable = false
     public var isCheckingUsername = false
     public var isUsernameAvailable = false
@@ -104,7 +104,7 @@ public class RegisterViewModel {
     }
 
     public var isLoading = false
-    public var alert: AppErrorAlert? = nil
+    public var alert: AppErrorAlert?
     public var isRegistrationSuccess = false
 
     private let registerUseCase: RegisterUseCaseProtocol
