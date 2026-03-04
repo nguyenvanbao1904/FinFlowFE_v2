@@ -134,7 +134,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					A4AD53C32EFDA7CA0070A2E4 = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -191,7 +191,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Export đường dẫn Homebrew để tìm thấy SwiftLint trên Mac M-series\nexport PATH=\"$PATH:/opt/homebrew/bin\"\n\n# Định nghĩa các thư mục cần quét (Sử dụng đường dẫn tương đối từ SRCROOT)\n# SRCROOT của bạn là: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos\nAPP_DIR=\"${SRCROOT}/FinFlow\"\nPACKAGES_DIR=\"${SRCROOT}/../Packages\"\n\nif which swiftlint >/dev/null; then\n  # Chạy swiftlint bằng cách truyền trực tiếp đường dẫn thư mục cần quét vào lệnh\n  swiftlint lint \"$APP_DIR\" \"$PACKAGES_DIR\"\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "# Export đường dẫn Homebrew để tìm thấy SwiftLint trên Mac M-series\nexport PATH=\"$PATH:/opt/homebrew/bin\"\n\n# Lùi ra thư mục gốc FinFlow_Project (Nơi chứa .swiftlint.yml)\ncd \"${SRCROOT}/..\"\n\nif which swiftlint >/dev/null; then\n  # Chạy SwiftLint (Nó sẽ tự tìm file .swiftlint.yml và đọc rule excluded)\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -265,6 +265,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -322,6 +323,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};

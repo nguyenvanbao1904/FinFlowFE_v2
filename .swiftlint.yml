@@ -1,0 +1,97 @@
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - function_body_length
+  - type_body_length
+  - identifier_name
+
+# Trỏ đúng tọa độ code của bạn
+included:
+  - FinFlowIos/FinFlow # Quét code của App chính
+  - Packages # Quét code của các Modules
+
+# Bịt mắt SwiftLint khỏi các thư viện bên ngoài
+excluded:
+  - "**/.build" # Chặn thư mục build ngầm của Local Packages
+  - "**/checkouts" # Chặn code thư viện bên thứ 3 (Google, AppAuth...)
+  - "**/DerivedData"
+  - "**/SourcePackages"
+  - "**/Tests"
+
+custom_rules:
+  no_print:
+    included: ".*\\.swift"
+    name: "No Print"
+    regex: "\\b(?:print|debugPrint|NSLog)\\s*\\("
+    message: "BANNED: Use Logger from FinFlowCore instead of print(), debugPrint(), or NSLog()."
+    severity: error
+
+  no_combine_property_wrappers:
+    included: ".*\\.swift"
+    name: "Combine Wrappers Banned"
+    regex: "@(?:Published|StateObject|ObservedObject)\\b"
+    message: "BANNED: Use @Observable for State Management in Swift 6."
+    severity: error
+
+  no_observable_object:
+    included: ".*\\.swift"
+    name: "ObservableObject Banned"
+    regex: ":\\s*ObservableObject\\b"
+    message: "BANNED: Use @Observable instead of ObservableObject protocol."
+    severity: error
+
+  no_navigation_link_destination:
+    included: ".*\\.swift"
+    name: "NavigationLink Destination Banned"
+    regex: "NavigationLink\\s*\\(\\s*destination\\s*:"
+    message: "BANNED: Do not use NavigationLink(destination:) for full feature screens. Use AppRouter instead."
+    severity: error
+
+  no_hardcoded_colors:
+    included: ".*\\.swift"
+    name: "Hardcoded Colors Banned"
+    regex: "\\.(?:foregroundColor|background|foregroundStyle|tint)\\s*\\(\\s*(?:Color\\(|\\.(?:blue|red|green|black|white|gray|orange|yellow|purple))"
+    message: "BANNED: Hardcoded system colors are not allowed. Use AppColors tokens."
+    severity: error
+
+  no_hardcoded_fonts:
+    included: ".*\\.swift"
+    name: "Hardcoded Fonts Banned"
+    regex: "\\.font\\s*\\(\\s*\\.(?:system|largeTitle|title|title2|title3|headline|subheadline|body|callout|caption|caption2|footnote)"
+    message: "BANNED: Hardcoded system fonts are not allowed. Use AppTypography tokens."
+    severity: error
+
+  no_hardcoded_padding:
+    included: ".*\\.swift"
+    name: "Hardcoded Padding Banned"
+    regex: "\\.padding\\s*\\(\\s*[0-9]+|\\.padding\\s*\\(\\s*\\.[a-zA-Z]+\\s*,\\s*[0-9]+"
+    message: "BANNED: Hardcoded padding values are not allowed. Use AppSpacing tokens."
+    severity: error
+
+  no_hardcoded_spacing:
+    included: ".*\\.swift"
+    name: "Hardcoded Spacing Banned"
+    regex: "(?:VStack|HStack|ZStack|LazyVStack|LazyHStack)\\s*\\(.*spacing\\s*:\\s*[0-9]+"
+    message: "BANNED: Hardcoded spacing values are not allowed. Use AppSpacing tokens."
+    severity: error
+
+  no_url_session:
+    included: ".*\\.swift"
+    name: "URLSession Banned"
+    regex: "URLSession\\."
+    message: "BANNED: Do not use URLSession directly. Use APIClient actor."
+    severity: error
+
+  domain_layer_isolation:
+    included: ".*Domain.*\\.swift"
+    name: "Domain Layer Isolation"
+    regex: "import\\s+(?:SwiftUI|UIKit)\\b"
+    message: "BANNED: Domain / UseCase layer is pure business logic. Do not import SwiftUI or UIKit."
+    severity: error
+
+  no_business_logic_in_view:
+    included: ".*View\\.swift"
+    name: "No Business Logic in View"
+    regex: "(?:UseCase|Repository)\\s*\\("
+    message: "BANNED: Views must not construct UseCase or Repository directly. Inject them via ViewModel."
+    severity: error
