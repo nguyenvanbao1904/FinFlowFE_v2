@@ -8,8 +8,8 @@
 import Dashboard
 import FinFlowCore
 import Identity
-import SwiftUI
 import Profile
+import SwiftUI
 import Transaction
 
 // MARK: - App View Factories
@@ -19,15 +19,20 @@ extension DependencyContainer {
     func makeAuthenticationView(router: any AppRouterProtocol) -> some View {
         switch sessionManager.state {
         case .welcomeBack(let email, let firstName, let lastName):
-            makeWelcomeBackView(router: router, email: email, firstName: firstName, lastName: lastName)
+            makeWelcomeBackView(
+                router: router, email: email, firstName: firstName, lastName: lastName)
         case .sessionExpired(let email, let firstName, let lastName):
-            let displayName = [firstName, lastName].compactMap { $0 }.joined(separator: " ").trimmingCharacters(in: .whitespaces)
-            makeLoginView(router: router, prefillEmail: email, userDisplayName: displayName.isEmpty ? nil : displayName)
+            let displayName = [firstName, lastName].compactMap { $0 }.joined(separator: " ")
+                .trimmingCharacters(in: .whitespaces)
+            makeLoginView(
+                router: router, prefillEmail: email,
+                userDisplayName: displayName.isEmpty ? nil : displayName)
         default:
             makeLoginView(router: router)
         }
     }
 
+    @MainActor
     func makeLoginView(
         router: any AppRouterProtocol,
         prefillEmail: String? = nil,
@@ -42,6 +47,7 @@ extension DependencyContainer {
         return LoginView(viewModel: viewModel)
     }
 
+    @MainActor
     func makeRegisterView(router: any AppRouterProtocol) -> some View {
         RegisterView(
             viewModel: makeRegisterViewModel(
@@ -51,6 +57,7 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeForgotPasswordView(router: any AppRouterProtocol) -> some View {
         ForgotPasswordView(
             viewModel: makeForgotPasswordViewModel(
@@ -64,6 +71,7 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeWelcomeBackView(
         router: any AppRouterProtocol,
         email: String,
@@ -84,27 +92,30 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeLockScreenView(user: UserProfile, biometricAvailable: Bool) -> some View {
-        LockScreenView(viewModel: makeLockScreenViewModel(user: user, biometricAvailable: biometricAvailable))
+        LockScreenView(
+            viewModel: makeLockScreenViewModel(user: user, biometricAvailable: biometricAvailable))
     }
 
     // Factory cho Main Tab View (Home + Profile)
     func makeMainTabView(router: any AppRouterProtocol) -> some View {
         let profileView = makeProfileView(router: router)
-        let transactionView = TransactionListView(router: router)
+        let transactionView = makeTransactionListView(router: router)
         return MainTabView(profileView: profileView, transactionView: transactionView)
     }
 
+    @MainActor
     func makeProfileView(router: any AppRouterProtocol) -> ProfileView {
         let email = sessionManager.currentUser?.email ?? ""
-        
+
         let profileVM = ProfileViewModel(
             getProfileUseCase: GetProfileUseCase(repository: authRepository),
             authRepository: authRepository,
             router: router,
             sessionManager: sessionManager
         )
-        
+
         let securityVM = SecuritySettingsViewModel(
             userEmail: email,
             pinManager: pinManager,
@@ -113,7 +124,7 @@ extension DependencyContainer {
             sessionManager: sessionManager,
             otpHandler: otpHandler
         )
-        
+
         let accountVM = AccountManagementViewModel(
             userEmail: email,
             authRepository: authRepository,
@@ -122,7 +133,7 @@ extension DependencyContainer {
             sessionManager: sessionManager,
             pinManager: pinManager
         )
-        
+
         return ProfileView(
             profileVM: profileVM,
             securityVM: securityVM,
@@ -130,6 +141,7 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeUpdateProfileView(profile: UserProfile, router: any AppRouterProtocol) -> some View {
         UpdateProfileView(
             viewModel: UpdateProfileViewModel(
@@ -143,6 +155,7 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeChangePasswordView(hasPassword: Bool, router: any AppRouterProtocol) -> some View {
         ChangePasswordView(
             viewModel: ChangePasswordViewModel(
@@ -156,6 +169,7 @@ extension DependencyContainer {
         )
     }
 
+    @MainActor
     func makeCreatePINView(email: String, router: any AppRouterProtocol) -> some View {
         CreatePINView(
             viewModel: CreatePINViewModel(
@@ -168,7 +182,41 @@ extension DependencyContainer {
         )
     }
 
-    func makeAddTransactionView(router: any AppRouterProtocol) -> some View {
-        AddTransactionView(router: router)
+    @MainActor
+    func makeAddTransactionView(
+        router: any AppRouterProtocol,
+        transactionToEdit: TransactionResponse? = nil
+    ) -> some View {
+        let addUseCase = AddTransactionUseCase(repository: transactionRepository)
+        let updateUseCase = UpdateTransactionUseCase(repository: transactionRepository)
+        let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
+        let analyzeUseCase = AnalyzeTextUseCase(repository: transactionRepository)
+        let viewModel = AddTransactionViewModel(
+            addUseCase: addUseCase,
+            updateUseCase: updateUseCase,
+            getCategoriesUseCase: getCategoriesUseCase,
+            analyzeUseCase: analyzeUseCase,
+            router: router,
+            sessionManager: sessionManager,
+            transactionToEdit: transactionToEdit
+        )
+        return AddTransactionView(viewModel: viewModel)
+    }
+
+    @MainActor
+    func makeTransactionListView(router: any AppRouterProtocol) -> some View {
+        let getTransactionsUseCase = GetTransactionsUseCase(repository: transactionRepository)
+        let getSummaryUseCase = GetTransactionSummaryUseCase(repository: transactionRepository)
+        let getChartUseCase = GetTransactionChartUseCase(repository: transactionRepository)
+        let deleteTransactionUseCase = DeleteTransactionUseCase(repository: transactionRepository)
+        let viewModel = TransactionListViewModel(
+            getTransactionsUseCase: getTransactionsUseCase,
+            getSummaryUseCase: getSummaryUseCase,
+            getChartUseCase: getChartUseCase,
+            deleteTransactionUseCase: deleteTransactionUseCase,
+            router: router,
+            sessionManager: sessionManager
+        )
+        return TransactionListView(viewModel: viewModel)
     }
 }

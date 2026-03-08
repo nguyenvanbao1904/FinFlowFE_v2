@@ -31,21 +31,21 @@ struct FinFlowIosApp: App {
                         isFirstLaunch = false
                     }
                 }
-                }
         }
+    }
 }
 
 struct AppRootView: View {
     let router: AppRouter
     let container: DependencyContainer
-    
+
     // Lifecycle & State
-   @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.scenePhase) private var scenePhase
     @State private var lastBackgroundDate: Date?
     @State private var isPrivacyBlurVisible = false
 
     // Constants
-    private let backgroundTimeout: TimeInterval = 60 // 1 minute
+    private let backgroundTimeout: TimeInterval = 60  // 1 minute
 
     var body: some View {
         @Bindable var observableRouter = router
@@ -56,7 +56,7 @@ struct AppRootView: View {
                 Group {
                     switch observableRouter.root {
                     case .splash:
-                        ProgressView() // Or SplashView
+                        ProgressView()  // Or SplashView
                     case .authentication:
                         container.makeAuthenticationView(router: router)
                     case .welcomeBack:
@@ -64,8 +64,10 @@ struct AppRootView: View {
                     case .dashboard:
                         container.makeMainTabView(router: router)
                     case .locked:
-                        if case .locked(let user, let bioAvailable) = container.sessionManager.state {
-                            container.makeLockScreenView(user: user, biometricAvailable: bioAvailable)
+                        if case .locked(let user, let bioAvailable) = container.sessionManager.state
+                        {
+                            container.makeLockScreenView(
+                                user: user, biometricAvailable: bioAvailable)
                         } else {
                             container.makeLoginView(router: router)
                         }
@@ -79,7 +81,7 @@ struct AppRootView: View {
             .sheet(item: $observableRouter.presentedSheet) { route in
                 makeDestination(for: route)
             }
-            
+
             // Privacy Blur Overlay
             if isPrivacyBlurVisible {
                 PrivacyBlurView()
@@ -92,9 +94,9 @@ struct AppRootView: View {
             handleScenePhaseChange(newPhase: newPhase)
         }
     }
-    
+
     // MARK: - Lifecycle Handlers
-    
+
     private func handleScenePhaseChange(newPhase: ScenePhase) {
         switch newPhase {
         case .active:
@@ -109,7 +111,7 @@ struct AppRootView: View {
                 }
             }
             lastBackgroundDate = nil
-            
+
         case .inactive:
             // Fix: Don't show privacy blur if Biometric Auth is in progress
             if !container.sessionManager.isBiometricAuthenticationInProgress {
@@ -118,15 +120,15 @@ struct AppRootView: View {
                     isPrivacyBlurVisible = true
                 }
             } else {
-                 Logger.debug("Privacy Blur suppressed due to Biometric Auth", category: "App")
+                Logger.debug("Privacy Blur suppressed due to Biometric Auth", category: "App")
             }
-            
+
         case .background:
             // Ensure blur is visible (duplicate check safe)
             isPrivacyBlurVisible = true
             // Save timestamp
             lastBackgroundDate = Date()
-            
+
         @unknown default:
             break
         }
@@ -161,6 +163,8 @@ struct AppRootView: View {
             container.makeCreatePINView(email: email, router: router)
         case .addTransaction:
             container.makeAddTransactionView(router: router)
+        case .editTransaction(let transaction):
+            container.makeAddTransactionView(router: router, transactionToEdit: transaction)
         }
     }
 }

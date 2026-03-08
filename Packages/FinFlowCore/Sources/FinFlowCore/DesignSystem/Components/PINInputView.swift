@@ -15,7 +15,7 @@ public struct PINInputView: View {
     public let subtitle: String?
     public let showConfirmButton: Bool
     public let isLoading: Bool
-    public let displayMode: PINCodeInput.DisplayMode
+    public let displayMode: PINDisplayMode
     public let onComplete: (String) -> Void
     public let onCancel: (() -> Void)?
     public let onForgotPIN: (() -> Void)?
@@ -27,7 +27,7 @@ public struct PINInputView: View {
         subtitle: String? = nil,
         showConfirmButton: Bool = false,
         isLoading: Bool = false,
-        displayMode: PINCodeInput.DisplayMode = .dots,
+        displayMode: PINDisplayMode = .dots,
         onComplete: @escaping (String) -> Void,
         onCancel: (() -> Void)? = nil,
         onForgotPIN: (() -> Void)? = nil
@@ -94,7 +94,7 @@ public struct PINInputView: View {
                     .disabled(pin.count != 6 || isLoading)
                 }
             }
-            
+
             // Forgot PIN Link
             if let onForgotPIN = onForgotPIN {
                 Button(action: onForgotPIN) {

@@ -15,7 +15,8 @@ public struct ForgotPasswordView: View {
 
         return ZStack {
             // Background Gradient
-            AppBackgroundGradient()
+            AppColors.appBackground
+                .ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Spacing.xl) {
@@ -48,11 +49,12 @@ public struct ForgotPasswordView: View {
                                 )
                                 .padding(.vertical, Spacing.xs)
 
-                                PrimaryButton(title: "Xác Thực") {
+                                Button("Xác Thực") {
                                     Task {
                                         await viewModel.verifyOtp()
                                     }
                                 }
+                                .primaryButton()
                                 .disabled(viewModel.otpCode.count < 6)
 
                                 Button("Gửi lại mã?") {
@@ -109,14 +111,12 @@ public struct ForgotPasswordView: View {
                 onVerifyOTP: {}  // No-op
             )
 
-            PrimaryButton(
-                title: "Gửi Mã OTP",
-                isLoading: viewModel.isSendingOTP
-            ) {
+            Button("Gửi Mã OTP") {
                 Task {
                     await viewModel.sendOtp()
                 }
             }
+            .primaryButton(isLoading: viewModel.isSendingOTP)
             .disabled(!viewModel.canSendOTP)
         }
     }
@@ -127,17 +127,20 @@ public struct ForgotPasswordView: View {
         return VStack(spacing: Spacing.lg) {
             Text("Thiết lập mật khẩu mới")
                 .font(AppTypography.headline)
-                .foregroundColor(AppColors.primary) // Used AppColors.primary for emphasis
+                .foregroundColor(AppColors.primary)  // Used AppColors.primary for emphasis
 
-            GlassSecureField(text: $vm.password, placeholder: "Mật khẩu mới", icon: "lock.fill")
-            GlassSecureField(
-                text: $vm.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation")
+            GlassField(
+                text: $vm.password, placeholder: "Mật khẩu mới", icon: "lock.fill", isSecure: true)
+            GlassField(
+                text: $vm.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation",
+                isSecure: true)
 
-            PrimaryButton(title: "Đổi Mật Khẩu") {
+            Button("Đổi Mật Khẩu") {
                 Task {
                     await viewModel.resetPassword()  // This is safe now, no double wrapping
                 }
             }
+            .primaryButton()
         }
     }
 }

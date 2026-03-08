@@ -17,7 +17,8 @@ public struct CreatePINView: View {
         @Bindable var vm = viewModel
 
         return ZStack {
-            AppBackgroundGradient()
+            AppColors.appBackground
+                .ignoresSafeArea()
 
             CreatePINWelcomeView(onNext: {
                 vm.showCreatePINSheet = true

@@ -24,22 +24,45 @@ public enum AppColors {
     public static let accent = Color(red: 10 / 255, green: 132 / 255, blue: 255 / 255)
 
     /// Disabled state — Neutral Gray
-    public static let disabled = Color(red: 142 / 255, green: 142 / 255, blue: 147 / 255).opacity(0.3)
+    public static let disabled = Color(red: 142 / 255, green: 142 / 255, blue: 147 / 255).opacity(
+        0.3)
+
+    /// Text on primary/dark backgrounds
+    public static let textInverted = Color.white
 
     // MARK: - Social
 
     public static let google = Color.red
     public static let apple = Color(red: 24 / 255, green: 119 / 255, blue: 242 / 255)
 
-    // MARK: - Background Gradients
+    // MARK: - UI Component Tokens
 
-    public static let backgroundDark = [
-        Color(red: 5 / 255, green: 7 / 255, blue: 10 / 255),
-        Color(red: 10 / 255, green: 16 / 255, blue: 26 / 255)
-    ]
+    /// Overlay background for modals/loading (semi-transparent black)
+    public static let overlayBackground = Color.black.opacity(0.4)
 
-    public static let backgroundLight = [
-        Color(red: 245 / 255, green: 247 / 255, blue: 250 / 255),
-        Color.white
-    ]
+    /// Default input border color (unfocused state)
+    public static let inputBorderDefault = Color.gray.opacity(0.3)
+
+    /// Glass effect border (subtle white overlay)
+    public static let glassBorder = Color.white.opacity(0.1)
+
+    /// Glass effect border for focused inputs
+    public static let glassBorderFocused = Color.white.opacity(0.6)
+
+    /// Error state border color
+    public static let errorBorder = Color.red.opacity(0.3)
+
+    /// Disabled button background
+    public static let buttonDisabled = Color.gray.opacity(0.4)
+
+    /// Light background overlay for settings/cards
+    public static let settingsCardBackground = Color.gray.opacity(0.1)
+
+    // MARK: - System Backgrounds
+
+    /// Global app background (systemGroupedBackground default)
+    public static let appBackground = Color(UIColor.systemGroupedBackground)
+
+    /// Solid card background (secondarySystemGroupedBackground default)
+    public static let cardBackground = Color(UIColor.secondarySystemGroupedBackground)
 }

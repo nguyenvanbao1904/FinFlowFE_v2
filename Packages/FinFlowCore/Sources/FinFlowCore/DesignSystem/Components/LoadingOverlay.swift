@@ -15,7 +15,7 @@ public struct LoadingOverlayModifier: ViewModifier {
             content
 
             if isLoading {
-                Color.black.opacity(0.4)
+                AppColors.overlayBackground
                     .ignoresSafeArea()
 
                 ProgressView()

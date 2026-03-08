@@ -9,6 +9,7 @@ import Dashboard
 import FinFlowCore
 import Foundation
 import Identity
+import Transaction
 
 @MainActor
 public class DependencyContainer {
@@ -29,6 +30,7 @@ public class DependencyContainer {
 
     // 3. (Repositories)
     let authRepository: AuthRepositoryProtocol
+    let transactionRepository: TransactionRepositoryProtocol
 
     // 4. Use Cases - Created on demand (Transient) to avoid Container bloat
 
@@ -69,6 +71,8 @@ public class DependencyContainer {
         )
         self.authRepository = concreteAuthRepository
         self.otpHandler = OTPInputHandler(repository: concreteAuthRepository)
+        
+        self.transactionRepository = TransactionRepository(client: apiClient)
 
         // 🔗 Config Auth Hooks (Break Circular Dependency)
         Task { [weak concreteAuthRepository, tokenStore] in

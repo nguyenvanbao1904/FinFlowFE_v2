@@ -4,25 +4,25 @@ import SwiftUI
 
 private struct SettingsCardModifier: ViewModifier {
     let title: String
-    
+
     func body(content: Content) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm2) {
             Text(title)
                 .font(AppTypography.headline)
-            
+
             content
         }
         .padding()
-        .background(Color.gray.opacity(0.1))
+        .background(AppColors.settingsCardBackground)
         .cornerRadius(12)
     }
 }
 
-public extension View {
+extension View {
     /// Applies consistent settings card styling with a title
     /// - Parameter title: The section title
     /// - Returns: A styled settings card view
-    func settingsCardStyle(title: String) -> some View {
+    public func settingsCardStyle(title: String) -> some View {
         modifier(SettingsCardModifier(title: title))
     }
 }

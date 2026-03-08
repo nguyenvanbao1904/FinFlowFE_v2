@@ -22,23 +22,42 @@ public protocol ProfileRepositoryProtocol: Sendable {
 /// Handles OTP operations (send, verify)
 public protocol OTPRepositoryProtocol: Sendable {
     func sendOtp(email: String, purpose: OtpPurpose) async throws
-    func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws -> VerifyOtpResponse
+    func verifyOtp(email: String, otp: String, purpose: OtpPurpose) async throws
+        -> VerifyOtpResponse
 }
 
 /// Handles account management (password, biometric, deletion, existence check)
 public protocol AccountRepositoryProtocol: Sendable {
-    func checkUserExistence(email: String?, username: String?) async throws -> CheckUserExistenceResponse
+    func checkUserExistence(email: String?, username: String?) async throws
+        -> CheckUserExistenceResponse
     func changePassword(req: ChangePasswordRequest) async throws
     func resetPassword(req: ResetPasswordRequest, token: String) async throws
     func toggleBiometric(enabled: Bool) async throws
     func deleteAccount(password: String?, token: String) async throws
 }
 
+// MARK: - Transaction Repository Protocol
+
+/// Handles transaction operations (add, list, summary, categories)
+public protocol TransactionRepositoryProtocol: Sendable {
+    func getCategories() async throws -> [CategoryResponse]
+    func addTransaction(request: AddTransactionRequest) async throws -> TransactionResponse
+    func updateTransaction(id: String, request: AddTransactionRequest) async throws
+        -> TransactionResponse
+    func getTransactions(page: Int, size: Int, startDate: Date?, endDate: Date?, keyword: String?)
+        async throws -> PaginatedResponse<TransactionResponse>
+    func getTransactionSummary() async throws -> TransactionSummaryResponse
+    func analyzeTransaction(request: AnalyzeTransactionRequest) async throws
+        -> AnalyzeTransactionResponse
+    func getChart(range: ChartRange, referenceDate: Date) async throws -> TransactionChartResponse
+    func deleteTransaction(id: String) async throws
+}
+
 // MARK: - Composite Protocol (Backward Compatibility)
 
 /// Composite protocol that combines all repository protocols
 /// This maintains backward compatibility while allowing gradual migration to segregated protocols
-public protocol AuthRepositoryProtocol: 
+public protocol AuthRepositoryProtocol:
     AuthenticationRepositoryProtocol,
     ProfileRepositoryProtocol,
     OTPRepositoryProtocol,

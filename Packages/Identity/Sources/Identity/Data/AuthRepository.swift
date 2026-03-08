@@ -29,7 +29,7 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             body: req,
             headers: nil,
             version: nil,
-            retryOn401: false // 401 = sai mật khẩu, không retry refresh; giữ message từ backend
+            retryOn401: false  // 401 = sai mật khẩu, không retry refresh; giữ message từ backend
         )
     }
 
@@ -109,8 +109,15 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
                 body: request,
                 headers: nil,
                 version: nil,
-                retryOn401: false // ⛔️ Prevent infinite loop
+                retryOn401: false  // ⛔️ Prevent infinite loop
             )
+
+            // 🔐 CRITICAL FIX: Save new tokens immediately to prevent race condition
+            // Without this, concurrent 401s will reuse old token (already blacklisted)
+            await tokenStore?.setToken(response.token)
+            if let newRefreshToken = response.refreshToken {
+                await tokenStore?.setRefreshToken(newRefreshToken)
+            }
 
             Logger.info("Refresh token thành công", category: "Auth")
             return response
@@ -136,8 +143,14 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
                 body: request,
                 headers: nil,
                 version: nil,
-                retryOn401: false // ⛔️ Prevent infinite loop
+                retryOn401: false  // ⛔️ Prevent infinite loop
             )
+
+            // 🔐 CRITICAL FIX: Save new tokens immediately to prevent race condition
+            await tokenStore?.setToken(response.token)
+            if let newRefreshToken = response.refreshToken {
+                await tokenStore?.setRefreshToken(newRefreshToken)
+            }
 
             Logger.info("Refresh token (silent) thành công", category: "Auth")
             return response

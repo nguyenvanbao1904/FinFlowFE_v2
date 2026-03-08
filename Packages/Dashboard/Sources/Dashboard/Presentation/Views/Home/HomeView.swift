@@ -12,13 +12,27 @@ public struct HomeView: View {
     public init() {}
     
     public var body: some View {
-        NavigationStack {
-            VStack {
+        ZStack {
+            AppColors.appBackground
+                .ignoresSafeArea()
+                
+            VStack(spacing: .zero) {
+                // Custom Navigation Bar
+                HStack {
+                    Spacer()
+                    Text("Tổng quan")
+                        .font(AppTypography.headline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                }
+                .padding()
+                
+                Spacer()
                 Text("Trang chủ")
                     .font(AppTypography.title)
                     .foregroundStyle(.secondary)
+                Spacer()
             }
-            .navigationTitle("Tổng quan")
         }
     }
 }

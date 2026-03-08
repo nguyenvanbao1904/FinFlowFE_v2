@@ -110,3 +110,17 @@ custom_rules:
     regex: "import\\s+(?:Identity|Dashboard|Profile|Transaction)\\b"
     message: "BANNED: Feature modules must not import each other. Only import FinFlowCore."
     severity: error
+
+  no_navigation_stack_in_tab:
+    included: ".*Packages/.*\\.swift"
+    name: "Nested NavigationStack Banned"
+    regex: "\\bNavigationStack\\b"
+    message: "BANNED: Do not use NavigationStack inside feature modules. It causes TabView rendering bugs. Use custom headers."
+    severity: error
+
+  no_custom_materials_or_backgrounds:
+    included: ".*\\.swift"
+    name: "Custom Materials Banned"
+    regex: "\\.(?:ultraThinMaterial|thinMaterial|regularMaterial|thickMaterial|ultraThickMaterial)\\b"
+    message: "BANNED: Do not use heavy material blurs or custom glass effects. Use AppColors.cardBackground for Solid Apple Native styling."
+    severity: error

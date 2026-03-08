@@ -1,18 +1,22 @@
 //
 //  AppLogoHeader.swift
-//  FinFlowCore
+//  Identity
+//
+//  MOVED FROM: FinFlowCore (Identity-specific component)
+//  Reusable logo header with title and subtitle
 //
 
+import FinFlowCore
 import SwiftUI
 
 /// Reusable logo header với title và subtitle
 /// Tự động fallback sang SF Symbol nếu không có custom logo
-public struct AppLogoHeader: View {
+struct AppLogoHeader: View {
     let title: String?
     let subtitle: String?
     let logoSize: CGFloat
 
-    public init(
+    init(
         title: String? = "FinFlow",
         subtitle: String? = "Quản lý tài chính thông minh",
         logoSize: CGFloat = 80
@@ -22,7 +26,7 @@ public struct AppLogoHeader: View {
         self.logoSize = logoSize
     }
 
-    public var body: some View {
+    var body: some View {
         VStack(spacing: Spacing.sm) {
             // App Logo - Try custom asset first, fallback to SF Symbol
             Group {

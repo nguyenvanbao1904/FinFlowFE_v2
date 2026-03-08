@@ -8,15 +8,13 @@ let package = Package(
         .library(name: "Profile", targets: ["Profile"])
     ],
     dependencies: [
-        .package(path: "../FinFlowCore"),
-        .package(path: "../Identity")
+        .package(path: "../FinFlowCore")
     ],
     targets: [
         .target(
             name: "Profile",
             dependencies: [
-                .product(name: "FinFlowCore", package: "FinFlowCore"),
-                .product(name: "Identity", package: "Identity")
+                .product(name: "FinFlowCore", package: "FinFlowCore")
             ]
         )
     ]

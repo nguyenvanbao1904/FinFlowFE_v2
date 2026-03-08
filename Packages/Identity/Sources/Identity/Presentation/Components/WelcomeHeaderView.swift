@@ -49,11 +49,8 @@ public struct WelcomeHeaderView: View {
 
             // Login Buttons
             HStack(spacing: Spacing.sm) {
-                PrimaryButton(
-                    title: "Đăng nhập",
-                    isLoading: false, // Loading handled by parent or specific button state
-                    action: onLogin
-                )
+                Button("Đăng nhập", action: onLogin)
+                    .primaryButton()
 
                 // Biometric button
                 Button {
@@ -61,8 +58,11 @@ public struct WelcomeHeaderView: View {
                 } label: {
                     Image(systemName: biometryType == .faceID ? "faceid" : "touchid")
                         .font(AppTypography.displaySmall)
-                        .foregroundStyle(AppColors.backgroundLight[1])
-                        .frame(width: 56, height: 56)
+                        .foregroundStyle(AppColors.textInverted)
+                        .frame(
+                            width: UILayout.biometricButtonSize,
+                            height: UILayout.biometricButtonSize
+                        )
                         .background(
                             LinearGradient(
                                 colors: [AppColors.primary, AppColors.primary.opacity(0.7)],

@@ -35,6 +35,9 @@ public class ProfileViewModel {
         self.authRepository = authRepository
         self.router = router
         self.sessionManager = sessionManager
+        
+        // Pre-populate profile to avoid 1-frame empty UI flash
+        self.profile = sessionManager.currentUser
     }
     
     // MARK: - Public Methods

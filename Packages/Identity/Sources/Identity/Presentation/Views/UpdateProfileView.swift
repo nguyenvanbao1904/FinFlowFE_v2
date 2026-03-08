@@ -18,32 +18,45 @@ public struct UpdateProfileView: View {
 
         return NavigationView {
             ZStack {
-                AppBackgroundGradient()
+                AppColors.appBackground
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
                         VStack(spacing: Spacing.md) {
-                            ValidatedTextField(
+                            GlassField(
                                 text: $vm.lastName,
                                 placeholder: "Họ",
-                                icon: "person.fill",
-                                validationMessage: nil,
-                                focusedField: $focusedField,
-                                fieldIdentifier: .lastName,
-                                onFocusChange: { _ in }
+                                icon: "person.fill"
                             )
+                            .focused($focusedField, equals: .lastName)
 
-                            ValidatedTextField(
+                            GlassField(
                                 text: $vm.firstName,
                                 placeholder: "Tên",
-                                icon: "person",
-                                validationMessage: nil,
-                                focusedField: $focusedField,
-                                fieldIdentifier: .firstName,
-                                onFocusChange: { _ in }
+                                icon: "person"
                             )
+                            .focused($focusedField, equals: .firstName)
 
-                            GlassDatePicker(date: $vm.dob, label: "Ngày sinh", icon: "calendar")
+                            // Date of birth picker
+                            HStack(spacing: Spacing.sm) {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(.secondary)
+                                    .frame(width: UILayout.iconSize)
+
+                                DatePicker(
+                                    "Ngày sinh", selection: $vm.dob, displayedComponents: .date
+                                )
+                                .tint(AppColors.primary)
+                            }
+                            .padding(.vertical, Spacing.sm2)
+                            .padding(.horizontal, Spacing.sm)
+                            .background(AppColors.cardBackground)
+                            .cornerRadius(CornerRadius.medium)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: CornerRadius.medium)
+                                    .stroke(AppColors.glassBorder, lineWidth: 0.5)
+                            )
                         }
                         .padding(.horizontal)
                         .padding(.top, Spacing.lg)
@@ -55,14 +68,12 @@ public struct UpdateProfileView: View {
                                 .padding(.horizontal)
                         }
 
-                        PrimaryButton(
-                            title: "Cập nhật",
-                            isLoading: viewModel.isLoading
-                        ) {
+                        Button("Cập nhật") {
                             Task {
                                 await viewModel.updateProfile()
                             }
                         }
+                        .primaryButton(isLoading: viewModel.isLoading)
                         .padding(.horizontal)
                         .disabled(!viewModel.isValid)
                     }

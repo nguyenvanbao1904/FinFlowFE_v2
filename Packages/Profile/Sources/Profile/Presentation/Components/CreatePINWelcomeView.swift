@@ -11,8 +11,8 @@ struct CreatePINWelcomeView: View {
             // Icon với animation
             ZStack {
                 Circle()
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 140, height: 140)
+                    .fill(AppColors.cardBackground)
+                    .frame(width: UILayout.logoCircleLarge, height: UILayout.logoCircleLarge)
                     .shadow(color: AppColors.primary.opacity(0.3), radius: 30, x: 0, y: 15)
 
                 Image(systemName: "lock.shield.fill")
@@ -52,16 +52,30 @@ struct CreatePINWelcomeView: View {
                 )
             }
             .padding(.horizontal, Spacing.lg)
-            
+
             Spacer()
 
             // Next Button
-            GradientButton(
-                title: "Bắt Đầu",
-                icon: "arrow.right",
-                style: .primary,
-                action: onNext
-            )
+            Button(action: onNext) {
+                HStack(spacing: Spacing.sm) {
+                    Text("Bắt Đầu")
+                        .font(AppTypography.headline)
+                    Image(systemName: "arrow.right")
+                        .font(AppTypography.headline.weight(.semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.sm2)
+                .background(
+                    LinearGradient(
+                        colors: [AppColors.primary, AppColors.primary.opacity(0.7)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .foregroundStyle(AppColors.textInverted)
+                .cornerRadius(CornerRadius.medium)
+                .shadow(color: AppColors.primary.opacity(0.5), radius: 15, y: 8)
+            }
             .padding(.horizontal, Spacing.md)
             // swiftlint:disable:next no_hardcoded_padding
             .padding(.bottom, 60.0)
@@ -79,8 +93,10 @@ private struct FeatureRow: View {
         HStack(spacing: Spacing.md) {
             ZStack {
                 Circle()
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 50, height: 50)
+                    .fill(AppColors.cardBackground)
+                    .frame(
+                        width: UILayout.featureIconBackground,
+                        height: UILayout.featureIconBackground)
 
                 Image(systemName: icon)
                     .font(AppTypography.iconMedium)

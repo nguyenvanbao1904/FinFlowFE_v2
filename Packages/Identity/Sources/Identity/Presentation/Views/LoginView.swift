@@ -22,7 +22,8 @@ public struct LoginView: View {
 
         return ZStack {
             // Background gradient
-            AppBackgroundGradient()
+            AppColors.appBackground
+                .ignoresSafeArea()
 
             // Main content with safe area
             // swiftlint:disable:next no_hardcoded_spacing
@@ -55,10 +56,13 @@ public struct LoginView: View {
         .task {
             await viewModel.refreshSavedUserInfo()
             await viewModel.checkBiometricAvailability()
-            
+
             // Nếu phiên trước vừa hết hạn (sessionExpired -> Login), hiển thị alert một lần
             if viewModel.isSessionExpired, viewModel.alert == nil {
-                viewModel.alert = .auth(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.")
+                viewModel.alert = .auth(
+                    message:
+                        "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại."
+                )
                 viewModel.isSessionExpired = false
             }
         }
@@ -91,17 +95,19 @@ public struct LoginView: View {
     private var loginForm: some View {
         @Bindable var vm = viewModel
         return VStack(spacing: Spacing.md) {
-            GlassTextField(
+            GlassField(
                 text: $vm.username,
                 placeholder: "Tên đăng nhập hoặc Email",
-                icon: AppAssets.personIcon
+                icon: AppAssets.personIcon,
+                isSecure: false
             )
 
             VStack(alignment: .trailing, spacing: Spacing.xs) {
-                GlassSecureField(
+                GlassField(
                     text: $vm.password,
                     placeholder: "Mật khẩu",
-                    icon: AppAssets.lockIcon
+                    icon: AppAssets.lockIcon,
+                    isSecure: true
                 )
 
                 Button("Quên mật khẩu?") {
@@ -117,12 +123,10 @@ public struct LoginView: View {
     private var actionSection: some View {
         VStack(spacing: Spacing.lg) {
             HStack(spacing: 12) {
-                PrimaryButton(
-                    title: "Đăng nhập",
-                    isLoading: viewModel.isLoading
-                ) {
+                Button("Đăng nhập") {
                     Task { await viewModel.login() }
                 }
+                .primaryButton(isLoading: viewModel.isLoading)
 
                 // Hiển thị nút sinh trắc (disabled nếu thiết bị không hỗ trợ)
                 Button {
@@ -130,8 +134,11 @@ public struct LoginView: View {
                 } label: {
                     Image(systemName: viewModel.biometricType == .touchID ? "touchid" : "faceid")
                         .font(AppTypography.displaySmall)
-                        .foregroundStyle(AppColors.backgroundLight[1])
-                        .frame(width: 56, height: 56)
+                        .foregroundStyle(AppColors.textInverted)
+                        .frame(
+                            width: UILayout.biometricButtonSize,
+                            height: UILayout.biometricButtonSize
+                        )
                         .background(
                             LinearGradient(
                                 colors: [AppColors.primary, AppColors.primary.opacity(0.7)],
@@ -147,7 +154,14 @@ public struct LoginView: View {
 
             // Social login section
             VStack(spacing: Spacing.md) {
-                DividerWithText("Hoặc tiếp tục với")
+                // Divider with text
+                HStack {
+                    Divider()
+                    Text("Hoặc tiếp tục với")
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.secondary)
+                    Divider()
+                }
 
                 HStack(spacing: 25) {
                     SocialLoginButton(provider: .google) {
@@ -165,14 +179,15 @@ public struct LoginView: View {
     @MainActor
     private func handleGoogleLogin() async {
         // The View is responsible for UIKit presentation and Google SDK call only.
-        // It extracts the raw idToken and hands it to the ViewModel — 
+        // It extracts the raw idToken and hands it to the ViewModel —
         // no isLoading or error state management here.
         do {
             guard
                 let windowScene = UIApplication.shared.connectedScenes
                     .compactMap({ $0 as? UIWindowScene })
                     .first(where: { $0.activationState == .foregroundActive }),
-                let presenter = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+                let presenter = windowScene.windows.first(where: { $0.isKeyWindow })?
+                    .rootViewController
             else {
                 viewModel.alert = AppError.validationError("Không tìm thấy cửa sổ hiện tại")
                     .toAppAlert(defaultTitle: "Lỗi")

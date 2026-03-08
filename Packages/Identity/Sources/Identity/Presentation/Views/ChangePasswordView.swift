@@ -18,66 +18,86 @@ public struct ChangePasswordView: View {
 
     public var body: some View {
         @Bindable var vm = viewModel
-        
-        NavigationStack {
-            ZStack {
-                AppBackgroundGradient()
-                
+
+        ZStack {
+            AppColors.appBackground
+                .ignoresSafeArea()
+
+            VStack(spacing: .zero) {
+                // Custom Header
+                HStack {
+                    Button("Đóng") {
+                        dismiss()
+                    }
+                    .foregroundColor(AppColors.primary)
+
+                    Spacer()
+
+                    Text(viewModel.isCreatingPassword ? "Tạo Mật Khẩu" : "Đổi Mật Khẩu")
+                        .font(AppTypography.headline)
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+
+                    Button("Đóng") {}
+                        .opacity(0)
+                        .accessibilityHidden(true)
+                }
+                .padding()
+
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
                         VStack(spacing: Spacing.md) {
                             if !viewModel.isCreatingPassword {
-                                GlassSecureField(
+                                GlassField(
                                     text: $vm.oldPassword,
                                     placeholder: "Mật khẩu hiện tại",
-                                    icon: "lock"
+                                    icon: "lock",
+                                    isSecure: true
                                 )
                                 .focused($focusedField, equals: .oldPassword)
                             }
-                            
-                            PasswordFieldGroup(
-                                password: $vm.newPassword,
-                                passwordConfirmation: $vm.confirmPassword,
-                                passwordPlaceholder: "Mật khẩu mới (tối thiểu 6 ký tự)",
-                                confirmationPlaceholder: "Xác nhận mật khẩu mới",
-                                passwordMessage: nil, // Add real-time validation if available
-                                passwordConfirmationMessage: nil,
-                                focusedField: $focusedField,
-                                passwordFieldIdentifier: .newPassword,
-                                confirmationFieldIdentifier: .confirmPassword,
-                                onPasswordFocusChange: { _ in },
-                                onConfirmationFocusChange: { _ in }
-                            )
+
+                            VStack(spacing: Spacing.xs) {
+                                // New password field
+                                GlassField(
+                                    text: $vm.newPassword,
+                                    placeholder: "Mật khẩu mới (tối thiểu 6 ký tự)",
+                                    icon: "lock",
+                                    isSecure: true
+                                )
+                                .focused($focusedField, equals: .newPassword)
+                                .textContentType(.newPassword)
+
+                                // Password confirmation field
+                                GlassField(
+                                    text: $vm.confirmPassword,
+                                    placeholder: "Xác nhận mật khẩu mới",
+                                    icon: "lock.fill",
+                                    isSecure: true
+                                )
+                                .focused($focusedField, equals: .confirmPassword)
+                                .textContentType(.newPassword)
+                            }
                         }
                         .padding(.top, Spacing.xl)
                         .padding(.horizontal)
-                        
-                        PrimaryButton(
-                            title: viewModel.isCreatingPassword ? "Tạo mật khẩu" : "Đổi mật khẩu",
-                            isLoading: viewModel.isLoading
-                        ) {
+
+                        Button(viewModel.isCreatingPassword ? "Tạo mật khẩu" : "Đổi mật khẩu") {
                             Task {
                                 await viewModel.changePassword()
                             }
                         }
+                        .primaryButton(isLoading: viewModel.isLoading)
                         .disabled(viewModel.isLoading)
                         .padding(.horizontal)
-                        
+
                         Spacer()
                     }
                 }
             }
-            .navigationTitle(viewModel.isCreatingPassword ? "Tạo Mật Khẩu" : "Đổi Mật Khẩu")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Đóng") {
-                        dismiss()
-                    }
-                }
-            }
-            .loadingOverlay(viewModel.isLoading)
-            .alertHandler($viewModel.alert)
         }
+        .loadingOverlay(viewModel.isLoading)
+        .alertHandler($viewModel.alert)
     }
 }

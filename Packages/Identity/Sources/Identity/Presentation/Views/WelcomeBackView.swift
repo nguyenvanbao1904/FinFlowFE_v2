@@ -18,7 +18,8 @@ public struct WelcomeBackView: View {
         @Bindable var vm = viewModel
 
         return ZStack {
-            AppBackgroundGradient()
+            AppColors.appBackground
+                .ignoresSafeArea()
 
             VStack(spacing: Spacing.xl) {
                 // Logo

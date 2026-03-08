@@ -1,5 +1,5 @@
-import SwiftUI      // BẮT BUỘC - Để dùng View, State, Environment...
 import FinFlowCore
+import SwiftUI  // BẮT BUỘC - Để dùng View, State, Environment...
 
 public struct RegisterView: View {
     @State private var viewModel: RegisterViewModel
@@ -17,7 +17,8 @@ public struct RegisterView: View {
     public var body: some View {
         // Main view logic
         ZStack {
-            AppBackgroundGradient()
+            AppColors.appBackground
+                .ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Spacing.xl) {
@@ -54,26 +55,60 @@ public struct RegisterView: View {
             usernameField(vm: vm)
             emailSection(vm: vm)
             nameFields(vm: vm)
-            GlassDatePicker(date: Binding(get: { vm.dob }, set: { vm.dob = $0 }))
+            dobPicker(vm: vm)
             passwordGroup(vm: vm)
         }
     }
 
+    private func dobPicker(vm: RegisterViewModel) -> some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "calendar")
+                .foregroundColor(.secondary)
+                .frame(width: UILayout.iconSize)
+
+            DatePicker(
+                "Ngày sinh", selection: Binding(get: { vm.dob }, set: { vm.dob = $0 }),
+                displayedComponents: .date
+            )
+            .tint(AppColors.primary)
+        }
+        .padding(.vertical, Spacing.sm2)
+        .padding(.horizontal, Spacing.sm)
+        .background(AppColors.cardBackground)
+        .cornerRadius(CornerRadius.medium)
+        .overlay(
+            RoundedRectangle(cornerRadius: CornerRadius.medium)
+                .stroke(AppColors.glassBorder, lineWidth: 0.5)
+        )
+    }
+
     private func usernameField(vm: RegisterViewModel) -> some View {
         @Bindable var vm = vm
-        return ValidatedTextField(
-            text: $vm.username,
-            placeholder: "Tên đăng nhập",
-            icon: "person",
-            validationMessage: vm.usernameMessage,
-            focusedField: $focusedField,
-            fieldIdentifier: .username,
-            textContentType: .username
-        ) { isFocused in
-            if !isFocused {
-                vm.validate(.username)
-            } else {
-                vm.usernameMessage = nil
+        return VStack(spacing: Spacing.xs) {
+            GlassField(
+                text: $vm.username,
+                placeholder: "Tên đăng nhập",
+                icon: "person"
+            )
+            .focused($focusedField, equals: .username)
+            .textContentType(.username)
+            .onChange(of: focusedField == .username) { _, isFocused in
+                if !isFocused {
+                    vm.validate(.username)
+                } else {
+                    vm.usernameMessage = nil
+                }
+            }
+
+            if let message = vm.usernameMessage {
+                HStack {
+                    Text(message)
+                        .font(AppTypography.caption)
+                        .foregroundColor(
+                            message.contains("✅") ? AppColors.success : AppColors.google)
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.xs)
             }
         }
     }
@@ -99,62 +134,122 @@ public struct RegisterView: View {
     private func nameFields(vm: RegisterViewModel) -> some View {
         @Bindable var vm = vm
         return VStack(spacing: Spacing.xs) {
-            ValidatedTextField(
-                text: $vm.firstName,
-                placeholder: "Họ",
-                icon: "person.fill",
-                validationMessage: vm.firstNameMessage,
-                focusedField: $focusedField,
-                fieldIdentifier: .firstName
-            ) { isFocused in
-                if !isFocused { vm.validate(.firstName) }
+            // First name field
+            VStack(spacing: Spacing.xs) {
+                GlassField(
+                    text: $vm.firstName,
+                    placeholder: "Họ",
+                    icon: "person.fill"
+                )
+                .focused($focusedField, equals: .firstName)
+                .onChange(of: focusedField == .firstName) { _, isFocused in
+                    if !isFocused { vm.validate(.firstName) }
+                }
+
+                if let message = vm.firstNameMessage {
+                    HStack {
+                        Text(message)
+                            .font(AppTypography.caption)
+                            .foregroundColor(
+                                message.contains("✅") ? AppColors.success : AppColors.google)
+                        Spacer()
+                    }
+                    .padding(.horizontal, Spacing.xs)
+                }
             }
 
-            ValidatedTextField(
-                text: $vm.lastName,
-                placeholder: "Tên",
-                icon: "person",
-                validationMessage: vm.lastNameMessage,
-                focusedField: $focusedField,
-                fieldIdentifier: .lastName
-            ) { isFocused in
-                if !isFocused { vm.validate(.lastName) }
+            // Last name field
+            VStack(spacing: Spacing.xs) {
+                GlassField(
+                    text: $vm.lastName,
+                    placeholder: "Tên",
+                    icon: "person"
+                )
+                .focused($focusedField, equals: .lastName)
+                .onChange(of: focusedField == .lastName) { _, isFocused in
+                    if !isFocused { vm.validate(.lastName) }
+                }
+
+                if let message = vm.lastNameMessage {
+                    HStack {
+                        Text(message)
+                            .font(AppTypography.caption)
+                            .foregroundColor(
+                                message.contains("✅") ? AppColors.success : AppColors.google)
+                        Spacer()
+                    }
+                    .padding(.horizontal, Spacing.xs)
+                }
             }
         }
     }
 
     private func passwordGroup(vm: RegisterViewModel) -> some View {
         @Bindable var vm = vm
-        return PasswordFieldGroup(
-            password: $vm.password,
-            passwordConfirmation: $vm.passwordConfirmation,
-            passwordMessage: vm.passwordMessage,
-            passwordConfirmationMessage: vm.passwordConfirmationMessage,
-            focusedField: $focusedField,
-            passwordFieldIdentifier: .password,
-            confirmationFieldIdentifier: .passwordConfirmation
-        ) { isFocused in
-            if !isFocused {
-                vm.validate(.password)
-            } else {
-                vm.passwordMessage = nil
+        return VStack(spacing: Spacing.xs) {
+            // Password field
+            GlassField(
+                text: $vm.password,
+                placeholder: "Mật khẩu",
+                icon: "lock",
+                isSecure: true
+            )
+            .focused($focusedField, equals: .password)
+            .onChange(of: focusedField == .password) { _, isFocused in
+                if !isFocused {
+                    vm.validate(.password)
+                } else {
+                    vm.passwordMessage = nil
+                }
             }
-        } onConfirmationFocusChange: { isFocused in
-            if !isFocused {
-                vm.validate(.passwordConfirmation)
-            } else {
-                vm.passwordConfirmationMessage = nil
+            .textContentType(.newPassword)
+
+            if let message = vm.passwordMessage {
+                HStack {
+                    Text(message)
+                        .font(AppTypography.caption)
+                        .foregroundColor(
+                            message.contains("✅") ? AppColors.success : AppColors.google)
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.xs)
+            }
+
+            // Password confirmation field
+            GlassField(
+                text: $vm.passwordConfirmation,
+                placeholder: "Xác nhận mật khẩu",
+                icon: "lock.fill",
+                isSecure: true
+            )
+            .focused($focusedField, equals: .passwordConfirmation)
+            .onChange(of: focusedField == .passwordConfirmation) { _, isFocused in
+                if !isFocused {
+                    vm.validate(.passwordConfirmation)
+                } else {
+                    vm.passwordConfirmationMessage = nil
+                }
+            }
+            .textContentType(.newPassword)
+
+            if let message = vm.passwordConfirmationMessage {
+                HStack {
+                    Text(message)
+                        .font(AppTypography.caption)
+                        .foregroundColor(
+                            message.contains("✅") ? AppColors.success : AppColors.google)
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.xs)
             }
         }
     }
 
     private var registerButton: some View {
-        PrimaryButton(
-            title: "Đăng ký",
-            isLoading: viewModel.isLoading
-        ) {
+        Button("Đăng ký") {
             Task { await viewModel.register() }
         }
+        .primaryButton(isLoading: viewModel.isLoading)
         .disabled(!viewModel.isFormValid)
     }
 

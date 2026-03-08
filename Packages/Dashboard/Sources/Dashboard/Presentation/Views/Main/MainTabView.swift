@@ -33,5 +33,6 @@ public struct MainTabView<ProfileContent: View, TransactionContent: View>: View 
                     Label("Tài khoản", systemImage: "person.fill")
                 }
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
 }

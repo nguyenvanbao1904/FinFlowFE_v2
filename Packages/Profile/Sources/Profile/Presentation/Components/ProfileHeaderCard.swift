@@ -14,28 +14,28 @@ public struct ProfileHeaderCard: View {
             ZStack {
                 Circle()
                     .fill(AppColors.primary.opacity(0.1))
-                    .frame(width: 60, height: 60)
-                
+                    .frame(width: UILayout.avatarSize, height: UILayout.avatarSize)
+
                 Text(profile.initials)
                     .font(AppTypography.title)
                     .fontWeight(.bold)
                     .foregroundColor(AppColors.primary)
             }
-            
+
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(profile.fullName)
                     .font(AppTypography.headline)
                     .foregroundColor(.primary)
-                
+
                 Text(profile.email)
                     .font(AppTypography.subheadline)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
         }
         .padding()
-        .background(AppColors.backgroundLight[1])
+        .background(AppColors.textInverted)
         .cornerRadius(12)
     }
 }

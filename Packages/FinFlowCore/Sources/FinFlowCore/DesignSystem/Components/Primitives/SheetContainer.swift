@@ -1,0 +1,114 @@
+//
+//  SheetContainer.swift
+//  FinFlowCore
+//
+//  Generic sheet container following Apple HIG
+//  Replaces: PINInputSheet, PasswordConfirmationSheet, DateRangeFilterSheet headers
+//
+
+import SwiftUI
+
+/// Generic sheet container with standardized header and presentation
+/// Use this as the base for all sheet presentations in the app
+public struct SheetContainer<Content: View>: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    // Configuration
+    public let title: String
+    public let showCloseButton: Bool
+    public let detents: Set<PresentationDetent>
+    public let dragIndicator: Visibility
+    public let allowDismissal: Bool
+    public let onDismiss: (() -> Void)?
+    
+    // Content
+    @ViewBuilder public let content: () -> Content
+    
+    public init(
+        title: String,
+        showCloseButton: Bool = true,
+        detents: Set<PresentationDetent> = [.medium],
+        dragIndicator: Visibility = .visible,
+        allowDismissal: Bool = true,
+        onDismiss: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.title = title
+        self.showCloseButton = showCloseButton
+        self.detents = detents
+        self.dragIndicator = dragIndicator
+        self.allowDismissal = allowDismissal
+        self.onDismiss = onDismiss
+        self.content = content
+    }
+    
+    public var body: some View {
+        VStack(spacing: .zero) {
+            // Standardized Header
+            header
+            
+            // Content
+            content()
+        }
+        .presentationDetents(detents)
+        .presentationDragIndicator(dragIndicator)
+        .interactiveDismissDisabled(!allowDismissal)
+        .onDisappear {
+            onDismiss?()
+        }
+    }
+    
+    // MARK: - Header
+    
+    private var header: some View {
+        HStack {
+            // Invisible button for spacing balance
+            if showCloseButton {
+                Button("Đóng") {}
+                    .opacity(0)
+                    .accessibilityHidden(true)
+            }
+            
+            Spacer()
+            
+            Text(title)
+                .font(AppTypography.headline)
+                .foregroundStyle(.primary)
+            
+            Spacer()
+            
+            // Close button
+            if showCloseButton {
+                Button("Đóng") {
+                    dismiss()
+                }
+                .foregroundColor(AppColors.primary)
+            }
+        }
+        .padding()
+    }
+}
+
+// MARK: - View Extension
+
+extension View {
+    /// Present content in a standardized sheet container
+    public func sheetContainer<Content: View>(
+        isPresented: Binding<Bool>,
+        title: String,
+        detents: Set<PresentationDetent> = [.medium],
+        allowDismissal: Bool = true,
+        onDismiss: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> Content
+    ) -> some View {
+        self.sheet(isPresented: isPresented) {
+            SheetContainer(
+                title: title,
+                detents: detents,
+                allowDismissal: allowDismissal,
+                onDismiss: onDismiss,
+                content: content
+            )
+        }
+    }
+}

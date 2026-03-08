@@ -1,0 +1,77 @@
+//
+//  CurrencyFormatter.swift
+//  Transaction
+//
+//  Centralized currency formatting utility
+//
+
+import Foundation
+
+public enum CurrencyFormatter {
+
+    // MARK: - Shared Formatter
+
+    private static let sharedFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = "."
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
+
+    // MARK: - Public API
+
+    /// Format amount as plain currency (e.g., "150.000 ₫")
+    public static func format(_ amount: Double) -> String {
+        if let formatted = sharedFormatter.string(from: NSNumber(value: amount)) {
+            return "\(formatted) ₫"
+        }
+        return "\(Int(amount)) ₫"
+    }
+
+    /// Format amount with explicit sign (e.g., "+ 150.000 ₫" or "- 50.000 ₫")
+    public static func formatWithSign(_ amount: Double, isIncome: Bool) -> String {
+        let absoluteValue = abs(amount)
+        let formatted =
+            sharedFormatter.string(from: NSNumber(value: absoluteValue)) ?? "\(Int(absoluteValue))"
+        let sign = isIncome ? "+" : "-"
+        return "\(sign) \(formatted) ₫"
+    }
+
+    /// Format balance with auto sign detection (e.g., "+ 150.000 ₫", "- 50.000 ₫", or "0 ₫")
+    public static func formatBalance(_ value: Double) -> String {
+        let absoluteValue = abs(value)
+        let formatted =
+            sharedFormatter.string(from: NSNumber(value: absoluteValue)) ?? "\(Int(absoluteValue))"
+
+        if value < 0 {
+            return "- \(formatted) ₫"
+        } else if value > 0 {
+            return "+ \(formatted) ₫"
+        } else {
+            return "\(formatted) ₫"
+        }
+    }
+
+    /// Format numeric input for text field (e.g., "150000" → "150.000")
+    public static func formatInput(_ input: String) -> String {
+        let numericOnly = String(input.filter { "0123456789".contains($0) })
+
+        if numericOnly.isEmpty { return "" }
+
+        guard let number = Double(numericOnly) else { return input }
+        return sharedFormatter.string(from: NSNumber(value: number)) ?? numericOnly
+    }
+
+    /// Format large numbers for axis labels (e.g., 1500000 → "1.5M")
+    public static func formatAxisValue(_ value: Int) -> String {
+        let doubleVal = Double(value)
+        if doubleVal >= 1_000_000 {
+            return String(format: "%gM", doubleVal / 1_000_000)
+        } else if doubleVal >= 1_000 {
+            return String(format: "%gK", doubleVal / 1_000)
+        } else {
+            return "\(value)"
+        }
+    }
+}

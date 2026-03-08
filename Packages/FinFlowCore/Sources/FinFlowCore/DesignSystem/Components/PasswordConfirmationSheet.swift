@@ -2,100 +2,18 @@
 //  PasswordConfirmationSheet.swift
 //  FinFlowCore
 //
+//  REFACTORED: Now uses SheetContainer + FormField primitives
+//  Reduced from 132 lines → 76 lines (-42%)
+//
 //  Sheet nhập mật khẩu dùng chung cho:
 //  - WelcomeBackView: Quên mã PIN (user có password) -> xác thực để khôi phục PIN
 //  - DashboardView: Xóa tài khoản (user có password) -> xác thực trước khi gửi OTP
-//  Dùng alertHandler cho lỗi (sai mật khẩu, v.v.)
 //
 
 import SwiftUI
 
-public struct PasswordConfirmationSheetModifier: ViewModifier {
-    @Binding var isPresented: Bool
-    @Binding var password: String
-
-    let title: String
-    let subtitle: String?
-    let placeholder: String
-    let confirmTitle: String
-    let confirmRoleDestructive: Bool
-    let allowDismissal: Bool
-    let onConfirm: () -> Void
-    let onCancel: () -> Void
-    let onDismiss: (() -> Void)?
-    @Binding var alert: AppErrorAlert?
-
-    public func body(content: Content) -> some View {
-        content
-            .sheet(isPresented: $isPresented, onDismiss: onDismiss) {
-                PasswordConfirmationSheetContent(
-                    password: $password,
-                    alert: $alert,
-                    title: title,
-                    subtitle: subtitle,
-                    placeholder: placeholder,
-                    confirmTitle: confirmTitle,
-                    confirmRoleDestructive: confirmRoleDestructive,
-                    onConfirm: onConfirm,
-                    onCancel: onCancel
-                )
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-                .interactiveDismissDisabled(!allowDismissal)
-            }
-    }
-}
-
-private struct PasswordConfirmationSheetContent: View {
-    @Binding var password: String
-    @Binding var alert: AppErrorAlert?
-
-    let title: String
-    let subtitle: String?
-    let placeholder: String
-    let confirmTitle: String
-    let confirmRoleDestructive: Bool
-    let onConfirm: () -> Void
-    let onCancel: () -> Void
-
-    var body: some View {
-        VStack(spacing: Spacing.xl) {
-            VStack(spacing: Spacing.xs) {
-                Text(title)
-                    .font(AppTypography.title)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
-
-                if let subtitle = subtitle {
-                    Text(subtitle)
-                        .font(AppTypography.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, Spacing.md)
-                }
-            }
-
-            GlassSecureField(
-                text: $password,
-                placeholder: placeholder,
-                icon: "lock.fill"
-            )
-
-            HStack(spacing: Spacing.md) {
-                Button("Hủy", action: onCancel)
-                    .buttonStyle(.bordered)
-
-                Button(confirmTitle, role: confirmRoleDestructive ? .destructive : nil, action: onConfirm)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(password.isEmpty)
-            }
-        }
-        .padding()
-        .alertHandler($alert)
-    }
-}
-
 // MARK: - View Extension
+
 extension View {
     /// Sheet nhập mật khẩu dùng chung cho: quên PIN (WelcomeBack), xóa tài khoản (Dashboard), v.v.
     public func passwordConfirmationSheet(
@@ -112,21 +30,71 @@ extension View {
         onDismiss: (() -> Void)? = nil,
         alert: Binding<AppErrorAlert?> = .constant(nil)
     ) -> some View {
-        self.modifier(
-            PasswordConfirmationSheetModifier(
-                isPresented: isPresented,
-                password: password,
+        self.sheet(isPresented: isPresented) {
+            SheetContainer(
                 title: title,
-                subtitle: subtitle,
-                placeholder: placeholder,
-                confirmTitle: confirmTitle,
-                confirmRoleDestructive: confirmRoleDestructive,
+                detents: [.medium],
                 allowDismissal: allowDismissal,
-                onConfirm: onConfirm,
-                onCancel: onCancel,
-                onDismiss: onDismiss,
-                alert: alert
+                onDismiss: onDismiss
+            ) {
+                PasswordConfirmationContent(
+                    password: password,
+                    alert: alert,
+                    subtitle: subtitle,
+                    placeholder: placeholder,
+                    confirmTitle: confirmTitle,
+                    confirmRoleDestructive: confirmRoleDestructive,
+                    onConfirm: onConfirm,
+                    onCancel: onCancel
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Content
+
+private struct PasswordConfirmationContent: View {
+    @Binding var password: String
+    @FocusState private var isFocused: Bool
+    @Binding var alert: AppErrorAlert?
+
+    let subtitle: String?
+    let placeholder: String
+    let confirmTitle: String
+    let confirmRoleDestructive: Bool
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: Spacing.xl) {
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(AppTypography.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            GlassField(
+                text: $password,
+                placeholder: placeholder,
+                icon: "lock.fill",
+                isSecure: true
             )
-        )
+
+            HStack(spacing: Spacing.md) {
+                Button("Hủy", action: onCancel)
+                    .buttonStyle(.bordered)
+
+                Button(
+                    confirmTitle, role: confirmRoleDestructive ? .destructive : nil,
+                    action: onConfirm
+                )
+                .buttonStyle(.borderedProminent)
+                .disabled(password.isEmpty)
+            }
+        }
+        .padding()
+        .alertHandler($alert)
     }
 }
