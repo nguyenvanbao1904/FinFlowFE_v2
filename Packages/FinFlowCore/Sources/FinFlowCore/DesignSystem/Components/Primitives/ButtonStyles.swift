@@ -3,7 +3,6 @@
 //  FinFlowCore
 //
 //  Apple HIG compliant button styles
-//  Replaces: PrimaryButton component with proper ButtonStyle protocol
 //
 
 import SwiftUI
@@ -32,7 +31,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
         .font(AppTypography.headline)
         .fontWeight(.bold)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.sm2)
+        .padding(.vertical, Spacing.sm)
         .background(
             isEnabled
                 ? AnyShapeStyle(AppColors.primary.gradient)
@@ -58,7 +57,7 @@ public struct SecondaryButtonStyle: ButtonStyle {
         configuration.label
             .font(AppTypography.headline)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.sm2)
+            .padding(.vertical, Spacing.sm)
             .background(AppColors.cardBackground)
             .foregroundStyle(AppColors.primary)
             .cornerRadius(CornerRadius.medium)
@@ -102,29 +101,5 @@ extension View {
     /// Apply text button style
     public func textButton() -> some View {
         self.buttonStyle(TextButtonStyle())
-    }
-}
-
-// MARK: - Backwards Compatibility
-
-/// Legacy PrimaryButton component for gradual migration
-/// Prefer using Button with .primaryButton() modifier
-@available(*, deprecated, message: "Use Button with .primaryButton() modifier instead")
-public struct PrimaryButton: View {
-    public let title: String
-    public let isLoading: Bool
-    public let action: () -> Void
-    
-    public init(title: String, isLoading: Bool = false, action: @escaping () -> Void) {
-        self.title = title
-        self.isLoading = isLoading
-        self.action = action
-    }
-    
-    public var body: some View {
-        Button(action: action) {
-            Text(title)
-        }
-        .primaryButton(isLoading: isLoading)
     }
 }

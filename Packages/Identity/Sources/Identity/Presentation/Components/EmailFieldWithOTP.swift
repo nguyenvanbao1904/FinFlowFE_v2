@@ -147,7 +147,7 @@ private struct EmailFieldRow: View {
                 }
             }
         }
-        .padding(.vertical, Spacing.sm2)
+        .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.medium)
@@ -202,7 +202,7 @@ private struct OTPFieldRow: View {
             }
             .disabled(isVerifying || otpCode.count != 6)
         }
-        .padding(.vertical, Spacing.sm2)
+        .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.medium)

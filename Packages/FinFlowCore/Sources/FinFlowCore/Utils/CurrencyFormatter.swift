@@ -1,6 +1,6 @@
 //
 //  CurrencyFormatter.swift
-//  Transaction
+//  FinFlowCore
 //
 //  Centralized currency formatting utility
 //
@@ -53,14 +53,21 @@ public enum CurrencyFormatter {
         }
     }
 
-    /// Format numeric input for text field (e.g., "150000" → "150.000")
-    public static func formatInput(_ input: String) -> String {
-        let numericOnly = String(input.filter { "0123456789".contains($0) })
+    /// Format numeric input for text field (e.g., "150000" → "150.000").
+    /// When `allowNegative` is true, a single leading "-" is preserved (e.g. "-150000" → "-150.000").
+    public static func formatInput(_ input: String, allowNegative: Bool = false) -> String {
+        let trimmed = input.trimmingCharacters(in: .whitespaces)
+        let hasLeadingMinus = allowNegative && trimmed.hasPrefix("-")
+        let withoutMinus = hasLeadingMinus ? String(trimmed.dropFirst()) : trimmed
+        let numericOnly = String(withoutMinus.filter { "0123456789".contains($0) })
 
-        if numericOnly.isEmpty { return "" }
+        if numericOnly.isEmpty {
+            return hasLeadingMinus ? "-" : ""
+        }
 
         guard let number = Double(numericOnly) else { return input }
-        return sharedFormatter.string(from: NSNumber(value: number)) ?? numericOnly
+        let formatted = sharedFormatter.string(from: NSNumber(value: number)) ?? numericOnly
+        return hasLeadingMinus ? "-" + formatted : formatted
     }
 
     /// Format large numbers for axis labels (e.g., 1500000 → "1.5M")

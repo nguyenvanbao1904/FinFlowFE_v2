@@ -4,26 +4,25 @@ import Foundation
 @MainActor
 @Observable
 public class AddTransactionViewModel {
-    // UI State
     public var amount: String = ""
     public var isIncome: Bool = false
     public var selectedCategory: CategoryResponse?
     public var note: String = ""
     public var date: Date = Date()
 
-    // Edit Mode
     public let transactionToEdit: TransactionResponse?
     public var isEditMode: Bool { transactionToEdit != nil }
 
-    // System State
     public var categories: [CategoryResponse] = []
+    public var accounts: [WealthAccountResponse] = []
+    public var selectedAccount: WealthAccountResponse?
     public var isLoading: Bool = false
     public var alert: AppErrorAlert?
 
-    // Dependencies
     private let addUseCase: AddTransactionUseCase
     private let updateUseCase: UpdateTransactionUseCase
     private let getCategoriesUseCase: GetCategoriesUseCase
+    private let getWealthAccountsUseCase: GetWealthAccountsUseCase
     private let analyzeUseCase: any AnalyzeTextUseCaseProtocol
     private let router: any AppRouterProtocol
     private let sessionManager: any SessionManagerProtocol
@@ -32,6 +31,7 @@ public class AddTransactionViewModel {
         addUseCase: AddTransactionUseCase,
         updateUseCase: UpdateTransactionUseCase,
         getCategoriesUseCase: GetCategoriesUseCase,
+        getWealthAccountsUseCase: GetWealthAccountsUseCase,
         analyzeUseCase: any AnalyzeTextUseCaseProtocol,
         router: any AppRouterProtocol,
         sessionManager: any SessionManagerProtocol,
@@ -40,35 +40,46 @@ public class AddTransactionViewModel {
         self.addUseCase = addUseCase
         self.updateUseCase = updateUseCase
         self.getCategoriesUseCase = getCategoriesUseCase
+        self.getWealthAccountsUseCase = getWealthAccountsUseCase
         self.analyzeUseCase = analyzeUseCase
         self.router = router
         self.sessionManager = sessionManager
         self.transactionToEdit = transactionToEdit
 
-        // Pre-fill fields if editing
         if let transaction = transactionToEdit {
             self.amount = String(format: "%.0f", transaction.amount)
             self.isIncome = transaction.type == .income
             self.note = transaction.note ?? ""
-            // Date will be parsed from transaction.transactionDate later in fetchCategories
         }
+    }
+
+    public var transactionEligibleAccounts: [WealthAccountResponse] {
+        accounts.filter { $0.accountType.transactionEligible }
     }
 
     public func fetchCategories() async {
         do {
-            self.categories = try await getCategoriesUseCase.execute()
+            async let categoriesTask = getCategoriesUseCase.execute()
+            async let accountsTask = getWealthAccountsUseCase.execute()
 
-            // Pre-select category and parse date if editing
+            let (fetchedCategories, allAccounts) = try await (categoriesTask, accountsTask)
+
+            self.categories = fetchedCategories
+            self.accounts = allAccounts
+
             if let transaction = transactionToEdit {
                 self.selectedCategory = categories.first { $0.id == transaction.category.id }
+                self.selectedAccount = accounts.first { $0.id == transaction.accountId }
 
-                // Parse transaction date
-                if let parsedDate = parseTransactionDate(transaction.transactionDate) {
+                if let parsedDate = TransactionDateParser.parseBackendLocalDateTime(
+                    transaction.transactionDate) {
                     self.date = parsedDate
                 }
+            } else if !transactionEligibleAccounts.isEmpty {
+                self.selectedAccount = transactionEligibleAccounts.first
             }
         } catch {
-            handleError(error, defaultTitle: "Lỗi Tải Danh Mục")
+            handleError(error, defaultTitle: "Lỗi Tải Dữ Liệu")
         }
     }
 
@@ -82,7 +93,7 @@ public class AddTransactionViewModel {
     }
 
     public var isSaveEnabled: Bool {
-        return !amount.isEmpty
+        !amount.isEmpty
             && Double(amount.components(separatedBy: CharacterSet.decimalDigits.inverted).joined())
                 != nil
             && selectedCategory != nil
@@ -91,6 +102,12 @@ public class AddTransactionViewModel {
     public func saveTransaction() async {
         guard let category = selectedCategory else {
             self.alert = AppError.validationError("Vui lòng chọn danh mục").toAppAlert(
+                defaultTitle: "Lỗi Dữ Liệu")
+            return
+        }
+
+        guard let account = selectedAccount else {
+            self.alert = AppError.validationError("Vui lòng chọn tài khoản").toAppAlert(
                 defaultTitle: "Lỗi Dữ Liệu")
             return
         }
@@ -112,6 +129,7 @@ public class AddTransactionViewModel {
             amount: numericAmount,
             type: type,
             categoryId: category.id,
+            accountId: account.id,
             note: note.isEmpty ? nil : note,
             transactionDate: dateString
         )
@@ -121,10 +139,8 @@ public class AddTransactionViewModel {
 
         do {
             if let transaction = transactionToEdit {
-                // Update existing transaction
                 _ = try await updateUseCase.execute(id: transaction.id, request: request)
             } else {
-                // Add new transaction
                 _ = try await addUseCase.execute(request: request)
             }
             NotificationCenter.default.post(name: .transactionDidSave, object: nil)
@@ -140,8 +156,9 @@ public class AddTransactionViewModel {
         do {
             let response = try await analyzeUseCase.execute(text: input)
 
-            // Update fields based on AI response
-            self.amount = String(format: "%.0f", response.amount)
+            if let amountValue = response.amount {
+                self.amount = String(format: "%.0f", amountValue)
+            }
             self.isIncome = response.type == .income
             self.note = response.note ?? input
 
@@ -156,12 +173,10 @@ public class AddTransactionViewModel {
         }
     }
 
-    // MARK: - Error Handling (401 + generic)
-
     private func handleError(_ error: Error, defaultTitle: String) {
         if let appError = error as? AppError, case .unauthorized = appError {
             alert = .authWithAction(
-                message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại."
+                message: AppErrorAlert.sessionExpiredMessage
             ) { [sessionManager] in
                 Task { @MainActor in
                     await sessionManager.clearExpiredSession()
@@ -172,20 +187,4 @@ public class AddTransactionViewModel {
         alert = error.toAppAlert(defaultTitle: defaultTitle)
     }
 
-    // MARK: - Helper
-
-    private func parseTransactionDate(_ dateString: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
-        // Try with milliseconds
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
-        if let date = formatter.date(from: dateString) {
-            return date
-        }
-
-        // Try without fractional seconds
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return formatter.date(from: dateString)
-    }
 }

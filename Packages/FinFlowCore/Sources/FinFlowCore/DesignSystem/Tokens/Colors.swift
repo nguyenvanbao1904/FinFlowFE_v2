@@ -11,21 +11,19 @@ import SwiftUI
 public enum AppColors {
     // MARK: - Brand
 
-    /// Primary brand color - Navy Blue (#3E7BFF)
-    /// Note: In Production, consider using Asset Catalog (Color Set) for automatic Dark/Light mode support.
-    public static let primary = Color(red: 62 / 255, green: 123 / 255, blue: 255 / 255)
+    /// Primary brand color - mapped to native accentColor to support Dark/Light out of the box
+    public static let primary = Color.accentColor
 
     // MARK: - Semantic
 
-    /// Success / Confirm actions — Emerald Green
-    public static let success = Color(red: 52 / 255, green: 199 / 255, blue: 89 / 255)
+    /// Success / Confirm actions — System Green
+    public static let success = Color.green
 
-    /// Accent / Highlight color — Sky Blue (charts, secondary highlights)
-    public static let accent = Color(red: 10 / 255, green: 132 / 255, blue: 255 / 255)
+    /// Accent / Highlight color — System Blue (charts, secondary highlights)
+    public static let accent = Color.blue
 
-    /// Disabled state — Neutral Gray
-    public static let disabled = Color(red: 142 / 255, green: 142 / 255, blue: 147 / 255).opacity(
-        0.3)
+    /// Disabled state — Semantic system label color for disabled items
+    public static let disabled = Color(UIColor.tertiaryLabel)
 
     /// Text on primary/dark backgrounds
     public static let textInverted = Color.white
@@ -33,7 +31,11 @@ public enum AppColors {
     // MARK: - Social
 
     public static let google = Color.red
-    public static let apple = Color(red: 24 / 255, green: 119 / 255, blue: 242 / 255)
+    /// Semantic alias — used for expense amounts and destructive actions
+    public static let expense = google
+    public static let destructive = google
+    /// Adapted for dark mode instead of hardcoded hex
+    public static let apple = Color.primary
 
     // MARK: - UI Component Tokens
 
@@ -41,7 +43,7 @@ public enum AppColors {
     public static let overlayBackground = Color.black.opacity(0.4)
 
     /// Default input border color (unfocused state)
-    public static let inputBorderDefault = Color.gray.opacity(0.3)
+    public static let inputBorderDefault = Color(UIColor.separator)
 
     /// Glass effect border (subtle white overlay)
     public static let glassBorder = Color.white.opacity(0.1)
@@ -53,10 +55,10 @@ public enum AppColors {
     public static let errorBorder = Color.red.opacity(0.3)
 
     /// Disabled button background
-    public static let buttonDisabled = Color.gray.opacity(0.4)
+    public static let buttonDisabled = Color(UIColor.tertiarySystemFill)
 
     /// Light background overlay for settings/cards
-    public static let settingsCardBackground = Color.gray.opacity(0.1)
+    public static let settingsCardBackground = Color(UIColor.secondarySystemGroupedBackground)
 
     // MARK: - System Backgrounds
 

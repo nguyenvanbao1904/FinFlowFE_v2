@@ -26,7 +26,6 @@ public struct LoginView: View {
                 .ignoresSafeArea()
 
             // Main content with safe area
-            // swiftlint:disable:next no_hardcoded_spacing
             VStack(spacing: .zero) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Spacing.xl) {
@@ -122,7 +121,7 @@ public struct LoginView: View {
 
     private var actionSection: some View {
         VStack(spacing: Spacing.lg) {
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.md) {
                 Button("Đăng nhập") {
                     Task { await viewModel.login() }
                 }
@@ -163,7 +162,7 @@ public struct LoginView: View {
                     Divider()
                 }
 
-                HStack(spacing: 25) {
+                HStack(spacing: Spacing.xl) {
                     SocialLoginButton(provider: .google) {
                         Task { await handleGoogleLogin() }
                     }

@@ -15,10 +15,6 @@ let package = Package(
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny")
             ]
-        ),
-        .testTarget(
-            name: "FinFlowCoreTests",
-            dependencies: ["FinFlowCore"]
         )
     ]
 )

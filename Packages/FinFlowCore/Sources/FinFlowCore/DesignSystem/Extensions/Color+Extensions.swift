@@ -7,7 +7,23 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 extension Color {
+    /// Convert to hex string (e.g. #FF0000) for storage. Uses UIKit on iOS.
+    public var toHex: String? {
+        #if canImport(UIKit)
+        let uiColor = UIColor(self)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard uiColor.getRed(&r, green: &g, blue: &b, alpha: &a) else { return nil }
+        return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+        #else
+        return nil
+        #endif
+    }
+
     /// Initialize Color from hex string
     /// - Parameter hex: Hex color string (supports RGB, ARGB formats)
     public init(hex: String) {

@@ -51,35 +51,36 @@ struct AppRootView: View {
         @Bindable var observableRouter = router
 
         ZStack {
-            NavigationStack(path: $observableRouter.path) {
-                // Main Content Switching
-                Group {
-                    switch observableRouter.root {
-                    case .splash:
-                        ProgressView()  // Or SplashView
-                    case .authentication:
+            // Main Content Switching
+            Group {
+                switch observableRouter.root {
+                case .splash:
+                    ProgressView()  // Or SplashView
+                case .authentication, .welcomeBack:
+                    NavigationStack(path: $observableRouter.authPath) {
                         container.makeAuthenticationView(router: router)
-                    case .welcomeBack:
-                        container.makeAuthenticationView(router: router)
-                    case .dashboard:
-                        container.makeMainTabView(router: router)
-                    case .locked:
-                        if case .locked(let user, let bioAvailable) = container.sessionManager.state
-                        {
-                            container.makeLockScreenView(
-                                user: user, biometricAvailable: bioAvailable)
-                        } else {
-                            container.makeLoginView(router: router)
-                        }
+                            .navigationDestination(for: AppRoute.self) { route in
+                                makeDestination(for: route)
+                            }
                     }
-                }
-                .navigationDestination(for: AppRoute.self) { route in
-                    makeDestination(for: route)
+                case .dashboard:
+                    container.makeMainTabView(router: router) { route in
+                        makeDestination(for: route)
+                    }
+                case .locked:
+                    if case .locked(let user, let bioAvailable) = container.sessionManager.state {
+                        container.makeLockScreenView(
+                            user: user, biometricAvailable: bioAvailable)
+                    } else {
+                        container.makeLoginView(router: router)
+                    }
                 }
             }
             .id(observableRouter.root)
             .sheet(item: $observableRouter.presentedSheet) { route in
-                makeDestination(for: route)
+                NavigationStack {
+                    makeDestination(for: route)
+                }
             }
 
             // Privacy Blur Overlay
@@ -148,13 +149,18 @@ struct AppRootView: View {
             container.makeForgotPasswordView(router: router)
                 .navigationTitle("Quên Mật Khẩu")
         case .dashboard:
-            container.makeMainTabView(router: router)
+            container.makeMainTabView(router: router) { route in
+                AnyView(makeDestination(for: route))
+            }
         case .profile:
-            Text("Profile View - Coming Soon")
+            container.makeProfileView(router: router)
         case .settings:
-            Text("Settings View - Coming Soon")
+            ContentUnavailableView(
+                "Cài đặt", systemImage: "gear", description: Text("Mục này đang được hoàn thiện."))
         case .transactionDetail(let id):
-            Text("Transaction Detail: \(id) - Coming Soon")
+            ContentUnavailableView(
+                "Chi tiết giao dịch", systemImage: "doc.text.magnifyingglass",
+                description: Text("Không tìm thấy nội dung cho giao dịch #\(id)."))
         case .updateProfile(let profile):
             container.makeUpdateProfileView(profile: profile, router: router)
         case .changePassword(let hasPassword):
@@ -165,6 +171,12 @@ struct AppRootView: View {
             container.makeAddTransactionView(router: router)
         case .editTransaction(let transaction):
             container.makeAddTransactionView(router: router, transactionToEdit: transaction)
+        case .categoryList:
+            container.makeCategoryListView(router: router)
+        case .addBudget:
+            container.makeAddBudgetView(router: router)
+        case .editBudget(let budget):
+            container.makeAddBudgetView(router: router, budgetToEdit: budget)
         }
     }
 }
@@ -176,7 +188,7 @@ struct PrivacyBlurView: View {
             Color.black.opacity(0.1)
             Rectangle()
                 .fill(.ultraThinMaterial)
-            VStack(spacing: Spacing.sm2) {
+            VStack(spacing: Spacing.sm) {
                 Image(systemName: "lock.shield.fill")
                     .font(AppTypography.displayXL)
                     .foregroundColor(AppColors.disabled)

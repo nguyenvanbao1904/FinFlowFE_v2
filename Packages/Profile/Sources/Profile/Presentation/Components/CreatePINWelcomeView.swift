@@ -64,7 +64,7 @@ struct CreatePINWelcomeView: View {
                         .font(AppTypography.headline.weight(.semibold))
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.sm2)
+                .padding(.vertical, Spacing.sm)
                 .background(
                     LinearGradient(
                         colors: [AppColors.primary, AppColors.primary.opacity(0.7)],
@@ -77,8 +77,7 @@ struct CreatePINWelcomeView: View {
                 .shadow(color: AppColors.primary.opacity(0.5), radius: 15, y: 8)
             }
             .padding(.horizontal, Spacing.md)
-            // swiftlint:disable:next no_hardcoded_padding
-            .padding(.bottom, 60.0)
+            .padding(.bottom, Spacing.xl + Spacing.md)
         }
     }
 }

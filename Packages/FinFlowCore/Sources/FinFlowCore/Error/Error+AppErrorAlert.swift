@@ -6,8 +6,8 @@ public extension Error {
     func toAppAlert(defaultTitle: String = "Lỗi") -> AppErrorAlert {
         if let appError = self as? AppError {
             switch appError {
-            case .unauthorized(let message):
-                return .auth(message: message)
+            case .unauthorized:
+                return .auth(message: AppErrorAlert.sessionExpiredMessage)
             case .validationError(let message):
                 return .validation(message: message)
             case .networkError(let message):

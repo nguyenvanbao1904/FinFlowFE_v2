@@ -3,15 +3,52 @@ import Foundation
 
 public actor TransactionRepository: TransactionRepositoryProtocol {
     private let client: any HTTPClientProtocol
+    private let queryDateFormatter: DateFormatter
 
     public init(client: any HTTPClientProtocol) {
         self.client = client
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "yyyy-MM-dd"
+        self.queryDateFormatter = formatter
     }
 
     public func getCategories() async throws -> [CategoryResponse] {
         return try await client.request(
             endpoint: "/transactions/categories",
             method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
+    public func createCategory(request: CreateCategoryRequest) async throws -> CategoryResponse {
+        return try await client.request(
+            endpoint: "/transactions/categories",
+            method: "POST",
+            body: request,
+            headers: nil,
+            version: nil
+        )
+    }
+
+    public func updateCategory(id: String, request: UpdateCategoryRequest) async throws
+        -> CategoryResponse {
+        return try await client.request(
+            endpoint: "/transactions/categories/\(id)",
+            method: "PUT",
+            body: request,
+            headers: nil,
+            version: nil
+        )
+    }
+
+    public func deleteCategory(id: String) async throws {
+        let _: EmptyResponse = try await client.request(
+            endpoint: "/transactions/categories/\(id)",
+            method: "DELETE",
             body: nil as String?,
             headers: nil,
             version: nil
@@ -32,24 +69,13 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
         page: Int, size: Int, startDate: Date?, endDate: Date?, keyword: String?
     ) async throws
         -> PaginatedResponse<TransactionResponse> {
-        var endpoint = "/transactions?page=\(page)&size=\(size)"
-
-        // Format dates as "yyyy-MM-dd" for backend LocalDate.parse()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.timeZone = TimeZone.current  // Use user's timezone
-
-        if let start = startDate {
-            endpoint += "&startDate=\(dateFormatter.string(from: start))"
-        }
-        if let end = endDate {
-            endpoint += "&endDate=\(dateFormatter.string(from: end))"
-        }
-        if let keyword = keyword, !keyword.trimmingCharacters(in: .whitespaces).isEmpty {
-            let encodedKeyword =
-                keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? keyword
-            endpoint += "&keyword=\(encodedKeyword)"
-        }
+        let endpoint = buildTransactionsEndpoint(
+            page: page,
+            size: size,
+            startDate: startDate,
+            endDate: endDate,
+            keyword: keyword
+        )
 
         return try await client.request(
             endpoint: endpoint,
@@ -83,11 +109,9 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
 
     public func getChart(range: ChartRange, referenceDate: Date) async throws
         -> TransactionChartResponse {
-        let fmt = ISO8601DateFormatter()
-        fmt.formatOptions = [.withFullDate]
-        let dateStr = fmt.string(from: referenceDate)
+        let dateStr = queryDateFormatter.string(from: referenceDate)
         return try await client.request(
-            endpoint: "/transactions/chart?range=\(range.rawValue)&referenceDate=\(dateStr)",
+            endpoint: buildChartEndpoint(range: range, referenceDate: dateStr),
             method: "GET",
             body: nil as String?,
             headers: nil,
@@ -113,5 +137,56 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
             headers: nil,
             version: nil
         )
+    }
+
+    private func buildTransactionsEndpoint(
+        page: Int,
+        size: Int,
+        startDate: Date?,
+        endDate: Date?,
+        keyword: String?
+    ) -> String {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "size", value: String(size))
+        ]
+
+        if let startDate {
+            queryItems.append(
+                URLQueryItem(name: "startDate", value: queryDateFormatter.string(from: startDate)))
+        }
+
+        if let endDate {
+            queryItems.append(
+                URLQueryItem(name: "endDate", value: queryDateFormatter.string(from: endDate)))
+        }
+
+        if let keyword {
+            let trimmedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedKeyword.isEmpty {
+                queryItems.append(URLQueryItem(name: "keyword", value: trimmedKeyword))
+            }
+        }
+
+        return buildEndpoint(path: "/transactions", queryItems: queryItems)
+    }
+
+    private func buildChartEndpoint(range: ChartRange, referenceDate: String) -> String {
+        buildEndpoint(
+            path: "/transactions/chart",
+            queryItems: [
+                URLQueryItem(name: "range", value: range.rawValue),
+                URLQueryItem(name: "referenceDate", value: referenceDate)
+            ]
+        )
+    }
+
+    private func buildEndpoint(path: String, queryItems: [URLQueryItem]) -> String {
+        guard !queryItems.isEmpty else { return path }
+
+        var components = URLComponents()
+        components.path = path
+        components.queryItems = queryItems
+        return components.string ?? path
     }
 }

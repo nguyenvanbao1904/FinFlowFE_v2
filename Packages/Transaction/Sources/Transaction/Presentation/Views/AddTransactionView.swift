@@ -22,90 +22,77 @@ public struct AddTransactionView: View {
     // Category Selection State
     @State private var showCategoryPicker: Bool = false
 
+    @State private var showAccountPicker: Bool = false
+
     public init(viewModel: AddTransactionViewModel) {
         self._viewModel = State(initialValue: viewModel)
     }
 
     public var body: some View {
-        ZStack {
-            AppColors.appBackground
-                .ignoresSafeArea()
-
-            VStack(spacing: .zero) {
-
-                // Custom Header
-                HStack {
-                    Button("Hủy") {
-                        viewModel.cancel()
-                    }
-                    .foregroundColor(AppColors.primary)
-
-                    Spacer()
-
-                    Text(viewModel.isEditMode ? "Sửa giao dịch" : "Thêm giao dịch")
-                        .font(AppTypography.headline)
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    Button("Hủy") {}
-                        .opacity(0)
-                        .accessibilityHidden(true)
+        VStack(spacing: .zero) {
+            // 1. The "Brain" - Smart Input Bar (Pinned at top)
+            AISmartInputBar(
+                text: $aiInputText,
+                isAnalyzing: $isAnalyzing,
+                placeholder: "Ví dụ: Đổ xăng 50 cành...",
+                onSubmit: { text in
+                    triggerAIAnalysis(text: text)
+                },
+                onVoice: {
+                    // TODO: Implement real voice input (Speech framework)
+                },
+                onCamera: {
+                    // Trigger Camera UI
                 }
-                .padding()
+            )
+            .padding(.horizontal)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.sm)
+            .zIndex(1)  // Keep above scrollview
 
-                // 1. The "Brain" - Smart Input Bar (Pinned at top)
-                AISmartInputBar(
-                    text: $aiInputText,
-                    isAnalyzing: $isAnalyzing,
-                    placeholder: "Ví dụ: Đổ xăng 50 cành...",
-                    onSubmit: { text in
-                        triggerAIAnalysis(text: text)
-                    },
-                    onVoice: {
-                        triggerVoiceInput()
-                    },
-                    onCamera: {
-                        // Trigger Camera UI
-                    }
-                )
-                .padding(.horizontal)
-                .padding(.top, Spacing.sm)
-                .padding(.bottom, Spacing.md)
-                .zIndex(1)  // Keep above scrollview
+            Form {
+                Section {
+                    amountHeaderSection
+                        .padding(.vertical, Spacing.sm)
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: Spacing.xl) {
+                Section {
+                    typeSelectorSection
+                        .padding(.vertical, Spacing.sm)
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
 
-                        // 2. Centralized Big Amount Input
-                        amountHeaderSection
+                // 4. Details Form
+                detailsFormSection
 
-                        // 3. Type Selector
-                        typeSelectorSection
-
-                        // 4. Details Form
-                        detailsFormSection
-
-                        // 5. Save Button
-                        Button("Lưu Giao Dịch") {
-                            Task {
-                                await viewModel.saveTransaction()
-                            }
+                Section {
+                    // 5. Save Button
+                    Button("Lưu Giao Dịch") {
+                        Task {
+                            await viewModel.saveTransaction()
                         }
-                        .primaryButton(isLoading: viewModel.isLoading)
-                        .disabled(!viewModel.isSaveEnabled || viewModel.isLoading)
-                        .opacity(viewModel.isSaveEnabled ? 1.0 : OpacityLevel.medium)
-                        .padding(.top, Spacing.md)
-
                     }
-                    .padding(.horizontal)
-                    .padding(.top, Spacing.md)
-                    .padding(.bottom, Spacing.xl)
+                    .primaryButton(isLoading: viewModel.isLoading)
+                    .disabled(!viewModel.isSaveEnabled || viewModel.isLoading)
+                    .opacity(viewModel.isSaveEnabled ? 1.0 : OpacityLevel.medium)
                 }
-                .scrollDismissesKeyboard(.interactively)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
             }
-            .onTapGesture {
-                hideKeyboard()
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .background(AppColors.appBackground)
+        .navigationTitle(viewModel.isEditMode ? "Sửa giao dịch" : "Thêm giao dịch")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Hủy") {
+                    viewModel.cancel()
+                }
+                .foregroundColor(AppColors.primary)
             }
         }
         .task {
@@ -117,6 +104,14 @@ public struct AddTransactionView: View {
                 isPresented: $showCategoryPicker,
                 selectedCategory: $viewModel.selectedCategory,
                 categories: viewModel.filteredCategories
+            )
+        }
+        // swiftlint:disable:next no_direct_sheet_or_cover
+        .sheet(isPresented: $showAccountPicker) {
+            AccountSelectionSheet(
+                isPresented: $showAccountPicker,
+                selectedAccount: $viewModel.selectedAccount,
+                accounts: viewModel.transactionEligibleAccounts
             )
         }
         .alertHandler(
@@ -171,8 +166,9 @@ public struct AddTransactionView: View {
         }
     }
 
+    @ViewBuilder
     private var detailsFormSection: some View {
-        VStack(spacing: Spacing.md) {
+        Section {
             // Category Selector
             Button {
                 showCategoryPicker = true
@@ -207,17 +203,51 @@ public struct AddTransactionView: View {
                         .foregroundColor(.secondary)
                         .font(AppTypography.caption)
                 }
-                .padding()
-                .background(AppColors.cardBackground)
-                .cornerRadius(CornerRadius.large)
-                .overlay(
-                    RoundedRectangle(cornerRadius: CornerRadius.large)
-                        .stroke(
-                            showMagicEffect
-                                ? AppColors.accent.opacity(OpacityLevel.strong)
-                                : AppColors.disabled.opacity(OpacityLevel.medium),
-                            lineWidth: showMagicEffect ? BorderWidth.medium : BorderWidth.hairline)
-                )
+            }
+            .buttonStyle(.plain)
+            .listRowBackground(showMagicEffect ? AppColors.accent.opacity(0.1) : nil)
+
+            // Account Selector (transaction-eligible only)
+            Button {
+                if !viewModel.transactionEligibleAccounts.isEmpty {
+                    showAccountPicker = true
+                } else {
+                    viewModel.alert = AppError
+                        .validationError("Chưa có tài khoản khả dụng. Thêm tài khoản trong tab \"Tài sản\".")
+                        .toAppAlert(defaultTitle: "Thiếu tài khoản")
+                }
+            } label: {
+                HStack {
+                    ZStack {
+                        let iconColor = Color(hex: viewModel.selectedAccount?.accountType.color ?? "#10B981")
+                        Circle()
+                            .fill(iconColor.opacity(OpacityLevel.ultraLight))
+                            .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+                        Image(systemName: viewModel.selectedAccount?.accountType.icon ?? "banknote.fill")
+                            .foregroundColor(iconColor)
+                            .font(AppTypography.iconMedium)
+                    }
+
+                    VStack(alignment: .leading, spacing: Spacing.xs / 2) {
+                        Text("Tài khoản")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                        Text(viewModel.selectedAccount?.name ?? "Chọn tài khoản")
+                            .font(AppTypography.body)
+                            .foregroundColor(.primary)
+                    }
+                    Spacer()
+
+                    if let account = viewModel.selectedAccount {
+                        BalanceLabel(balance: account.balance, style: .signed)
+                            .font(AppTypography.caption)
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(AppTypography.caption)
+                        .padding(.leading, Spacing.xs)
+                }
             }
             .buttonStyle(.plain)
 
@@ -225,45 +255,26 @@ public struct AddTransactionView: View {
             HStack {
                 Image(systemName: "pencil")
                     .foregroundColor(.secondary)
-                    .frame(width: Spacing.iconSmall)
+                    .frame(width: Spacing.touchTarget)
 
                 TextField("Ví dụ: Ăn sáng tại phở Hùng...", text: $viewModel.note)
                     .font(AppTypography.body)
                     .foregroundColor(.primary)
             }
-            .padding()
-            .background(AppColors.cardBackground)
-            .cornerRadius(CornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: CornerRadius.medium)
-                    .stroke(
-                        showMagicEffect
-                            ? AppColors.primary.opacity(OpacityLevel.strong)
-                            : AppColors.disabled.opacity(OpacityLevel.medium),
-                        lineWidth: showMagicEffect ? BorderWidth.medium : BorderWidth.hairline)
-            )
+            .listRowBackground(showMagicEffect ? AppColors.primary.opacity(0.1) : nil)
 
             // Date Picker
             HStack {
                 Image(systemName: "calendar")
                     .foregroundColor(.secondary)
-                    .frame(width: Spacing.iconSmall)
+                    .frame(width: Spacing.touchTarget)
                 DatePicker("Ngày", selection: $viewModel.date, displayedComponents: .date)
                     .foregroundColor(.primary)
             }
-            .padding()
-            .background(AppColors.cardBackground)
-            .cornerRadius(CornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: CornerRadius.medium)
-                    .stroke(
-                        AppColors.disabled.opacity(OpacityLevel.medium),
-                        lineWidth: BorderWidth.hairline)
-            )
         }
     }
 
-    // MARK: - Helpers & Mock Logic
+    // MARK: - Helpers
 
     private func typeButton(
         title: String, isSelected: Bool, color: Color, action: @escaping () -> Void
@@ -292,10 +303,12 @@ public struct AddTransactionView: View {
                             lineWidth: BorderWidth.thin)
                 )
         }
+        .buttonStyle(.borderless)
     }
 
     private func triggerAIAnalysis(text: String) {
-        hideKeyboard()
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             isAnalyzing = true
         }
@@ -321,28 +334,6 @@ public struct AddTransactionView: View {
                 }
             }
         }
-    }
-
-    private func animateAmount(to target: Int) {
-        let steps = 15
-        let stepDuration = 0.03
-        for i in 0...steps {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (Double(i) * stepDuration)) {
-                let currentVal = (target / steps) * i
-                self.viewModel.amount = "\(currentVal)"
-            }
-        }
-    }
-
-    private func triggerVoiceInput() {
-        hideKeyboard()
-        aiInputText = "Đổ xăng 50 cành"
-        triggerAIAnalysis(text: "Đổ xăng 50 cành")
-    }
-
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     private func formatCurrency(_ input: String) -> String {

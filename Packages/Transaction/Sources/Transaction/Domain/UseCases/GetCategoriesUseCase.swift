@@ -1,7 +1,7 @@
 import Foundation
 import FinFlowCore
 
-public struct GetCategoriesUseCase: Sendable {
+public struct GetCategoriesUseCase: GetCategoriesUseCaseProtocol, Sendable {
     private let repository: any TransactionRepositoryProtocol
     
     public init(repository: any TransactionRepositoryProtocol) {

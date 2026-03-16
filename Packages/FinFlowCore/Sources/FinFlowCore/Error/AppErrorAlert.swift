@@ -1,6 +1,10 @@
 import SwiftUI
 
 public enum AppErrorAlert: AppAlert, Equatable, Sendable, Identifiable {
+
+    /// Thông báo thống nhất khi phiên đăng nhập hết hạn (401 / refresh fail). Dùng chung toàn app.
+    public static let sessionExpiredMessage = "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại."
+
     case network(onRetry: @Sendable () -> Void)
     case general(title: String, message: String)
     case auth(message: String)

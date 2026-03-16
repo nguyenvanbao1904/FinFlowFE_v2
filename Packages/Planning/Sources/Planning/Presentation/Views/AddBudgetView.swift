@@ -1,0 +1,340 @@
+//
+//  AddBudgetView.swift
+//  Planning
+//
+//  Form for creating/editing budget (API-backed). Apple HIG: Form-style layout.
+//
+
+import FinFlowCore
+import SwiftUI
+
+public struct AddBudgetView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var viewModel: AddBudgetViewModel
+    @FocusState private var isAmountFocused: Bool
+
+    public init(viewModel: AddBudgetViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+
+    public var body: some View {
+        @Bindable var vm = viewModel
+
+        Form {
+            Section {
+                categorySection
+                amountSection
+            }
+
+            Section {
+                periodSection
+                recurringSection
+            }
+
+            Section {
+                Button(viewModel.isEditing ? "Cập nhật" : "Tạo ngân sách") {
+                    Task { await viewModel.saveBudget() }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.sm)
+                .background(viewModel.isValid ? AppColors.primary : AppColors.disabled)
+                .foregroundStyle(viewModel.isValid ? AppColors.textInverted : .secondary)
+                .cornerRadius(CornerRadius.medium)
+                .disabled(!viewModel.isValid || viewModel.isLoading)
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+        }
+        .navigationTitle(viewModel.isEditing ? "Sửa ngân sách" : "Tạo ngân sách")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Hủy") { dismiss() }
+                    .foregroundColor(AppColors.primary)
+            }
+        }
+        .overlay {
+            if viewModel.isLoading { ProgressView() }
+        }
+        .alertHandler(
+            Binding(
+                get: { viewModel.loadError },
+                set: { viewModel.loadError = $0 }
+            )
+        )
+        .task { await viewModel.loadCategories() }
+        // swiftlint:disable:next no_direct_sheet_or_cover
+        .sheet(isPresented: $vm.showCategoryPicker) {
+            CategorySelectionSheet(
+                isPresented: $viewModel.showCategoryPicker,
+                selectedCategory: $viewModel.selectedCategory,
+                categories: viewModel.expenseCategories,
+                title: "Chọn danh mục"
+            )
+        }
+    }
+
+    private var categorySection: some View {
+        Button {
+            viewModel.showCategoryPicker = true
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                if let category = viewModel.selectedCategory {
+                    let categoryColor = Color(hex: category.color)
+                    Image(systemName: category.icon ?? "tag")
+                        .font(AppTypography.iconMedium)
+                        .foregroundStyle(categoryColor)
+                        .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+                } else {
+                    Image(systemName: "tag")
+                        .font(AppTypography.iconMedium)
+                        .foregroundStyle(.secondary)
+                        .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+                }
+                Text("Danh mục")
+                    .font(AppTypography.body)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Text(viewModel.selectedCategory?.name ?? "Chọn")
+                    .font(AppTypography.body)
+                    .foregroundStyle(viewModel.selectedCategory == nil ? .secondary : .primary)
+            }
+        }
+        .foregroundStyle(.primary)
+    }
+
+    private var amountSection: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "dollarsign.circle")
+                .font(AppTypography.iconMedium)
+                .foregroundStyle(AppColors.primary)
+                .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+            Text("Số tiền")
+                .font(AppTypography.body)
+            Spacer()
+            TextField("0", text: $viewModel.targetAmount)
+                .keyboardType(.numberPad)
+                .focused($isAmountFocused)
+                .multilineTextAlignment(.trailing)
+                .font(AppTypography.body)
+                .onChange(of: viewModel.targetAmount) { _, newValue in
+                    let formatted = CurrencyFormatter.formatInput(newValue, allowNegative: false)
+                    if viewModel.targetAmount != formatted {
+                        viewModel.targetAmount = formatted
+                    }
+                }
+            Text("₫")
+                .font(AppTypography.body)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var periodSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "calendar")
+                    .font(AppTypography.iconMedium)
+                    .foregroundStyle(AppColors.primary)
+                    .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+                Text("Kỳ ngân sách")
+                    .font(AppTypography.body)
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            DatePicker("Từ ngày", selection: $viewModel.startDate, displayedComponents: .date)
+                .font(AppTypography.body)
+                .tint(AppColors.primary)
+            DatePicker("Đến ngày", selection: $viewModel.endDate, displayedComponents: .date)
+                .font(AppTypography.body)
+                .tint(AppColors.primary)
+            if !viewModel.budgetPeriodSummary.isEmpty {
+                Text(viewModel.budgetPeriodSummary)
+                    .font(AppTypography.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var recurringSection: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "repeat")
+                .font(AppTypography.iconMedium)
+                .foregroundStyle(AppColors.primary)
+                .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+            Toggle("Tự động lặp lại", isOn: $viewModel.isRecurring)
+                .font(AppTypography.body)
+                .tint(AppColors.primary)
+        }
+    }
+}
+
+// MARK: - ViewModel
+
+@MainActor
+@Observable
+public final class AddBudgetViewModel {
+    public var selectedCategory: CategoryResponse?
+    public var targetAmount: String = ""
+    public var startDate: Date = AddBudgetViewModel.computeDefaultStartDate()
+    public var endDate: Date = AddBudgetViewModel.computeDefaultEndDate()
+    public var isRecurring: Bool = true
+    public var showCategoryPicker: Bool = false
+    public var categories: [CategoryResponse] = []
+    public var isLoading: Bool = false
+    public var loadError: AppErrorAlert?
+
+    public var expenseCategories: [CategoryResponse] {
+        categories.filter { $0.type == .expense }
+    }
+
+    private let router: any AppRouterProtocol
+    private let createBudgetUseCase: CreateBudgetUseCase
+    private let updateBudgetUseCase: UpdateBudgetUseCase
+    private let getCategoriesUseCase: any GetCategoriesUseCaseProtocol
+    private let sessionManager: any SessionManagerProtocol
+    private let budgetToEdit: BudgetResponse?
+    private let onSuccess: () -> Void
+
+    public var isEditing: Bool { budgetToEdit != nil }
+
+    private static func computeDefaultStartDate() -> Date {
+        let cal = Calendar.current
+        return cal.date(from: cal.dateComponents([.year, .month], from: Date())) ?? Date()
+    }
+
+    private static func computeDefaultEndDate() -> Date {
+        let cal = Calendar.current
+        let start = computeDefaultStartDate()
+        return cal.date(byAdding: DateComponents(month: 1, day: -1), to: start) ?? start
+    }
+
+    /// Summary e.g. "10 ngày" or "Từ 1 thg 3 đến 10 thg 3, 2026".
+    public var budgetPeriodSummary: String {
+        let days = Calendar.current.dateComponents([.day], from: startDate, to: endDate).day ?? 0
+        let dayCount = max(0, days) + 1
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        f.timeZone = TimeZone.current
+        return "\(dayCount) ngày · \(f.string(from: startDate)) – \(f.string(from: endDate))"
+    }
+
+    public var isValid: Bool {
+        selectedCategory != nil && !targetAmount.isEmpty
+            && (Double(targetAmount.replacingOccurrences(of: ".", with: "")) ?? 0) > 0
+    }
+
+    public init(
+        router: any AppRouterProtocol,
+        createBudgetUseCase: CreateBudgetUseCase,
+        updateBudgetUseCase: UpdateBudgetUseCase,
+        getCategoriesUseCase: any GetCategoriesUseCaseProtocol,
+        sessionManager: any SessionManagerProtocol,
+        budgetToEdit: BudgetResponse? = nil,
+        onSuccess: @escaping () -> Void = {}
+    ) {
+        self.router = router
+        self.createBudgetUseCase = createBudgetUseCase
+        self.updateBudgetUseCase = updateBudgetUseCase
+        self.getCategoriesUseCase = getCategoriesUseCase
+        self.sessionManager = sessionManager
+        self.budgetToEdit = budgetToEdit
+        self.onSuccess = onSuccess
+        if let budget = budgetToEdit {
+            loadBudgetData(budget)
+        }
+    }
+
+    private func loadBudgetData(_ budget: BudgetResponse) {
+        targetAmount = CurrencyFormatter.formatInput(
+            String(Int(budget.targetAmount)), allowNegative: false)
+        isRecurring = budget.isRecurring
+        selectedCategory = budget.category
+        if let start = budget.startDate.asDateFromYYYYMMDD() {
+            startDate = start
+        }
+        if let end = budget.endDate.asDateFromYYYYMMDD() {
+            endDate = end
+        }
+    }
+
+    public func loadCategories() async {
+        do {
+            categories = try await getCategoriesUseCase.execute()
+        } catch {
+            if let appError = error as? AppError, case .unauthorized = appError {
+                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
+                    [sessionManager] in
+                    Task { @MainActor in await sessionManager.clearExpiredSession() }
+                }
+                return
+            }
+            loadError = error.toAppAlert(defaultTitle: "Lỗi tải danh mục")
+        }
+    }
+
+    public func saveBudget() async {
+        guard isValid,
+            let category = selectedCategory,
+            let amount = Double(targetAmount.replacingOccurrences(of: ".", with: "")),
+            amount > 0
+        else { return }
+
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+
+        let startStr = dateToIso(startDate)
+        let endStr = dateToIso(endDate)
+        let request = CreateBudgetRequest(
+            categoryId: category.id,
+            targetAmount: amount,
+            startDate: startStr,
+            endDate: endStr,
+            isRecurring: isRecurring,
+            recurringStartDate: isRecurring ? startStr : nil
+        )
+
+        do {
+            if let existing = budgetToEdit {
+                _ = try await updateBudgetUseCase.execute(
+                    id: existing.id,
+                    request: UpdateBudgetRequest(
+                        categoryId: category.id,
+                        targetAmount: amount,
+                        startDate: startStr,
+                        endDate: endStr,
+                        isRecurring: isRecurring,
+                        recurringStartDate: isRecurring ? startStr : nil
+                    ))
+            } else {
+                _ = try await createBudgetUseCase.execute(request: request)
+            }
+            onSuccess()
+        } catch {
+            if let appError = error as? AppError, case .unauthorized = appError {
+                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
+                    [sessionManager] in
+                    Task { @MainActor in await sessionManager.clearExpiredSession() }
+                }
+                return
+            }
+            loadError = error.toAppAlert(defaultTitle: "Lỗi")
+        }
+    }
+
+    private func dateToIso(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current
+        return formatter.string(from: date)
+    }
+}
+
+extension String {
+    fileprivate func asDateFromYYYYMMDD() -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current
+        return formatter.date(from: self)
+    }
+}

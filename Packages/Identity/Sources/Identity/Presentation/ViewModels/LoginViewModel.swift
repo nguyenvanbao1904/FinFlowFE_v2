@@ -24,7 +24,7 @@ public class LoginViewModel {
     private let sessionManager: any SessionManagerProtocol
     private let pinManager: any PINManagerProtocol
     private let userDefaults: any UserDefaultsManagerProtocol
-    private let biometricAuth: any BiometricAuthHandling
+    private let biometricAuth: any SessionBiometricAuthHandling
     // Keep a strong reference to router to avoid deallocation-related crashes
     private let router: any AppRouterProtocol
 
@@ -34,7 +34,7 @@ public class LoginViewModel {
         router: any AppRouterProtocol,
         pinManager: any PINManagerProtocol,
         userDefaults: any UserDefaultsManagerProtocol,
-        biometricAuth: any BiometricAuthHandling
+        biometricAuth: any SessionBiometricAuthHandling
     ) {
         self.loginUseCase = loginUseCase
         self.sessionManager = sessionManager
@@ -166,7 +166,8 @@ public class LoginViewModel {
     private func ensureBiometricAvailableNow() -> Bool {
         let context = LAContext()
         var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        else {
             canUseBiometric = false
             alert = .general(
                 title: "Thiết bị không hỗ trợ",
@@ -189,7 +190,7 @@ public class LoginViewModel {
         let alertResult = await biometricAuth.authenticate(
             sessionManager: sessionManager,
             userDefaults: userDefaults,
-            options: BiometricAuthHandler.Copy.login
+            options: SessionBiometricAuthCoordinator.Preset.login
         )
 
         if let alertResult {

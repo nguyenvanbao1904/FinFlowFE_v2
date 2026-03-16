@@ -18,7 +18,7 @@ extension DependencyContainer {
             router: router,
             pinManager: pinManager,
             userDefaults: userDefaultsManager,
-            biometricAuth: BiometricAuthHandler()
+            biometricAuth: SessionBiometricAuthCoordinator()
         )
     }
 
@@ -36,7 +36,9 @@ extension DependencyContainer {
         )
     }
 
-    func makeForgotPasswordViewModel(onSuccess: @escaping (String) -> Void) -> ForgotPasswordViewModel {
+    func makeForgotPasswordViewModel(onSuccess: @escaping (String) -> Void)
+        -> ForgotPasswordViewModel
+    {
         return ForgotPasswordViewModel(
             useCase: ForgotPasswordUseCase(repository: authRepository),
             otpHandler: otpHandler,
@@ -61,7 +63,8 @@ extension DependencyContainer {
         )
     }
 
-    func makeLockScreenViewModel(user: UserProfile, biometricAvailable: Bool) -> LockScreenViewModel {
+    func makeLockScreenViewModel(user: UserProfile, biometricAvailable: Bool) -> LockScreenViewModel
+    {
         return LockScreenViewModel(
             sessionManager: sessionManager,
             pinManager: pinManager,

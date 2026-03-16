@@ -2,8 +2,7 @@
 //  GlassField.swift
 //  FinFlowCore
 //
-//  CONSOLIDATED: Merged GlassTextField + GlassSecureField into single component
-//  Supports both text and secure input modes with consistent glassmorphism styling
+//  Glassmorphism-styled text/secure field with icon and focus state
 //
 
 import SwiftUI
@@ -68,14 +67,14 @@ public struct GlassField: View {
                 eyeToggleButton
             }
         }
-        .padding(.vertical, Spacing.sm2)
+        .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.medium)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .stroke(
-                    isFocused ? AppColors.primary.opacity(0.6) : Color.white.opacity(0.1),
+                    isFocused ? AppColors.primary.opacity(0.6) : AppColors.primary.opacity(0.2),
                     lineWidth: isFocused ? 1 : 0.5
                 )
         )
@@ -96,7 +95,7 @@ public struct GlassField: View {
         } else {
             TextField(placeholder, text: $text)
                 #if os(iOS)
-                    .textInputAutocapitalization(isSecure ? .never : .none)
+                    .textInputAutocapitalization(isSecure ? .never : .sentences)
                     .autocorrectionDisabled(isSecure)
                     .keyboardType(keyboardType)
                 #endif
@@ -118,13 +117,3 @@ public struct GlassField: View {
         }
     }
 }
-
-// MARK: - Backward Compatibility
-
-/// Backward compatibility: GlassTextField → GlassField(isSecure: false)
-@available(*, deprecated, message: "Use GlassField(isSecure: false) instead")
-public typealias GlassTextField = GlassField
-
-/// Backward compatibility: GlassSecureField → GlassField(isSecure: true)
-@available(*, deprecated, message: "Use GlassField(isSecure: true) instead")
-public typealias GlassSecureField = GlassField

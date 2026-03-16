@@ -41,6 +41,9 @@ public protocol AccountRepositoryProtocol: Sendable {
 /// Handles transaction operations (add, list, summary, categories)
 public protocol TransactionRepositoryProtocol: Sendable {
     func getCategories() async throws -> [CategoryResponse]
+    func createCategory(request: CreateCategoryRequest) async throws -> CategoryResponse
+    func updateCategory(id: String, request: UpdateCategoryRequest) async throws -> CategoryResponse
+    func deleteCategory(id: String) async throws
     func addTransaction(request: AddTransactionRequest) async throws -> TransactionResponse
     func updateTransaction(id: String, request: AddTransactionRequest) async throws
         -> TransactionResponse
@@ -51,6 +54,27 @@ public protocol TransactionRepositoryProtocol: Sendable {
         -> AnalyzeTransactionResponse
     func getChart(range: ChartRange, referenceDate: Date) async throws -> TransactionChartResponse
     func deleteTransaction(id: String) async throws
+}
+
+// MARK: - Wealth Account Repository Protocol (accounts in Wealth / Tài sản)
+
+/// Handles account types and wealth account CRUD for the Wealth feature (unified wallet + asset).
+public protocol WealthAccountRepositoryProtocol: Sendable {
+    func getAccountTypes() async throws -> [AccountTypeOptionResponse]
+    func getWealthAccounts() async throws -> [WealthAccountResponse]
+    func createWealthAccount(request: CreateWealthAccountRequest) async throws -> WealthAccountResponse
+    func updateWealthAccount(id: String, request: UpdateWealthAccountRequest) async throws -> WealthAccountResponse
+    func deleteWealthAccount(id: String) async throws
+}
+
+// MARK: - Budget Repository Protocol
+
+/// Handles budget CRUD for the Planning (Ngân sách) feature.
+public protocol BudgetRepositoryProtocol: Sendable {
+    func getBudgets() async throws -> [BudgetResponse]
+    func createBudget(request: CreateBudgetRequest) async throws -> BudgetResponse
+    func updateBudget(id: String, request: UpdateBudgetRequest) async throws -> BudgetResponse
+    func deleteBudget(id: String) async throws
 }
 
 // MARK: - Composite Protocol (Backward Compatibility)

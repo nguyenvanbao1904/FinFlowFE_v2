@@ -43,12 +43,20 @@ public struct SheetContainer<Content: View>: View {
     }
     
     public var body: some View {
-        VStack(spacing: .zero) {
-            // Standardized Header
-            header
-            
-            // Content
+        NavigationStack {
             content()
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    if showCloseButton {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Hủy") {
+                                dismiss()
+                            }
+                            .foregroundColor(AppColors.primary)
+                        }
+                    }
+                }
         }
         .presentationDetents(detents)
         .presentationDragIndicator(dragIndicator)
@@ -56,36 +64,6 @@ public struct SheetContainer<Content: View>: View {
         .onDisappear {
             onDismiss?()
         }
-    }
-    
-    // MARK: - Header
-    
-    private var header: some View {
-        HStack {
-            // Invisible button for spacing balance
-            if showCloseButton {
-                Button("Đóng") {}
-                    .opacity(0)
-                    .accessibilityHidden(true)
-            }
-            
-            Spacer()
-            
-            Text(title)
-                .font(AppTypography.headline)
-                .foregroundStyle(.primary)
-            
-            Spacer()
-            
-            // Close button
-            if showCloseButton {
-                Button("Đóng") {
-                    dismiss()
-                }
-                .foregroundColor(AppColors.primary)
-            }
-        }
-        .padding()
     }
 }
 

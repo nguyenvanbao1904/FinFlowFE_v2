@@ -5,7 +5,6 @@
 
 import FinFlowCore
 import Foundation
-import LocalAuthentication
 
 // 1. Tách cấu hình ra thành một Public Struct độc lập
 public struct BiometricAuthOptions: Sendable {
@@ -13,8 +12,11 @@ public struct BiometricAuthOptions: Sendable {
     public let unauthorizedMessage: String
     public let missingEnableMessage: String
     public let missingAccountMessage: String
-    
-    public init(reason: String, unauthorizedMessage: String, missingEnableMessage: String, missingAccountMessage: String) {
+
+    public init(
+        reason: String, unauthorizedMessage: String, missingEnableMessage: String,
+        missingAccountMessage: String
+    ) {
         self.reason = reason
         self.unauthorizedMessage = unauthorizedMessage
         self.missingEnableMessage = missingEnableMessage
@@ -22,37 +24,46 @@ public struct BiometricAuthOptions: Sendable {
     }
 }
 
-public protocol BiometricAuthHandling: Sendable {
+public protocol SessionBiometricAuthHandling: Sendable {
     func authenticate(
         sessionManager: any SessionManagerProtocol,
         userDefaults: any UserDefaultsManagerProtocol,
-        options: BiometricAuthOptions // ✅ Đã dùng kiểu Public
+        options: BiometricAuthOptions  // ✅ Đã dùng kiểu Public
     ) async -> AppErrorAlert?
 }
 
 /// Dùng chung cho luồng đăng nhập sinh trắc học (Login / WelcomeBack).
 @MainActor
-public final class BiometricAuthHandler: BiometricAuthHandling {
-    
+public final class SessionBiometricAuthCoordinator: SessionBiometricAuthHandling {
+    private let verifier: any BiometricVerifying
+
     // Preset thông điệp dùng chung để đồng nhất giữa các màn
-    public enum Copy {
+    public enum Preset {
         public static let login = BiometricAuthOptions(
             reason: "Xác thực bằng Face ID/Touch ID để đăng nhập",
-            unauthorizedMessage: "Phiên đăng nhập đã hết hạn hoặc refresh token không còn hiệu lực. Vui lòng đăng nhập lại.",
-            missingEnableMessage: "Vui lòng bật xác thực sinh trắc học trong Cài đặt bảo mật để sử dụng tính năng này.",
-            missingAccountMessage: "Vui lòng đăng nhập bằng tài khoản & mật khẩu để tiếp tục dùng sinh trắc."
+            unauthorizedMessage:
+                "Phiên đăng nhập đã hết hạn hoặc refresh token không còn hiệu lực. Vui lòng đăng nhập lại.",
+            missingEnableMessage:
+                "Vui lòng bật xác thực sinh trắc học trong Cài đặt bảo mật để sử dụng tính năng này.",
+            missingAccountMessage:
+                "Vui lòng đăng nhập bằng tài khoản & mật khẩu để tiếp tục dùng sinh trắc."
         )
 
         public static let welcomeBack = BiometricAuthOptions(
             reason: "Xác thực bằng Face ID/Touch ID để tiếp tục",
-            unauthorizedMessage: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại để sử dụng tính năng này.",
-            missingEnableMessage: "Vui lòng bật xác thực sinh trắc học trong Cài đặt bảo mật để sử dụng tính năng này.",
-            missingAccountMessage: "Vui lòng đăng nhập bằng tài khoản & mật khẩu để tiếp tục dùng sinh trắc."
+            unauthorizedMessage:
+                "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại để sử dụng tính năng này.",
+            missingEnableMessage:
+                "Vui lòng bật xác thực sinh trắc học trong Cài đặt bảo mật để sử dụng tính năng này.",
+            missingAccountMessage:
+                "Vui lòng đăng nhập bằng tài khoản & mật khẩu để tiếp tục dùng sinh trắc."
         )
     }
 
     // ✅ Thêm public init để DI Container có thể khởi tạo được
-    public init() {}
+    public init(verifier: any BiometricVerifying = FinFlowCore.BiometricAuthHandler()) {
+        self.verifier = verifier
+    }
 
     /// Thực hiện xác thực sinh trắc học và refresh token.
     /// - Returns: AppErrorAlert nếu cần hiển thị; nil nếu thành công.
@@ -62,9 +73,7 @@ public final class BiometricAuthHandler: BiometricAuthHandling {
         options: BiometricAuthOptions
     ) async -> AppErrorAlert? {
         // 1) Kiểm tra thiết bị hỗ trợ
-        let context = LAContext()
-        var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        guard verifier.isBiometricAvailable() else {
             return .general(
                 title: "Thiết bị không hỗ trợ",
                 message: "Thiết bị của bạn không hỗ trợ Face ID / Touch ID.")
@@ -93,13 +102,10 @@ public final class BiometricAuthHandler: BiometricAuthHandling {
         // ✅ Fix: Set flag to prevent Privacy Blur glitch
         sessionManager.isBiometricAuthenticationInProgress = true
         defer {
-             sessionManager.isBiometricAuthenticationInProgress = false
+            sessionManager.isBiometricAuthenticationInProgress = false
         }
-        
-        let success = (try? await context.evaluatePolicy(
-            .deviceOwnerAuthenticationWithBiometrics,
-            localizedReason: options.reason
-        )) ?? false
+
+        let success = await verifier.verifyBiometric(reason: options.reason)
 
         guard success else {
             return nil  // Người dùng hủy / thất bại, iOS sẽ tự retry

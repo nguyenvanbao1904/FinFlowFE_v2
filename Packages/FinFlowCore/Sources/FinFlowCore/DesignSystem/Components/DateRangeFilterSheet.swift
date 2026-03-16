@@ -269,36 +269,3 @@ private struct PresetButton: View {
         }
     }
 }
-
-// MARK: - Legacy Component (Deprecated)
-
-/// **DEPRECATED**: Use `.dateRangeFilterSheet()` view modifier instead
-@available(*, deprecated, message: "Use .dateRangeFilterSheet() view modifier for consistent API")
-public struct DateRangeFilterSheet: View {
-    @Binding public var startDate: Date?
-    @Binding public var endDate: Date?
-
-    public var onApply: () -> Void
-    public var onClear: () -> Void
-
-    public init(
-        startDate: Binding<Date?>,
-        endDate: Binding<Date?>,
-        onApply: @escaping () -> Void,
-        onClear: @escaping () -> Void
-    ) {
-        self._startDate = startDate
-        self._endDate = endDate
-        self.onApply = onApply
-        self.onClear = onClear
-    }
-
-    public var body: some View {
-        DateRangeFilterContent(
-            startDate: $startDate,
-            endDate: $endDate,
-            onApply: onApply,
-            onClear: onClear
-        )
-    }
-}

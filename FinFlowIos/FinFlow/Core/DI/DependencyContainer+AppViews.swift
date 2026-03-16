@@ -8,9 +8,12 @@
 import Dashboard
 import FinFlowCore
 import Identity
+import Investment
+import Planning
 import Profile
 import SwiftUI
 import Transaction
+import Wealth
 
 // MARK: - App View Factories
 extension DependencyContainer {
@@ -98,11 +101,82 @@ extension DependencyContainer {
             viewModel: makeLockScreenViewModel(user: user, biometricAvailable: biometricAvailable))
     }
 
-    // Factory cho Main Tab View (Home + Profile)
-    func makeMainTabView(router: any AppRouterProtocol) -> some View {
-        let profileView = makeProfileView(router: router)
+    // Factory cho Main Tab View
+    func makeMainTabView<Destination: View>(
+        router: any AppRouterProtocol,
+        @ViewBuilder destinationFactory: @escaping (AppRoute) -> Destination
+    ) -> some View {
+        guard let appRouter = router as? AppRouter else {
+            fatalError("Router must be AppRouter")
+        }
+        @Bindable var observableRouter = appRouter
+
         let transactionView = makeTransactionListView(router: router)
-        return MainTabView(profileView: profileView, transactionView: transactionView)
+
+        let planningView = makePlanningView(router: router)
+        let wealthView = makeWealthView(router: router)
+        let investmentView = makeInvestmentView(router: router)
+
+        return MainTabView(
+            router: router,
+            activeTab: $observableRouter.activeTab,
+            homePath: $observableRouter.homePath,
+            transactionPath: $observableRouter.transactionPath,
+            planningPath: $observableRouter.planningPath,
+            wealthPath: $observableRouter.wealthPath,
+            investmentPath: $observableRouter.investmentPath,
+            transactionView: transactionView,
+            planningView: planningView,
+            wealthView: wealthView,
+            investmentView: investmentView,
+            destinationFactory: destinationFactory
+        )
+    }
+
+    @MainActor
+    func makePlanningView(router: any AppRouterProtocol) -> some View {
+        let getBudgetsUseCase = GetBudgetsUseCase(repository: budgetRepository)
+        let deleteBudgetUseCase = DeleteBudgetUseCase(repository: budgetRepository)
+        let createBudgetUseCase = CreateBudgetUseCase(repository: budgetRepository)
+        let updateBudgetUseCase = UpdateBudgetUseCase(repository: budgetRepository)
+        let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
+        let budgetListViewModel = BudgetListViewModel(
+            router: router,
+            getBudgetsUseCase: getBudgetsUseCase,
+            deleteBudgetUseCase: deleteBudgetUseCase,
+            createBudgetUseCase: createBudgetUseCase,
+            updateBudgetUseCase: updateBudgetUseCase,
+            getCategoriesUseCase: getCategoriesUseCase,
+            sessionManager: sessionManager
+        )
+        return PlanningView(router: router, budgetListViewModel: budgetListViewModel)
+    }
+
+    @MainActor
+    func makeWealthView(router: any AppRouterProtocol) -> some View {
+        let getWealthAccountsUseCase = GetWealthAccountsUseCase(repository: wealthAccountRepository)
+        let getWealthAccountTypesUseCase = GetWealthAccountTypesUseCase(
+            repository: wealthAccountRepository)
+        let createWealthAccountUseCase = CreateWealthAccountUseCase(
+            repository: wealthAccountRepository)
+        let updateWealthAccountUseCase = UpdateWealthAccountUseCase(
+            repository: wealthAccountRepository)
+        let deleteWealthAccountUseCase = DeleteWealthAccountUseCase(
+            repository: wealthAccountRepository)
+        return WealthListView(
+            router: router,
+            getWealthAccountsUseCase: getWealthAccountsUseCase,
+            getWealthAccountTypesUseCase: getWealthAccountTypesUseCase,
+            createWealthAccountUseCase: createWealthAccountUseCase,
+            updateWealthAccountUseCase: updateWealthAccountUseCase,
+            deleteWealthAccountUseCase: deleteWealthAccountUseCase,
+            sessionManager: sessionManager
+        )
+    }
+
+    @MainActor
+    func makeInvestmentView(router: any AppRouterProtocol) -> some View {
+        return InvestmentView(router: router)
     }
 
     @MainActor
@@ -191,10 +265,12 @@ extension DependencyContainer {
         let updateUseCase = UpdateTransactionUseCase(repository: transactionRepository)
         let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
         let analyzeUseCase = AnalyzeTextUseCase(repository: transactionRepository)
+        let getWealthAccountsUseCase = GetWealthAccountsUseCase(repository: wealthAccountRepository)
         let viewModel = AddTransactionViewModel(
             addUseCase: addUseCase,
             updateUseCase: updateUseCase,
             getCategoriesUseCase: getCategoriesUseCase,
+            getWealthAccountsUseCase: getWealthAccountsUseCase,
             analyzeUseCase: analyzeUseCase,
             router: router,
             sessionManager: sessionManager,
@@ -218,5 +294,37 @@ extension DependencyContainer {
             sessionManager: sessionManager
         )
         return TransactionListView(viewModel: viewModel)
+    }
+
+    @MainActor
+    func makeCategoryListView(router: any AppRouterProtocol) -> some View {
+        let viewModel = CategoryListViewModel(
+            repository: transactionRepository,
+            router: router,
+            sessionManager: sessionManager
+        )
+        return CategoryListView(viewModel: viewModel)
+    }
+
+    @MainActor
+    func makeAddBudgetView(
+        router: any AppRouterProtocol,
+        budgetToEdit: BudgetResponse? = nil
+    ) -> some View {
+        let createBudgetUseCase = CreateBudgetUseCase(repository: budgetRepository)
+        let updateBudgetUseCase = UpdateBudgetUseCase(repository: budgetRepository)
+        let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
+        let viewModel = AddBudgetViewModel(
+            router: router,
+            createBudgetUseCase: createBudgetUseCase,
+            updateBudgetUseCase: updateBudgetUseCase,
+            getCategoriesUseCase: getCategoriesUseCase,
+            sessionManager: sessionManager,
+            budgetToEdit: budgetToEdit,
+            onSuccess: {
+                router.dismissSheet()
+            }
+        )
+        return AddBudgetView(viewModel: viewModel)
     }
 }

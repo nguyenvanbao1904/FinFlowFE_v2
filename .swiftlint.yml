@@ -4,6 +4,7 @@ disabled_rules:
   - function_body_length
   - type_body_length
   - identifier_name
+  - closure_parameter_position
 
 
 # Trỏ đúng tọa độ code của bạn
@@ -52,15 +53,15 @@ custom_rules:
     included: ".*\\.swift"
     name: "Hardcoded Colors Banned"
     regex: "\\.(?:foregroundColor|background|foregroundStyle|tint)\\s*\\(\\s*(?:Color\\(|\\.(?:blue|red|green|black|white|gray|orange|yellow|purple))"
-    message: "BANNED: Hardcoded system colors are not allowed. Use AppColors tokens."
-    severity: error
+    message: "GUIDELINE: Prefer AppColors tokens. Use custom colors only when building base components or following specific HIG guidelines."
+    severity: warning
 
-  no_hardcoded_fonts:
+  prefer_app_typography:
     included: ".*\\.swift"
-    name: "Hardcoded Fonts Banned"
+    name: "Prefer AppTypography"
     regex: "\\.font\\s*\\(\\s*\\.(?:system|largeTitle|title|title2|title3|headline|subheadline|body|callout|caption|caption2|footnote)"
-    message: "BANNED: Hardcoded system fonts are not allowed. Use AppTypography tokens."
-    severity: error
+    message: "GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility."
+    severity: warning
 
   no_hardcoded_padding:
     included: ".*\\.swift"
@@ -111,16 +112,9 @@ custom_rules:
     message: "BANNED: Feature modules must not import each other. Only import FinFlowCore."
     severity: error
 
-  no_navigation_stack_in_tab:
-    included: ".*Packages/.*\\.swift"
-    name: "Nested NavigationStack Banned"
-    regex: "\\bNavigationStack\\b"
-    message: "BANNED: Do not use NavigationStack inside feature modules. It causes TabView rendering bugs. Use custom headers."
-    severity: error
-
-  no_custom_materials_or_backgrounds:
+  liquid_glass_materials_guideline:
     included: ".*\\.swift"
-    name: "Custom Materials Banned"
+    name: "Liquid Glass Materials Guideline"
     regex: "\\.(?:ultraThinMaterial|thinMaterial|regularMaterial|thickMaterial|ultraThickMaterial)\\b"
-    message: "BANNED: Do not use heavy material blurs or custom glass effects. Use AppColors.cardBackground for Solid Apple Native styling."
-    severity: error
+    message: "GUIDELINE: Materials (Liquid Glass) are allowed, but use sparingly and avoid applying them to large/scrolling content due to performance/legibility. Prefer native components and DesignSystem tokens."
+    severity: warning

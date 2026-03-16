@@ -72,7 +72,7 @@ public struct RegisterView: View {
             )
             .tint(AppColors.primary)
         }
-        .padding(.vertical, Spacing.sm2)
+        .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.medium)

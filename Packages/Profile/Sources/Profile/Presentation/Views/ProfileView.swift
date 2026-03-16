@@ -17,6 +17,7 @@ public struct ProfileView: View {
     @State private var accountVM: AccountManagementViewModel
     @State private var verificationPIN: String = ""
     @State private var showRestorationAlert = false
+    @Environment(\.dismiss) private var dismiss
 
     public init(
         profileVM: ProfileViewModel,
@@ -33,85 +34,83 @@ public struct ProfileView: View {
         @Bindable var securityVM = securityVM
         @Bindable var accountVM = accountVM
 
-        ZStack {
-            AppColors.appBackground
-                .ignoresSafeArea()
-
-            VStack(spacing: .zero) {
-                // Custom Navigation Bar
-                HStack {
+        Group {
+            if profileVM.isLoading && profileVM.profile == nil {
+                VStack(spacing: Spacing.md) {
                     Spacer()
-                    Text("Tài khoản")
-                        .font(AppTypography.headline)
-                        .foregroundStyle(.primary)
+                    ProgressView("Đang tải dữ liệu...")
+                        .tint(AppColors.primary)
                     Spacer()
                 }
-                .padding()
-
-                Group {
-                    if profileVM.isLoading && profileVM.profile == nil {
-                        VStack(spacing: Spacing.md) {
-                            Spacer()
-                            ProgressView("Đang tải dữ liệu...")
-                                .tint(AppColors.primary)
-                            Spacer()
-                        }
-                    } else if profileVM.hasAuthExpiredError {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    } else if profileVM.hasLoadError {
-                        // Retry View
-                        VStack(spacing: Spacing.sm) {
-                            Spacer()
-                            Text("Không thể tải dữ liệu")
-                                .font(AppTypography.headline)
-                            Text("Vui lòng kiểm tra kết nối mạng và thử lại.")
-                                .font(AppTypography.body)
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                            Button("Thử lại") {
-                                Task { await profileVM.refresh() }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(profileVM.isLoading)
-                            Spacer()
-                        }
-                    } else {
-                        List {
+            } else if profileVM.hasAuthExpiredError {
+                VStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+            } else if profileVM.hasLoadError {
+                // Retry View
+                VStack(spacing: Spacing.sm) {
+                    Spacer()
+                    Text("Không thể tải dữ liệu")
+                        .font(AppTypography.headline)
+                    Text("Vui lòng kiểm tra kết nối mạng và thử lại.")
+                        .font(AppTypography.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Thử lại") {
+                        Task { await profileVM.refresh() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(profileVM.isLoading)
+                    Spacer()
+                }
+            } else {
+                List {
                             // SECTION 1: User Info
                             if let profile = profileVM.profile {
                                 Section {
-                                    HStack(spacing: Spacing.lg) {
-                                        // Avatar
-                                        ZStack {
-                                            Circle()
-                                                .fill(AppColors.primary.opacity(0.1))
-                                                .frame(
-                                                    width: UILayout.avatarSize,
-                                                    height: UILayout.avatarSize)
-
-                                            Text(profile.initials)
-                                                .font(AppTypography.displaySmall)
-                                                .foregroundStyle(AppColors.primary)
+                                    Button {
+                                        dismiss()
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                            profileVM.navigateToUpdateProfile()
                                         }
+                                    } label: {
+                                        HStack(spacing: Spacing.lg) {
+                                            // Avatar
+                                            ZStack {
+                                                Circle()
+                                                    .fill(AppColors.primary.opacity(0.1))
+                                                    .frame(
+                                                        width: UILayout.avatarSize * 1.2,
+                                                        height: UILayout.avatarSize * 1.2)
 
-                                        VStack(alignment: .leading, spacing: Spacing.xs) {
-                                            Text(
-                                                profile.fullName.isEmpty
-                                                    ? profile.email : profile.fullName
-                                            )
-                                            .font(AppTypography.headline)
-                                            .foregroundStyle(.primary)
-
-                                            if !profile.fullName.isEmpty {
-                                                Text(profile.email)
-                                                    .font(AppTypography.subheadline)
-                                                    .foregroundStyle(.secondary)
+                                                Text(profile.initials)
+                                                    .font(AppTypography.displaySmall)
+                                                    .foregroundStyle(AppColors.primary)
                                             }
+
+                                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                                Text(
+                                                    profile.fullName.isEmpty
+                                                        ? profile.email : profile.fullName
+                                                )
+                                                .font(AppTypography.headline)
+                                                .foregroundStyle(.primary)
+
+                                                if !profile.fullName.isEmpty {
+                                                    Text(profile.email)
+                                                        .font(AppTypography.subheadline)
+                                                        .foregroundStyle(.secondary)
+                                                }
+                                            }
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppTypography.caption)
+                                                .foregroundStyle(.tertiary)
                                         }
+                                        .padding(.vertical, Spacing.xs)
                                     }
-                                    .padding(.vertical, Spacing.xs)
                                 }
                             }
 
@@ -141,7 +140,11 @@ public struct ProfileView: View {
                             // SECTION 3: Account Settings
                             Section {
                                 Button {
-                                    accountVM.navigateToChangePassword()
+                                    dismiss()
+                                    // Chờ một chút để sheet đóng rồi mới chuyển trang
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        accountVM.navigateToChangePassword()
+                                    }
                                 } label: {
                                     HStack {
                                         SettingsRowIcon(icon: "lock.rotation", color: .gray)
@@ -190,10 +193,19 @@ public struct ProfileView: View {
                         }
                         .listStyle(.insetGrouped)  // The "Apple Settings" style
                         .refreshable { await profileVM.refresh() }
-                    }  // End of else
-                }  // End of Group
-            }  // End of VStack
-        }  // End of ZStack
+            }
+        }
+        .navigationTitle("Tài khoản")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Xong") {
+                    dismiss()
+                }
+                .fontWeight(.bold)
+                .foregroundColor(AppColors.primary)
+            }
+        }
         .task {
             await profileVM.loadProfile()
             if let profile = profileVM.profile {

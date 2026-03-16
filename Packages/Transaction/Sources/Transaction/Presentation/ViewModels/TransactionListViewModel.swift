@@ -165,8 +165,7 @@ public class TransactionListViewModel {
             isLoading = false
             hasLoadError = false
             alert = .authWithAction(
-                message:
-                    "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại."
+                message: AppErrorAlert.sessionExpiredMessage
             ) { [sessionManager] in
                 Task { @MainActor in
                     await sessionManager.clearExpiredSession()
@@ -192,6 +191,10 @@ public class TransactionListViewModel {
 
     public func presentAddTransaction() {
         router.presentSheet(.addTransaction)
+    }
+
+    public func presentCategoryList() {
+        router.navigate(to: .categoryList)
     }
 
     public func deleteTransaction(id: String) async {
@@ -263,7 +266,10 @@ public class TransactionListViewModel {
 
         // Group by date
         let grouped = Dictionary(grouping: transactions) { transaction -> Date in
-            guard let date = parseTransactionDate(transaction.transactionDate) else {
+            guard
+                let date = TransactionDateParser.parseBackendLocalDateTime(
+                    transaction.transactionDate)
+            else {
                 Logger.error(
                     "Parse failed: \(transaction.transactionDate)",
                     category: "Transaction"
@@ -306,35 +312,6 @@ public class TransactionListViewModel {
                     title: title, items: items.sorted { $0.transactionDate > $1.transactionDate }
                 )
             }
-    }
-
-    /// Parse ISO8601 date string from backend to local Date
-    /// Backend returns LocalDateTime in format: "2026-03-06T14:20:15.981" or "2026-03-06T14:20:15"
-    private func parseTransactionDate(_ dateString: String) -> Date? {
-        // Parse as LocalDateTime (device timezone)
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
-        // Try with fractional seconds first (up to 6 digits)
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
-        if let date = formatter.date(from: dateString) {
-            return date
-        }
-
-        // Try with milliseconds (3 digits)
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
-        if let date = formatter.date(from: dateString) {
-            return date
-        }
-
-        // Try without fractional seconds
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        if let date = formatter.date(from: dateString) {
-            return date
-        }
-
-        Logger.error("Failed to parse date: '\(dateString)'", category: "Transaction")
-        return nil
     }
 
     private func shiftChartReference(by step: Int) {

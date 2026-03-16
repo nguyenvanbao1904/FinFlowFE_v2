@@ -70,9 +70,9 @@ public struct TransactionAnalyticsView: View {
     }
 
     public var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: Spacing.xl) {
-                // 1. Time Range Picker
+        List {
+            // 1. Time Range Picker
+            Section {
                 Picker(
                     "Thời gian",
                     selection: Binding<ChartRange>(
@@ -85,18 +85,37 @@ public struct TransactionAnalyticsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .padding(.horizontal)
-
-                // 2. Chart Section
-                chartSection
-
-                // 3. AI Insights Section
-                aiInsightsSection
-
-                // Bottom padding to avoid tab bar collision
-                Color.clear.frame(height: 100)
+                .padding(.vertical, Spacing.xs)
             }
-            .padding(.top, Spacing.md)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+
+            // 2. Chart Section
+            Section {
+                chartSection
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+
+            // 3. AI Insights Section
+            aiInsightsSection
+
+            Section {
+                Button {
+                    // Trigger AI Report Generation
+                } label: {
+                    HStack {
+                        Image(systemName: "doc.text.magnifyingglass")
+                        Text("Tạo Báo Cáo Chi Tiết")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: Spacing.xl * 2)
         }
     }
 
@@ -106,10 +125,7 @@ public struct TransactionAnalyticsView: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             chartNavigationHeader
             chartContent
-                .padding()
-                .background(AppColors.cardBackground)
-                .cornerRadius(CornerRadius.large)
-                .padding(.horizontal)
+                .padding(.vertical, Spacing.sm)
         }
     }
 
@@ -262,8 +278,61 @@ public struct TransactionAnalyticsView: View {
         }
     }
 
+    @ViewBuilder
     private var aiInsightsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
+        Section {
+            // Insight 1
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                Circle()
+                    .fill(AppColors.primary.opacity(OpacityLevel.light))
+                    .frame(width: Spacing.iconMedium, height: Spacing.iconMedium)
+                    .overlay {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(AppColors.primary)
+                            .font(AppTypography.caption)
+                    }
+
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Cảnh báo chi tiêu")
+                        .font(AppTypography.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Text(
+                        "Bạn đã chi tiêu nhiều hơn 35% cho mục Ăn uống so với tháng trước. Hãy cân nhắc nấu ăn tại nhà để tiết kiệm khoảng 2.000.000 ₫ tháng tới."
+                    )
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+                    .lineSpacing(Spacing.xs / 2)
+                }
+            }
+            .padding(.vertical, Spacing.xs)
+
+            // Insight 2
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                Circle()
+                    .fill(AppColors.success.opacity(OpacityLevel.light))
+                    .frame(width: Spacing.iconMedium, height: Spacing.iconMedium)
+                    .overlay {
+                        Image(systemName: "leaf.fill")
+                            .foregroundColor(AppColors.success)
+                            .font(AppTypography.caption)
+                    }
+
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Mẹo Tài Chính")
+                        .font(AppTypography.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Text(
+                        "Thu nhập tháng này của bạn rất tốt. Nếu bạn trích 15% (khoảng 3.750.000 ₫) vào quỹ dự phòng khẩn cấp, bạn sẽ đạt mục tiêu an toàn tài chính sớm hơn 2 tháng."
+                    )
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+                    .lineSpacing(Spacing.xs / 2)
+                }
+            }
+            .padding(.vertical, Spacing.xs)
+        } header: {
             HStack {
                 Image(systemName: "sparkles")
                     .foregroundColor(AppColors.accent)
@@ -271,89 +340,7 @@ public struct TransactionAnalyticsView: View {
                     .font(AppTypography.headline)
                     .foregroundColor(.primary)
             }
-            .padding(.horizontal)
-
-            VStack(alignment: .leading, spacing: Spacing.md) {
-                // Insight 1
-                HStack(alignment: .top, spacing: Spacing.sm) {
-                    Circle()
-                        .fill(AppColors.primary.opacity(OpacityLevel.light))
-                        .frame(width: Spacing.iconMedium, height: Spacing.iconMedium)
-                        .overlay {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(AppColors.primary)
-                                .font(AppTypography.caption)
-                        }
-
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Cảnh báo chi tiêu")
-                            .font(AppTypography.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        Text(
-                            "Bạn đã chi tiêu nhiều hơn 35% cho mục Ăn uống so với tháng trước. Hãy cân nhắc nấu ăn tại nhà để tiết kiệm khoảng 2.000.000 ₫ tháng tới."
-                        )
-                        .font(AppTypography.caption)
-                        .foregroundColor(.secondary)
-                        .lineSpacing(Spacing.xs / 2)
-                    }
-                }
-
-                Divider().background(AppColors.disabled.opacity(OpacityLevel.strong))
-
-                // Insight 2
-                HStack(alignment: .top, spacing: Spacing.sm) {
-                    Circle()
-                        .fill(AppColors.success.opacity(OpacityLevel.light))
-                        .frame(width: Spacing.iconMedium, height: Spacing.iconMedium)
-                        .overlay {
-                            Image(systemName: "leaf.fill")
-                                .foregroundColor(AppColors.success)
-                                .font(AppTypography.caption)
-                        }
-
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Mẹo Tài Chính")
-                            .font(AppTypography.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        Text(
-                            "Thu nhập tháng này của bạn rất tốt. Nếu bạn trích 15% (khoảng 3.750.000 ₫) vào quỹ dự phòng khẩn cấp, bạn sẽ đạt mục tiêu an toàn tài chính sớm hơn 2 tháng."
-                        )
-                        .font(AppTypography.caption)
-                        .foregroundColor(.secondary)
-                        .lineSpacing(Spacing.xs / 2)
-                    }
-                }
-            }
-            .padding()
-            .background(AppColors.cardBackground)
-            .cornerRadius(CornerRadius.large)
-            .padding(.horizontal)
-
-            // Generate Detailed Report Button
-            Button {
-                // Trigger AI Report Generation
-            } label: {
-                HStack {
-                    Image(systemName: "doc.text.magnifyingglass")
-                    Text("Tạo Báo Cáo Chi Tiết")
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.sm)
-                .background(AppColors.primary.opacity(OpacityLevel.light))
-                .foregroundColor(AppColors.primary)
-                .cornerRadius(CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: CornerRadius.medium)
-                        .stroke(
-                            AppColors.primary.opacity(OpacityLevel.strong),
-                            lineWidth: BorderWidth.thin)
-                )
-            }
-            .padding(.horizontal)
-            .padding(.top, Spacing.sm)
+            .textCase(nil)
         }
     }
 
@@ -418,30 +405,5 @@ public struct TransactionAnalyticsView: View {
         )
         .padding(.horizontal, Spacing.xl)
         .padding(.top, Spacing.xs)
-    }
-}
-
-// Mock Data Model
-struct ExpenseData: Identifiable {
-    let id = UUID()
-    let period: String
-    let amount: Double
-}
-
-#Preview {
-    ZStack {
-        AppColors.appBackground
-            .ignoresSafeArea()
-        TransactionAnalyticsView(
-            summary: nil,
-            chartData: nil,
-            currentRange: .month,
-            onRangeChange: { _ in },
-            onNavigateBack: {},
-            onNavigateForward: {},
-            isLoading: false,
-            hasLoadError: false,
-            onRetry: nil
-        )
     }
 }

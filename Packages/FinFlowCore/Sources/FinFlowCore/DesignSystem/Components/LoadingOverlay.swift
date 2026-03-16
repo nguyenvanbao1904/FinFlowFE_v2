@@ -11,18 +11,18 @@ public struct LoadingOverlayModifier: ViewModifier {
     let isLoading: Bool
 
     public func body(content: Content) -> some View {
-        ZStack {
-            content
-
-            if isLoading {
-                AppColors.overlayBackground
-                    .ignoresSafeArea()
-
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.5)
+        content
+            .overlay {
+                if isLoading {
+                    ZStack {
+                        AppColors.overlayBackground
+                            .ignoresSafeArea()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .controlSize(.large)
+                    }
+                }
             }
-        }
     }
 }
 

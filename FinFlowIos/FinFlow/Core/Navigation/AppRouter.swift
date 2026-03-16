@@ -6,7 +6,14 @@ import OSLog
 @MainActor
 @Observable
 public final class AppRouter: AppRouterProtocol {
-    public var path = NavigationPath()
+    public var activeTab: AppTab = .home
+    public var homePath: [AppRoute] = []
+    public var transactionPath: [AppRoute] = []
+    public var planningPath: [AppRoute] = []
+    public var wealthPath: [AppRoute] = []
+    public var investmentPath: [AppRoute] = []
+    public var authPath: [AppRoute] = []
+    
     public var root: AppRoot = .splash
     public var presentedSheet: AppRoute?
     
@@ -41,13 +48,18 @@ public final class AppRouter: AppRouterProtocol {
         switch state {
         case .authenticated:
             root = .dashboard
-            path = NavigationPath()
+            homePath = []
+            transactionPath = []
+            planningPath = []
+            wealthPath = []
+            investmentPath = []
+            authPath = []
         case .welcomeBack:
             root = .welcomeBack
-            path = NavigationPath()
+            authPath = []
         case .unauthenticated, .sessionExpired:
             root = .authentication
-            path = NavigationPath()
+            authPath = []
         case .loading, .refreshing:
             root = .splash
         case .locked:
@@ -55,25 +67,44 @@ public final class AppRouter: AppRouterProtocol {
         }
     }
 
+    private var currentPath: Binding<[AppRoute]> {
+        if root == .dashboard {
+            switch activeTab {
+            case .home:
+                return Binding(get: { self.homePath }, set: { self.homePath = $0 })
+            case .transaction:
+                return Binding(get: { self.transactionPath }, set: { self.transactionPath = $0 })
+            case .planning:
+                return Binding(get: { self.planningPath }, set: { self.planningPath = $0 })
+            case .wealth:
+                return Binding(get: { self.wealthPath }, set: { self.wealthPath = $0 })
+            case .investment:
+                return Binding(get: { self.investmentPath }, set: { self.investmentPath = $0 })
+            }
+        } else {
+            return Binding(get: { self.authPath }, set: { self.authPath = $0 })
+        }
+    }
+
     public func navigate(to route: AppRoute) {
-        path.append(route)
+        currentPath.wrappedValue.append(route)
     }
 
     public func pop() {
-        guard !path.isEmpty else { return }
-        path.removeLast()
+        guard !currentPath.wrappedValue.isEmpty else { return }
+        currentPath.wrappedValue.removeLast()
     }
 
     public func popToRoot() {
-        path = NavigationPath()
+        currentPath.wrappedValue = []
     }
 
     public func replacePath(with routes: [AppRoute]) {
-        path = NavigationPath(routes)
+        currentPath.wrappedValue = routes
     }
 
     public func navigateToDeepLink(_ routes: [AppRoute]) {
-        path = NavigationPath(routes)
+        currentPath.wrappedValue = routes
     }
     
     public func presentSheet(_ route: AppRoute) {

@@ -13,29 +13,30 @@ public enum AppTypography {
 
     // MARK: - Display (Large decorative text, e.g. amounts, hero numbers)
 
-    /// 60pt bold rounded — hero amount display (AddTransaction)
-    public static let displayXL = Font.system(size: 60, weight: .bold, design: .rounded)
+    /// Hero amount display (AddTransaction)
+    /// Mapped to .largeTitle. Views should use .dynamicTypeSize or rely on .largeTitle for scaling.
+    public static let displayXL = Font.system(.largeTitle, design: .rounded).weight(.bold)
 
-    /// 42pt bold rounded — large title / big number
-    public static let largeTitle = Font.system(size: 42, weight: .bold, design: .rounded)
+    /// Large title / big number
+    public static let largeTitle = Font.system(.largeTitle, design: .rounded).weight(.bold)
 
-    /// 34pt bold — prominent section header or balance display
-    public static let displayLarge = Font.system(size: 34, weight: .bold, design: .default)
+    /// Prominent section header or balance display
+    public static let displayLarge = Font.system(.largeTitle, design: .default).weight(.bold)
 
-    /// 32pt bold rounded — mid-size display (AddTransaction label, LockScreen icon)
-    public static let displayMedium = Font.system(size: 32, weight: .bold, design: .rounded)
+    /// Mid-size display (AddTransaction label, LockScreen icon)
+    public static let displayMedium = Font.system(.title, design: .rounded).weight(.bold)
 
-    /// 28pt bold rounded — standard title
-    public static let title = Font.system(size: 28, weight: .bold, design: .rounded)
+    /// Standard title
+    public static let title = Font.system(.title, design: .rounded).weight(.bold)
 
-    /// 24pt bold — sub-section title, icon size text, Profile stat header
-    public static let displaySmall = Font.system(size: 24, weight: .bold, design: .default)
+    /// Sub-section title, icon size text, Profile stat header
+    public static let displaySmall = Font.system(.title2, design: .default).weight(.bold)
 
-    /// 22pt regular — supporting display text (CreatePIN welcome message)
-    public static let displayCaption = Font.system(size: 22, weight: .regular, design: .default)
+    /// Supporting display text (CreatePIN welcome message)
+    public static let displayCaption = Font.system(.title3, design: .default).weight(.regular)
 
-    /// 20pt regular — medium icon / list item icon
-    public static let iconMedium = Font.system(size: 20, weight: .regular, design: .default)
+    /// Medium icon / list item icon
+    public static let iconMedium = Font.system(.title3, design: .default).weight(.regular)
 
     // MARK: - System Scaled (auto-scale with Accessibility settings)
 
@@ -47,15 +48,15 @@ public enum AppTypography {
 
     // MARK: - Specialty
 
-    /// 70pt regular — large decorative emoji/icon (CreatePINWelcomeView)
-    public static let icon = Font.system(size: 70, weight: .regular, design: .default)
+    /// Large decorative emoji/icon (CreatePINWelcomeView)
+    public static let icon = Font.system(.largeTitle, design: .default).weight(.regular)
 
-    /// 24pt semibold rounded — PIN digit display
-    public static let pinDigit = Font.system(size: 24, weight: .semibold, design: .rounded)
+    /// PIN digit display
+    public static let pinDigit = Font.system(.title2, design: .rounded).weight(.semibold)
 
-    /// 14pt semibold — profile stat label / small badge
-    public static let profileStat = Font.system(size: 14, weight: .semibold, design: .default)
+    /// Profile stat label / small badge
+    public static let profileStat = Font.system(.subheadline, design: .default).weight(.semibold)
 
-    /// 13pt bold — compact label with emphasis (OTP countdown, small badge)
-    public static let labelSmall = Font.system(size: 13, weight: .bold, design: .default)
+    /// Compact label with emphasis (OTP countdown, small badge)
+    public static let labelSmall = Font.system(.footnote, design: .default).weight(.bold)
 }

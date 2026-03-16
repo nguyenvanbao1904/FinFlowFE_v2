@@ -10,7 +10,7 @@ import SwiftUI
 
 /// Generic single-selection sheet with search and custom item views
 /// Reusable for: Categories, Tags, Accounts, Budgets, Currencies, etc.
-public struct SelectionSheet<Item: Identifiable & Equatable>: View {
+public struct SelectionSheet<Item: Identifiable & Equatable, ItemView: View>: View {
     // Bindings
     @Binding public var isPresented: Bool
     @Binding public var selectedItem: Item?
@@ -20,22 +20,20 @@ public struct SelectionSheet<Item: Identifiable & Equatable>: View {
     public let title: String
 
     // View builder for item rows
-    public let itemContent: (Item, Bool) -> AnyView
+    public let itemContent: (Item, Bool) -> ItemView
 
     public init(
         isPresented: Binding<Bool>,
         selectedItem: Binding<Item?>,
         items: [Item],
         title: String,
-        @ViewBuilder itemContent: @escaping (Item, Bool) -> some View
+        @ViewBuilder itemContent: @escaping (Item, Bool) -> ItemView
     ) {
         self._isPresented = isPresented
         self._selectedItem = selectedItem
         self.items = items
         self.title = title
-        self.itemContent = { item, isSelected in
-            AnyView(itemContent(item, isSelected))
-        }
+        self.itemContent = itemContent
     }
 
     public var body: some View {
@@ -62,30 +60,32 @@ public struct SelectionSheet<Item: Identifiable & Equatable>: View {
 
 // MARK: - Convenience Init with Default Item View
 
-extension SelectionSheet where Item: CustomStringConvertible {
+extension SelectionSheet where ItemView == AnyView {
     /// Convenience initializer with default text-only item view
     public init(
         isPresented: Binding<Bool>,
         selectedItem: Binding<Item?>,
         items: [Item],
         title: String
-    ) {
+    ) where Item: CustomStringConvertible {
         self.init(
             isPresented: isPresented,
             selectedItem: selectedItem,
             items: items,
             title: title
         ) { item, isSelected in
-            HStack {
-                Text(item.description)
-                    .font(AppTypography.body)
-                    .foregroundColor(.primary)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .foregroundColor(AppColors.primary)
+            AnyView(
+                HStack {
+                    Text(item.description)
+                        .font(AppTypography.body)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(AppColors.primary)
+                    }
                 }
-            }
+            )
         }
     }
 }

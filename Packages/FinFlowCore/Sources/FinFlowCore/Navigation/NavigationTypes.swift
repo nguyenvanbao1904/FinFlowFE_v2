@@ -4,9 +4,32 @@
 
 import SwiftUI
 
+public enum AppRoot: Equatable, Sendable {
+    case splash
+    case authentication
+    case welcomeBack
+    case dashboard
+    case locked
+}
+
+public enum AppTab: Int, Hashable, Sendable {
+    case home
+    case transaction
+    case planning
+    case wealth
+    case investment
+}
+
 @MainActor
 public protocol AppRouterProtocol: AnyObject {
-    var path: NavigationPath { get set }
+    var activeTab: AppTab { get set }
+    var homePath: [AppRoute] { get set }
+    var transactionPath: [AppRoute] { get set }
+    var planningPath: [AppRoute] { get set }
+    var wealthPath: [AppRoute] { get set }
+    var investmentPath: [AppRoute] { get set }
+    var authPath: [AppRoute] { get set }
+
     var root: AppRoot { get }
     var presentedSheet: AppRoute? { get set }
 
@@ -32,14 +55,6 @@ public protocol AppRouterProtocol: AnyObject {
     func dismissSheet()
 }
 
-public enum AppRoot: Equatable, Sendable {
-    case splash
-    case authentication
-    case welcomeBack
-    case dashboard
-    case locked
-}
-
 /// Centralized enum for all navigation destinations.
 /// Lives in Core to prevent circular dependencies.
 public enum AppRoute: Hashable, Sendable {
@@ -58,6 +73,9 @@ public enum AppRoute: Hashable, Sendable {
     case createPIN(email: String)
     case addTransaction
     case editTransaction(TransactionResponse)
+    case categoryList
+    case addBudget
+    case editBudget(BudgetResponse)
 }
 
 extension AppRoute: Identifiable {

@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Smart input bar with AI sparkle icon, voice, and camera buttons
-/// Reusable across Transaction, Budget, Goals, and Dashboard modules
+/// Reusable across Transaction, Budget, and Dashboard modules
 public struct AISmartInputBar: View {
     // Text binding
     @Binding public var text: String
