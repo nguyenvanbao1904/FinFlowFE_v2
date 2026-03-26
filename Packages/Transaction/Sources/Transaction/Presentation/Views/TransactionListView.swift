@@ -34,7 +34,7 @@ public struct TransactionListView: View {
                 .animation(.default, value: selectedTab)
         }
         .background(AppColors.appBackground)
-        .navigationTitle("Giao dịch") // Fixed title for smooth transition
+        .navigationTitle("Giao dịch")  // Fixed title for smooth transition
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $viewModel.searchText, prompt: "Tìm kiếm giao dịch...")
         .toolbar {
@@ -63,7 +63,8 @@ public struct TransactionListView: View {
                                 ? AppColors.success : AppColors.primary
                         )
                     }
-                    .accessibilityLabel(viewModel.filterStartDate != nil ? "Bộ lọc đang bật" : "Lọc theo ngày")
+                    .accessibilityLabel(
+                        viewModel.filterStartDate != nil ? "Bộ lọc đang bật" : "Lọc theo ngày")
 
                     Button {
                         viewModel.presentAddTransaction()
@@ -77,9 +78,7 @@ public struct TransactionListView: View {
             }
         }
         .task {
-            if viewModel.transactions.isEmpty {
-                await viewModel.fetchData(isInitial: true)
-            }
+            await viewModel.fetchInitialDataIfNeeded()
         }
         .dateRangeFilterSheet(
             isPresented: $viewModel.showFilterSheet,
@@ -94,7 +93,7 @@ public struct TransactionListView: View {
         )
         .onReceive(NotificationCenter.default.publisher(for: .transactionDidSave)) { _ in
             Task {
-                await viewModel.fetchData(isInitial: true)
+                await viewModel.fetchData(isInitial: true, refreshAnalytics: true)
             }
         }
         .alertHandler(
@@ -147,7 +146,10 @@ public struct TransactionListView: View {
         List {
             Section {
                 summaryCard
-                    .listRowInsets(EdgeInsets(top: Spacing.sm, leading: .zero, bottom: Spacing.sm, trailing: .zero))
+                    .listRowInsets(
+                        EdgeInsets(
+                            top: Spacing.sm, leading: .zero, bottom: Spacing.sm, trailing: .zero)
+                    )
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -162,7 +164,7 @@ public struct TransactionListView: View {
                     .padding(.top, Spacing.xl)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                } else if viewModel.hasLoadError {
+                } else if viewModel.hasHistoryLoadError {
                     VStack(spacing: Spacing.sm) {
                         Text("Không thể tải dữ liệu")
                             .font(AppTypography.headline)
@@ -171,7 +173,9 @@ public struct TransactionListView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                         Button("Thử lại") {
-                            Task { await viewModel.fetchData(isInitial: true) }
+                            Task {
+                                await viewModel.fetchData(isInitial: true, refreshAnalytics: true)
+                            }
                         }
                         .buttonStyle(.borderedProminent)
                     }
@@ -201,12 +205,15 @@ public struct TransactionListView: View {
                                 title: transaction.note ?? transaction.category.name,
                                 subtitle: transaction.category.name,
                                 trailing: {
-                                    Text(CurrencyFormatter.formatWithSign(
-                                        transaction.amount,
-                                        isIncome: transaction.type == .income
-                                    ))
+                                    Text(
+                                        CurrencyFormatter.formatWithSign(
+                                            transaction.amount,
+                                            isIncome: transaction.type == .income
+                                        )
+                                    )
                                     .font(AppTypography.headline)
-                                    .foregroundStyle(transaction.type == .income ? AppColors.success : .primary)
+                                    .foregroundStyle(
+                                        transaction.type == .income ? AppColors.success : .primary)
                                 }
                             )
                             .onTapGesture {
@@ -260,8 +267,8 @@ public struct TransactionListView: View {
             chartData: viewModel.chartData,
             currentRange: viewModel.chartRange,
             onRangeChange: { newRange in
-                viewModel.chartRange = newRange
-                Task { await viewModel.fetchData(isInitial: true) }
+                guard viewModel.chartRange != newRange else { return }
+                viewModel.updateChartRange(newRange)
             },
             onNavigateBack: {
                 viewModel.navigateChartBack()
@@ -269,10 +276,10 @@ public struct TransactionListView: View {
             onNavigateForward: {
                 viewModel.navigateChartForward()
             },
-            isLoading: viewModel.isLoading,
-            hasLoadError: viewModel.hasLoadError,
+            isChartLoading: viewModel.isChartLoading,
+            hasLoadError: viewModel.hasChartLoadError,
             onRetry: {
-                Task { await viewModel.fetchData(isInitial: true) }
+                Task { await viewModel.fetchChartData() }
             }
         )
     }
@@ -290,12 +297,12 @@ public struct TransactionListView: View {
                 HStack(spacing: Spacing.xl) {
                     // Income Section
                     VStack(spacing: Spacing.xs) {
-                    HStack(spacing: Spacing.xs / 2) {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(AppColors.textInverted)
-                        Text("Thu nhập")
-                            .font(AppTypography.caption)
-                    }
+                        HStack(spacing: Spacing.xs / 2) {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .foregroundStyle(AppColors.textInverted)
+                            Text("Thu nhập")
+                                .font(AppTypography.caption)
+                        }
                         Text(
                             viewModel.displaySummary.map {
                                 CurrencyFormatter.formatWithSign($0.totalIncome, isIncome: true)
@@ -311,12 +318,12 @@ public struct TransactionListView: View {
 
                     // Expense Section
                     VStack(spacing: Spacing.xs) {
-                    HStack(spacing: Spacing.xs / 2) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .foregroundStyle(AppColors.textInverted)
-                        Text("Chi tiêu")
-                            .font(AppTypography.caption)
-                    }
+                        HStack(spacing: Spacing.xs / 2) {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .foregroundStyle(AppColors.textInverted)
+                            Text("Chi tiêu")
+                                .font(AppTypography.caption)
+                        }
                         Text(
                             viewModel.displaySummary.map {
                                 CurrencyFormatter.formatWithSign($0.totalExpense, isIncome: false)

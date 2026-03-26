@@ -44,6 +44,7 @@ public enum AppTypography {
     public static let subheadline = Font.subheadline
     public static let body = Font.body
     public static let caption = Font.caption
+    public static let caption2 = Font.caption2
     public static let buttonTitle = Font.subheadline.weight(.medium)
 
     // MARK: - Specialty

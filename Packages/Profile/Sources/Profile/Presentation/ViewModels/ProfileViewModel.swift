@@ -4,6 +4,7 @@
 //
 
 import FinFlowCore
+import Observation
 
 /// ViewModel cho Profile section
 /// Responsibility: Quản lý hiển thị và cập nhật profile
@@ -23,6 +24,8 @@ public class ProfileViewModel {
     private let authRepository: AuthRepositoryProtocol
     private let router: any AppRouterProtocol
     public let sessionManager: any SessionManagerProtocol
+    @ObservationIgnored
+    private var hasRequestedInitialLoad = false
     
     // MARK: - Initialization
     public init(
@@ -43,10 +46,17 @@ public class ProfileViewModel {
     // MARK: - Public Methods
     
     /// Load profile from API or cache
-    public func loadProfile() async {
+    public func loadProfile(force: Bool = false) async {
         // Nếu session không còn authenticated/sessionExpired thì không gọi API để tránh stuck
         if case .unauthenticated = sessionManager.state { return }
         if case .sessionExpired = sessionManager.state { return }
+
+        if !force, !isRefreshing {
+            if hasRequestedInitialLoad {
+                return
+            }
+            hasRequestedInitialLoad = true
+        }
         
         // Try SessionManager cache first
         if !isRefreshing, let cachedUser = sessionManager.currentUser {
@@ -121,7 +131,7 @@ public class ProfileViewModel {
         isLoading = true
         hasLoadError = false
         hasAuthExpiredError = false
-        await loadProfile()
+        await loadProfile(force: true)
     }
     
     /// Navigate to Update Profile

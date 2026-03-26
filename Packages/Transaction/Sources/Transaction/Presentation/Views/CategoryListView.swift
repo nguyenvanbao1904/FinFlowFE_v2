@@ -82,7 +82,7 @@ public struct CategoryListView: View {
             await viewModel.loadCategories()
         }
         .refreshable {
-            await viewModel.loadCategories()
+            await viewModel.loadCategories(force: true)
         }
         // swiftlint:disable:next no_direct_sheet_or_cover
         .sheet(isPresented: $showAddCategory) {

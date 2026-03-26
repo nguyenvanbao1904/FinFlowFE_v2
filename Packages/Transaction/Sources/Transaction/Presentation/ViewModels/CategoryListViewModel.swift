@@ -1,5 +1,6 @@
 import FinFlowCore
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -12,6 +13,8 @@ public final class CategoryListViewModel {
     private let repository: any TransactionRepositoryProtocol
     private let router: any AppRouterProtocol
     private let sessionManager: any SessionManagerProtocol
+    @ObservationIgnored
+    private var hasRequestedInitialLoad = false
 
     public init(
         repository: any TransactionRepositoryProtocol,
@@ -23,13 +26,26 @@ public final class CategoryListViewModel {
         self.sessionManager = sessionManager
     }
 
-    public func loadCategories() async {
+    public func loadCategories(force: Bool = false) async {
+        if !force {
+            if hasRequestedInitialLoad {
+                return
+            }
+            hasRequestedInitialLoad = true
+        }
+
+        // Prevent concurrent loads (.task + .refreshable)
+        if isLoading { return }
+
         isLoading = true
         loadError = nil
         defer { isLoading = false }
         do {
             categories = try await repository.getCategories()
         } catch {
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
                     Task { @MainActor in
@@ -52,7 +68,7 @@ public final class CategoryListViewModel {
         )
         do {
             _ = try await repository.createCategory(request: request)
-            await loadCategories()
+            await loadCategories(force: true)
             return true
         } catch {
             if let appError = error as? AppError, case .unauthorized = appError {
@@ -77,7 +93,7 @@ public final class CategoryListViewModel {
         )
         do {
             _ = try await repository.updateCategory(id: id, request: request)
-            await loadCategories()
+            await loadCategories(force: true)
             return true
         } catch {
             if let appError = error as? AppError, case .unauthorized = appError {
@@ -96,7 +112,7 @@ public final class CategoryListViewModel {
     public func deleteCategory(id: String) async {
         do {
             try await repository.deleteCategory(id: id)
-            await loadCategories()
+            await loadCategories(force: true)
         } catch {
             if let appError = error as? AppError, case .unauthorized = appError {
                 alert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {

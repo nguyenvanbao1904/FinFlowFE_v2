@@ -127,3 +127,7 @@ public struct UpdateBudgetRequest: Codable, Sendable {
         self.recurringStartDate = recurringStartDate
     }
 }
+
+extension Notification.Name {
+    public static let budgetDidSave = Notification.Name("budgetDidSave")
+}

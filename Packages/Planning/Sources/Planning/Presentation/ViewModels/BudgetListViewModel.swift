@@ -24,6 +24,8 @@ public final class BudgetListViewModel {
     let updateBudgetUseCase: UpdateBudgetUseCase
     let getCategoriesUseCase: any GetCategoriesUseCaseProtocol
     let sessionManager: any SessionManagerProtocol
+    @ObservationIgnored
+    private var hasRequestedInitialLoad = false
 
     public init(
         router: any AppRouterProtocol,
@@ -43,7 +45,20 @@ public final class BudgetListViewModel {
         self.sessionManager = sessionManager
     }
 
-    public func loadBudgets() async {
+    public func loadBudgets(force: Bool = false) async {
+        // Avoid repeated auto-load loops when the view is recreated/appears rapidly.
+        if !force {
+            if hasRequestedInitialLoad {
+                return
+            }
+            hasRequestedInitialLoad = true
+        }
+
+        // Prevent concurrent loads when user switches tabs quickly or triggers refresh repeatedly.
+        if isLoading {
+            return
+        }
+
         isLoading = true
         loadError = nil
         defer { isLoading = false }
@@ -51,6 +66,11 @@ public final class BudgetListViewModel {
             let list = try await getBudgetsUseCase.execute()
             budgets = list.map { BudgetWithSpending(budget: $0, spentAmount: $0.spentAmount ?? 0) }
         } catch {
+            // Khi user chuyển tab / rời màn hình, Task có thể bị hủy.
+            // Không hiển thị alert cho CancellationError.
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
                 [sessionManager] in

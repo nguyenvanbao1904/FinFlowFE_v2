@@ -79,6 +79,9 @@ public final class AddWealthAccountViewModel {
                 }
             }
         } catch {
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 alert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
                     [sessionManager] in

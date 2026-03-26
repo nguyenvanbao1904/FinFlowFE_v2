@@ -77,6 +77,14 @@ public protocol BudgetRepositoryProtocol: Sendable {
     func deleteBudget(id: String) async throws
 }
 
+// MARK: - Investment Portfolio Repository Protocol
+
+/// Handles investment portfolio CRUD for the Investment feature.
+public protocol PortfolioRepositoryProtocol: Sendable {
+    func getPortfolios() async throws -> [PortfolioResponse]
+    func createPortfolio(request: CreatePortfolioRequest) async throws -> PortfolioResponse
+}
+
 // MARK: - Composite Protocol (Backward Compatibility)
 
 /// Composite protocol that combines all repository protocols

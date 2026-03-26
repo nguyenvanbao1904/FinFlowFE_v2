@@ -25,6 +25,9 @@ public enum Spacing {
     public static let touchTarget: CGFloat = 44  // iOS minimum
 }
 
+// Compatibility alias used by lint rules that require AppSpacing naming.
+public typealias AppSpacing = Spacing
+
 // MARK: - Corner Radius
 
 public enum CornerRadius {

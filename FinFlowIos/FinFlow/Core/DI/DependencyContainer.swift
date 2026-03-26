@@ -9,6 +9,7 @@ import Dashboard
 import FinFlowCore
 import Foundation
 import Identity
+import Investment
 import Planning
 import Transaction
 import Wealth
@@ -35,6 +36,8 @@ public class DependencyContainer {
     let transactionRepository: TransactionRepositoryProtocol
     let wealthAccountRepository: WealthAccountRepositoryProtocol
     let budgetRepository: BudgetRepositoryProtocol
+    let investmentRepository: InvestmentRepositoryProtocol
+    let portfolioRepository: PortfolioRepositoryProtocol
 
     // 4. Use Cases - Created on demand (Transient) to avoid Container bloat
 
@@ -79,6 +82,8 @@ public class DependencyContainer {
         self.transactionRepository = TransactionRepository(client: apiClient)
         self.wealthAccountRepository = WealthAccountRepository(client: apiClient)
         self.budgetRepository = BudgetRepository(client: apiClient)
+        self.investmentRepository = InvestmentRepository(client: apiClient)
+        self.portfolioRepository = PortfolioRepository(client: apiClient)
 
         // 🔗 Config Auth Hooks (Break Circular Dependency)
         Task { [weak concreteAuthRepository, tokenStore] in

@@ -87,7 +87,10 @@ public struct BudgetListView: View {
             }
         }
         .task { await viewModel.loadBudgets() }
-        .refreshable { await viewModel.loadBudgets() }
+        .refreshable { await viewModel.loadBudgets(force: true) }
+        .onReceive(NotificationCenter.default.publisher(for: .budgetDidSave)) { _ in
+            Task { await viewModel.loadBudgets(force: true) }
+        }
         .alertHandler(Binding(
             get: { viewModel.loadError },
             set: { viewModel.loadError = $0 }

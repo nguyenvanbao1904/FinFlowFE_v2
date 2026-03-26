@@ -258,9 +258,22 @@ public final class AddBudgetViewModel {
     }
 
     public func loadCategories() async {
+        // Load once per screen lifecycle; manual reopen will create a fresh ViewModel.
+        if !categories.isEmpty { return }
+
+        // Guard re-entrancy for .task-based loading
+        if isLoading { return }
+
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+
         do {
             categories = try await getCategoriesUseCase.execute()
         } catch {
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
                     [sessionManager] in
@@ -309,6 +322,7 @@ public final class AddBudgetViewModel {
             } else {
                 _ = try await createBudgetUseCase.execute(request: request)
             }
+            NotificationCenter.default.post(name: .budgetDidSave, object: nil)
             onSuccess()
         } catch {
             if let appError = error as? AppError, case .unauthorized = appError {

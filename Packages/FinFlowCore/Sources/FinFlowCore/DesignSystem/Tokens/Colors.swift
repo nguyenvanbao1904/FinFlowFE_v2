@@ -19,6 +19,9 @@ public enum AppColors {
     /// Success / Confirm actions — System Green
     public static let success = Color.green
 
+    /// Error / Validation failure — System Red
+    public static let error = Color.red
+
     /// Accent / Highlight color — System Blue (charts, secondary highlights)
     public static let accent = Color.blue
 
@@ -67,4 +70,40 @@ public enum AppColors {
 
     /// Solid card background (secondarySystemGroupedBackground default)
     public static let cardBackground = Color(UIColor.secondarySystemGroupedBackground)
+
+    // MARK: - Chart Tokens
+
+    /// Subtle grid line for chart axes.
+    public static let chartGridLine = Color(UIColor.separator).opacity(0.28)
+
+    public static let chartRevenue = Color.cyan
+    public static let chartProfit = Color.green
+
+    public static let chartIncomeInterest = Color.indigo
+    public static let chartIncomeFee = Color.teal
+    public static let chartIncomeOther = Color.purple
+
+    public static let chartAssetLoans = Color.indigo
+    public static let chartAssetInvestmentSecurities = Color.purple
+    public static let chartAssetInterbank = Color.cyan
+    public static let chartAssetCash = Color.teal
+    public static let chartAssetTrading = Color.pink
+    public static let chartAssetFixed = Color.indigo
+    public static let chartAssetReceivables = Color.orange
+    public static let chartAssetShortTermInvestments = Color.blue
+    public static let chartAssetInventory = Color.pink
+
+    /// Hàng tồn kho (cơ cấu tài sản) — tách biệt rõ khỏi Tiền (teal) và Phải thu NH (pink).
+    public static let chartInventory = Color.mint
+
+    public static let chartCapitalDeposits = Color.blue
+    public static let chartCapitalEquity = Color.purple
+    public static let chartCapitalPapers = Color.orange
+    public static let chartCapitalGovernmentDebt = Color.pink
+    public static let chartCapitalShortTermLoan = Color.blue
+    public static let chartCapitalLongTermLoan = Color.orange
+    public static let chartCapitalCustomerAdvances = Color.teal
+
+    public static let chartGrowthStrong = Color.green
+    public static let chartGrowthStable = Color.orange
 }

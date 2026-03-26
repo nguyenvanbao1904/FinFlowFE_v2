@@ -1,5 +1,6 @@
 import FinFlowCore
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -13,7 +14,8 @@ public class TransactionListViewModel {
     public var isLoading: Bool = true
     public var isSearching: Bool = false  // Separate state for search to avoid UI jitter
     public var isChartLoading: Bool = true
-    public var hasLoadError: Bool = false
+    public var hasHistoryLoadError: Bool = false
+    public var hasChartLoadError: Bool = false
     public var alert: AppErrorAlert?
     public var currentPage: Int = 0
     public var hasMorePages: Bool = true
@@ -35,7 +37,7 @@ public class TransactionListViewModel {
                 try? await Task.sleep(for: .milliseconds(500))
                 guard !Task.isCancelled else { return }
                 isSearching = true
-                await fetchData(isInitial: true, triggeredBySearch: true)
+                await fetchData(isInitial: true, triggeredBySearch: true, refreshAnalytics: false)
                 isSearching = false
             }
         }
@@ -49,6 +51,10 @@ public class TransactionListViewModel {
     private let deleteTransactionUseCase: DeleteTransactionUseCase
     private let router: any AppRouterProtocol
     private let sessionManager: any SessionManagerProtocol
+    @ObservationIgnored
+    private var hasRequestedInitialLoad = false
+    @ObservationIgnored
+    private var latestChartRequestID = UUID()
 
     public init(
         getTransactionsUseCase: GetTransactionsUseCase,
@@ -66,7 +72,17 @@ public class TransactionListViewModel {
         self.sessionManager = sessionManager
     }
 
-    public func fetchData(isInitial: Bool = true, triggeredBySearch: Bool = false) async {
+    public func fetchInitialDataIfNeeded() async {
+        guard !hasRequestedInitialLoad else { return }
+        hasRequestedInitialLoad = true
+        await fetchData(isInitial: true, refreshAnalytics: true)
+    }
+
+    public func fetchData(
+        isInitial: Bool = true,
+        triggeredBySearch: Bool = false,
+        refreshAnalytics: Bool = false
+    ) async {
         if isInitial {
             // Only show loading skeleton if not triggered by search (avoid jitter)
             if !triggeredBySearch {
@@ -83,8 +99,7 @@ public class TransactionListViewModel {
         }
 
         do {
-            // Fetch summary
-            if isInitial {
+            if isInitial && refreshAnalytics {
                 summary = try await getSummaryUseCase.execute()
                 await fetchChartData()
             }
@@ -99,7 +114,7 @@ public class TransactionListViewModel {
             )
             transactions.append(contentsOf: response.content)
             hasMorePages = response.number < response.totalPages - 1
-            hasLoadError = false
+            hasHistoryLoadError = false
 
         } catch {
             // Ignore cancellation (from debounce) - don't show error alert
@@ -114,7 +129,7 @@ public class TransactionListViewModel {
 
     public func applyFilter() {
         Task {
-            await fetchData(isInitial: true)
+            await fetchData(isInitial: true, refreshAnalytics: false)
         }
     }
 
@@ -122,48 +137,64 @@ public class TransactionListViewModel {
         filterStartDate = nil
         filterEndDate = nil
         Task {
-            await fetchData(isInitial: true)
+            await fetchData(isInitial: true, refreshAnalytics: false)
         }
     }
 
     public func fetchChartData() async {
+        let requestID = UUID()
+        latestChartRequestID = requestID
         isChartLoading = true
-        defer { isChartLoading = false }
+        defer {
+            if latestChartRequestID == requestID {
+                isChartLoading = false
+            }
+        }
 
         do {
-            chartData = try await getChartUseCase.execute(
+            let response = try await getChartUseCase.execute(
                 range: chartRange, referenceDate: chartReferenceDate)
+
+            guard latestChartRequestID == requestID else { return }
+            chartData = response
+            hasChartLoadError = false
         } catch {
+            guard latestChartRequestID == requestID else { return }
             // Ignore cancellation - don't show error alert
             if error is CancellationError {
                 return
             }
-            handleError(error)
+            handleError(error, isChartError: true)
         }
     }
 
     public func updateChartRange(_ newRange: ChartRange) {
         chartRange = newRange
         chartReferenceDate = Date()  // Reset to today when changing range
+        isChartLoading = true
         Task {
             await fetchChartData()
         }
     }
 
     public func navigateChartBack() {
+        guard !isChartLoading else { return }
         shiftChartReference(by: -1)
     }
 
     public func navigateChartForward() {
+        guard !isChartLoading else { return }
         guard chartData?.hasNext == true else { return }
         shiftChartReference(by: 1)
     }
 
-    private func handleError(_ error: Error) {
+    private func handleError(_ error: Error, isChartError: Bool = false) {
         // 401 Unauthorized — token hết hạn, yêu cầu đăng nhập lại
         if let appError = error as? AppError, case .unauthorized = appError {
             isLoading = false
-            hasLoadError = false
+            isChartLoading = false
+            hasHistoryLoadError = false
+            hasChartLoadError = false
             alert = .authWithAction(
                 message: AppErrorAlert.sessionExpiredMessage
             ) { [sessionManager] in
@@ -174,8 +205,12 @@ public class TransactionListViewModel {
             return
         }
 
-        // Other errors
-        hasLoadError = true
+        if isChartError {
+            hasChartLoadError = true
+        } else {
+            hasHistoryLoadError = true
+        }
+
         self.alert = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu")
     }
 
@@ -270,21 +305,10 @@ public class TransactionListViewModel {
                 let date = TransactionDateParser.parseBackendLocalDateTime(
                     transaction.transactionDate)
             else {
-                Logger.error(
-                    "Parse failed: \(transaction.transactionDate)",
-                    category: "Transaction"
-                )
                 return Date(timeIntervalSince1970: 0)
             }
-            let startOfDay = calendar.startOfDay(for: date)
-            Logger.debug(
-                "✅ Grouped '\(transaction.transactionDate)' → startOfDay: \(startOfDay)",
-                category: "Transaction"
-            )
-            return startOfDay
+            return calendar.startOfDay(for: date)
         }
-
-        Logger.debug("📅 Today: \(today), Yesterday: \(yesterday)", category: "Transaction")
 
         // Sort by date descending and format labels
         return
@@ -328,7 +352,14 @@ public class TransactionListViewModel {
         }
 
         if let newDate = Calendar.current.date(byAdding: components, to: chartReferenceDate) {
+            guard
+                Calendar.current.compare(newDate, to: chartReferenceDate, toGranularity: .day)
+                    != .orderedSame
+            else {
+                return
+            }
             chartReferenceDate = newDate
+            isChartLoading = true
             Task {
                 await fetchChartData()
             }

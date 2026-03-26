@@ -58,6 +58,14 @@ public class AddTransactionViewModel {
     }
 
     public func fetchCategories() async {
+        if !categories.isEmpty && !accounts.isEmpty { return }
+
+        // Avoid duplicate loads if the sheet is presented multiple times quickly
+        if isLoading { return }
+
+        isLoading = true
+        defer { isLoading = false }
+
         do {
             async let categoriesTask = getCategoriesUseCase.execute()
             async let accountsTask = getWealthAccountsUseCase.execute()
@@ -79,6 +87,9 @@ public class AddTransactionViewModel {
                 self.selectedAccount = transactionEligibleAccounts.first
             }
         } catch {
+            if error is CancellationError {
+                return
+            }
             handleError(error, defaultTitle: "Lỗi Tải Dữ Liệu")
         }
     }

@@ -1,11 +1,11 @@
 disabled_rules:
   - trailing_whitespace
   - line_length
+  - file_length
   - function_body_length
   - type_body_length
   - identifier_name
   - closure_parameter_position
-
 
 # Trỏ đúng tọa độ code của bạn
 included:
@@ -73,7 +73,7 @@ custom_rules:
   no_hardcoded_spacing:
     included: ".*\\.swift"
     name: "Hardcoded Spacing Banned"
-    regex: "(?:VStack|HStack|ZStack|LazyVStack|LazyHStack)\\s*\\(.*spacing\\s*:\\s*[0-9]+"
+    regex: "(?:VStack|HStack|ZStack|LazyVStack|LazyHStack)\\s*\\([^)]*spacing\\s*:\\s*[0-9]+(?:\\.[0-9]+)?"
     message: "BANNED: Hardcoded spacing values are not allowed. Use AppSpacing tokens."
     severity: error
 

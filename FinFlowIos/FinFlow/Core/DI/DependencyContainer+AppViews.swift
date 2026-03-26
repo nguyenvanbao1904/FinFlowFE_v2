@@ -176,7 +176,15 @@ extension DependencyContainer {
 
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
-        return InvestmentView(router: router)
+        let getStockAnalysisUseCase = GetStockAnalysisUseCase(repository: investmentRepository)
+        let getPortfoliosUseCase = GetPortfoliosUseCase(repository: portfolioRepository)
+        let createPortfolioUseCase = CreatePortfolioUseCase(repository: portfolioRepository)
+        return InvestmentView(
+            getStockAnalysisUseCase: getStockAnalysisUseCase,
+            getPortfoliosUseCase: getPortfoliosUseCase,
+            createPortfolioUseCase: createPortfolioUseCase,
+            sessionManager: sessionManager
+        )
     }
 
     @MainActor

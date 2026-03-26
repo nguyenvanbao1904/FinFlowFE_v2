@@ -1,0 +1,1268 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project FinFlow.xcodeproj -scheme FinFlow -destination "generic/platform=iOS Simulator"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  Transaction: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction
+  GTMAppAuth: https://github.com/google/GTMAppAuth.git @ 5.0.0
+  AppCheck: https://github.com/google/app-check.git @ 11.2.0
+  GTMSessionFetcher: https://github.com/google/gtm-session-fetcher.git @ 3.5.0
+  Identity: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Identity
+  Planning: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Planning
+  Promises: https://github.com/google/promises.git @ 2.4.0
+  Profile: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Profile
+  Investment: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment
+  GoogleUtilities: https://github.com/google/GoogleUtilities.git @ 8.1.0
+  Dashboard: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Dashboard
+  AppAuth: https://github.com/openid/AppAuth-iOS.git @ 2.0.0
+  Wealth: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Wealth
+  FinFlowCore: /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/FinFlowCore
+  GoogleSignIn: https://github.com/google/GoogleSignIn-iOS @ 9.1.0
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (49 targets)
+    Target 'FinFlow' in project 'FinFlow'
+        ➜ Explicit dependency on target 'Profile' in project 'Profile'
+        ➜ Explicit dependency on target 'Planning' in project 'Planning'
+        ➜ Explicit dependency on target 'Transaction' in project 'Transaction'
+        ➜ Explicit dependency on target 'Investment' in project 'Investment'
+        ➜ Explicit dependency on target 'Wealth' in project 'Wealth'
+        ➜ Explicit dependency on target 'GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'Identity' in project 'Identity'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+        ➜ Explicit dependency on target 'Dashboard' in project 'Dashboard'
+    Target 'Dashboard' in project 'Dashboard'
+        ➜ Explicit dependency on target 'Dashboard' in project 'Dashboard'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Dashboard' in project 'Dashboard'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Identity' in project 'Identity'
+        ➜ Explicit dependency on target 'Identity' in project 'Identity'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignInSwift' in project 'GoogleSignIn'
+    Target 'Identity' in project 'Identity'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignInSwift' in project 'GoogleSignIn'
+    Target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn_GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn_GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn_GoogleSignInSwift' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'GoogleSignIn_GoogleSignIn' in project 'GoogleSignIn'
+        ➜ Explicit dependency on target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMAppAuth_GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+    Target 'GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMAppAuth_GTMAppAuth' in project 'GTMAppAuth'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+    Target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+        ➜ Explicit dependency on target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+        ➜ Explicit dependency on target 'GTMSessionFetcher_GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+        ➜ Explicit dependency on target 'GTMSessionFetcher_GTMSessionFetcherCore' in project 'GTMSessionFetcher'
+    Target 'GTMSessionFetcher_GTMSessionFetcherCore' in project 'GTMSessionFetcher' (no dependencies)
+    Target 'GTMAppAuth_GTMAppAuth' in project 'GTMAppAuth' (no dependencies)
+    Target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'FBLPromises' in project 'Promises'
+        ➜ Explicit dependency on target 'GULEnvironment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GULUserDefaults' in project 'GoogleUtilities'
+    Target 'AppCheckCore' in project 'AppCheck'
+        ➜ Explicit dependency on target 'FBLPromises' in project 'Promises'
+        ➜ Explicit dependency on target 'GULEnvironment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GULUserDefaults' in project 'GoogleUtilities'
+    Target 'GULUserDefaults' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-UserDefaults' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities_GoogleUtilities-UserDefaults' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'third-party-IsAppEncrypted' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Logger' in project 'GoogleUtilities'
+    Target 'GoogleUtilities-UserDefaults' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities_GoogleUtilities-UserDefaults' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'third-party-IsAppEncrypted' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Logger' in project 'GoogleUtilities'
+    Target 'GoogleUtilities-Logger' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities_GoogleUtilities-Logger' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'third-party-IsAppEncrypted' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Environment' in project 'GoogleUtilities'
+    Target 'GoogleUtilities_GoogleUtilities-Logger' in project 'GoogleUtilities' (no dependencies)
+    Target 'GoogleUtilities_GoogleUtilities-UserDefaults' in project 'GoogleUtilities' (no dependencies)
+    Target 'GULEnvironment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities_GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'third-party-IsAppEncrypted' in project 'GoogleUtilities'
+    Target 'GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'GoogleUtilities_GoogleUtilities-Environment' in project 'GoogleUtilities'
+        ➜ Explicit dependency on target 'third-party-IsAppEncrypted' in project 'GoogleUtilities'
+    Target 'third-party-IsAppEncrypted' in project 'GoogleUtilities' (no dependencies)
+    Target 'GoogleUtilities_GoogleUtilities-Environment' in project 'GoogleUtilities' (no dependencies)
+    Target 'FBLPromises' in project 'Promises'
+        ➜ Explicit dependency on target 'FBLPromises' in project 'Promises'
+        ➜ Explicit dependency on target 'Promises_FBLPromises' in project 'Promises'
+    Target 'FBLPromises' in project 'Promises'
+        ➜ Explicit dependency on target 'Promises_FBLPromises' in project 'Promises'
+    Target 'Promises_FBLPromises' in project 'Promises' (no dependencies)
+    Target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuth_AppAuthCore' in project 'AppAuth'
+    Target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuth_AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+    Target 'AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuth_AppAuth' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuthCore' in project 'AppAuth'
+    Target 'AppAuthCore' in project 'AppAuth'
+        ➜ Explicit dependency on target 'AppAuth_AppAuthCore' in project 'AppAuth'
+    Target 'AppAuth_AppAuthCore' in project 'AppAuth' (no dependencies)
+    Target 'AppAuth_AppAuth' in project 'AppAuth' (no dependencies)
+    Target 'GoogleSignIn_GoogleSignIn' in project 'GoogleSignIn' (no dependencies)
+    Target 'GoogleSignIn_GoogleSignInSwift' in project 'GoogleSignIn' (no dependencies)
+    Target 'Wealth' in project 'Wealth'
+        ➜ Explicit dependency on target 'Wealth' in project 'Wealth'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Wealth' in project 'Wealth'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Investment' in project 'Investment'
+        ➜ Explicit dependency on target 'Investment' in project 'Investment'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Investment' in project 'Investment'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Transaction' in project 'Transaction'
+        ➜ Explicit dependency on target 'Transaction' in project 'Transaction'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Transaction' in project 'Transaction'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Planning' in project 'Planning'
+        ➜ Explicit dependency on target 'Planning' in project 'Planning'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Planning' in project 'Planning'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Profile' in project 'Profile'
+        ➜ Explicit dependency on target 'Profile' in project 'Profile'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'Profile' in project 'Profile'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'FinFlowCore' in project 'FinFlowCore'
+        ➜ Explicit dependency on target 'FinFlowCore' in project 'FinFlowCore'
+    Target 'FinFlowCore' in project 'FinFlowCore' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x objective-c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Resources/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x objective-c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
+
+Build description signature: f04432dbc705c0403029ecd4bd74a58e
+Build description path: /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/XCBuildData/f04432dbc705c0403029ecd4bd74a58e.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Promises_FBLPromises.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Promises.build/Debug-iphonesimulator/Promises_FBLPromises.build/empty-Promises_FBLPromises.plist (in target 'Promises_FBLPromises' from project 'Promises')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/promises
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Promises.build/Debug-iphonesimulator/Promises_FBLPromises.build/empty-Promises_FBLPromises.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Promises_FBLPromises.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Logger.build/empty-GoogleUtilities_GoogleUtilities-Logger.plist (in target 'GoogleUtilities_GoogleUtilities-Logger' from project 'GoogleUtilities')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Logger.build/empty-GoogleUtilities_GoogleUtilities-Logger.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleSignIn_GoogleSignIn.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleSignIn.build/Debug-iphonesimulator/GoogleSignIn_GoogleSignIn.build/empty-GoogleSignIn_GoogleSignIn.plist (in target 'GoogleSignIn_GoogleSignIn' from project 'GoogleSignIn')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleSignIn-iOS
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleSignIn.build/Debug-iphonesimulator/GoogleSignIn_GoogleSignIn.build/empty-GoogleSignIn_GoogleSignIn.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleSignIn_GoogleSignIn.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GTMSessionFetcher_GTMSessionFetcherCore.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GTMSessionFetcher.build/Debug-iphonesimulator/GTMSessionFetcher_GTMSessionFetcherCore.build/empty-GTMSessionFetcher_GTMSessionFetcherCore.plist (in target 'GTMSessionFetcher_GTMSessionFetcherCore' from project 'GTMSessionFetcher')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/gtm-session-fetcher
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GTMSessionFetcher.build/Debug-iphonesimulator/GTMSessionFetcher_GTMSessionFetcherCore.build/empty-GTMSessionFetcher_GTMSessionFetcherCore.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GTMSessionFetcher_GTMSessionFetcherCore.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-UserDefaults.build/empty-GoogleUtilities_GoogleUtilities-UserDefaults.plist (in target 'GoogleUtilities_GoogleUtilities-UserDefaults' from project 'GoogleUtilities')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-UserDefaults.build/empty-GoogleUtilities_GoogleUtilities-UserDefaults.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GTMAppAuth_GTMAppAuth.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GTMAppAuth.build/Debug-iphonesimulator/GTMAppAuth_GTMAppAuth.build/empty-GTMAppAuth_GTMAppAuth.plist (in target 'GTMAppAuth_GTMAppAuth' from project 'GTMAppAuth')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GTMAppAuth
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GTMAppAuth.build/Debug-iphonesimulator/GTMAppAuth_GTMAppAuth.build/empty-GTMAppAuth_GTMAppAuth.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GTMAppAuth_GTMAppAuth.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/AppAuth_AppAuthCore.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/AppAuth.build/Debug-iphonesimulator/AppAuth_AppAuthCore.build/empty-AppAuth_AppAuthCore.plist (in target 'AppAuth_AppAuthCore' from project 'AppAuth')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/AppAuth.build/Debug-iphonesimulator/AppAuth_AppAuthCore.build/empty-AppAuth_AppAuthCore.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/AppAuth_AppAuthCore.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/AppAuth_AppAuth.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/AppAuth.build/Debug-iphonesimulator/AppAuth_AppAuth.build/empty-AppAuth_AppAuth.plist (in target 'AppAuth_AppAuth' from project 'AppAuth')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/AppAuth.build/Debug-iphonesimulator/AppAuth_AppAuth.build/empty-AppAuth_AppAuth.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/AppAuth_AppAuth.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Environment.build/empty-GoogleUtilities_GoogleUtilities-Environment.plist (in target 'GoogleUtilities_GoogleUtilities-Environment' from project 'GoogleUtilities')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleUtilities.build/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Environment.build/empty-GoogleUtilities_GoogleUtilities-Environment.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist
+
+ProcessInfoPlistFile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleSignIn_GoogleSignInSwift.bundle/Info.plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleSignIn.build/Debug-iphonesimulator/GoogleSignIn_GoogleSignInSwift.build/empty-GoogleSignIn_GoogleSignInSwift.plist (in target 'GoogleSignIn_GoogleSignInSwift' from project 'GoogleSignIn')
+    cd /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleSignIn-iOS
+    builtin-infoPlistUtility /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GoogleSignIn.build/Debug-iphonesimulator/GoogleSignIn_GoogleSignInSwift.build/empty-GoogleSignIn_GoogleSignInSwift.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/GoogleSignIn_GoogleSignInSwift.bundle/Info.plist
+
+ProcessProductPackaging "" /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "LC4F584F5W.nvb.FinFlowIos";
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent
+
+SwiftDriver Investment normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Investment -Onone -enforce-exclusivity\=checked @/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/x86_64/Investment.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target x86_64-apple-ios17.0-simulator -g -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/x86_64/Investment-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/x86_64/Investment.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -package-name investment -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/x86_64/Investment_const_extract_protocols.json -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources-normal/x86_64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources/x86_64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/x86_64/Investment-Swift.h -working-directory /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+SwiftDriver Investment normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Investment -Onone -enforce-exclusivity\=checked @/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -package-name investment -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment_const_extract_protocols.json -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources-normal/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment-Swift.h -working-directory /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+ExtractAppIntentsMetadata (in target 'Identity' from project 'Identity')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Identity
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Identity --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk --xcode-version 17C529 --platform-family iOS --deployment-target 17.0 --bundle-identifier identity.Identity --output /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Identity.appintents --target-triple arm64-apple-ios17.0-simulator --target-triple x86_64-apple-ios17.0-simulator --binary-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Identity.o --dependency-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/arm64/Identity_dependency_info.dat --dependency-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/x86_64/Identity_dependency_info.dat --stringsdata-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/arm64/Identity.SwiftFileList --source-file-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/x86_64/Identity.SwiftFileList --metadata-file-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Identity.DependencyMetadataFileList --static-metadata-file-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Identity.DependencyStaticMetadataFileList --swift-const-vals-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/arm64/Identity.SwiftConstValuesFileList --swift-const-vals-list /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Identity.build/Debug-iphonesimulator/Identity.build/Objects-normal/x86_64/Identity.SwiftConstValuesFileList --force --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-03-23 07:17:17.689 appintentsmetadataprocessor[14031:7940101] Starting appintentsmetadataprocessor export
+2026-03-23 07:17:17.910 appintentsmetadataprocessor[14031:7940101] Extracted no relevant App Intents symbols, skipping writing output
+
+ProcessProductPackagingDER /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent.der (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    /usr/bin/derq query -f xml -i /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent.der --raw
+
+PhaseScriptExecution SwiftLint /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Script-A42D54942F58959200EDD686.sh (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export ACTION\=build
+    export AD_HOC_CODE_SIGNING_ALLOWED\=YES
+    export AGGREGATE_TRACKED_DOMAINS\=YES
+    export ALLOW_BUILD_REQUEST_OVERRIDES\=NO
+    export ALLOW_TARGET_PLATFORM_SPECIALIZATION\=NO
+    export ALTERNATE_GROUP\=staff
+    export ALTERNATE_MODE\=u+w,go-w,a+rX
+    export ALTERNATE_OWNER\=nguyenvanbao
+    export ALTERNATIVE_DISTRIBUTION_WEB\=NO
+    export ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES\=NO
+    export ALWAYS_SEARCH_USER_PATHS\=NO
+    export ALWAYS_USE_SEPARATE_HEADERMAPS\=NO
+    export APPLICATION_EXTENSION_API_ONLY\=NO
+    export APPLY_RULES_IN_COPY_FILES\=NO
+    export APPLY_RULES_IN_COPY_HEADERS\=NO
+    export APP_SHORTCUTS_ENABLE_FLEXIBLE_MATCHING\=YES
+    export ARCHS\=arm64\ x86_64
+    export ARCHS_STANDARD\=arm64\ x86_64
+    export ARCHS_STANDARD_32_64_BIT\=arm64\ x86_64
+    export ARCHS_STANDARD_64_BIT\=arm64\ x86_64
+    export ARCHS_STANDARD_INCLUDING_64_BIT\=arm64\ x86_64
+    export ARCHS_UNIVERSAL_IPHONE_OS\=arm64\ x86_64
+    export ASSETCATALOG_COMPILER_APPICON_NAME\=AppIcon
+    export ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS\=YES
+    export ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME\=AccentColor
+    export AUTOMATICALLY_MERGE_DEPENDENCIES\=NO
+    export AUTOMATION_APPLE_EVENTS\=NO
+    export AVAILABLE_PLATFORMS\=android\ appletvos\ appletvsimulator\ driverkit\ iphoneos\ iphonesimulator\ macosx\ qnx\ watchos\ watchsimulator\ webassembly\ xros\ xrsimulator
+    export AppIdentifierPrefix\=LC4F584F5W.
+    export BUILD_ACTIVE_RESOURCES_ONLY\=NO
+    export BUILD_COMPONENTS\=headers\ build
+    export BUILD_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products
+    export BUILD_LIBRARY_FOR_DISTRIBUTION\=NO
+    export BUILD_ROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products
+    export BUILD_STYLE\=
+    export BUILD_VARIANTS\=normal
+    export BUILT_PRODUCTS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator
+    export BUNDLE_CONTENTS_FOLDER_PATH_deep\=Contents/
+    export BUNDLE_EXECUTABLE_FOLDER_NAME_deep\=MacOS
+    export BUNDLE_EXTENSIONS_FOLDER_PATH\=Extensions
+    export BUNDLE_FORMAT\=shallow
+    export BUNDLE_FRAMEWORKS_FOLDER_PATH\=Frameworks
+    export BUNDLE_PLUGINS_FOLDER_PATH\=PlugIns
+    export BUNDLE_PRIVATE_HEADERS_FOLDER_PATH\=PrivateHeaders
+    export BUNDLE_PUBLIC_HEADERS_FOLDER_PATH\=Headers
+    export CACHE_ROOT\=/var/folders/7q/cd9_45ds205_08hg8fp07f_h0000gn/C/com.apple.DeveloperTools/26.3-17C529/Xcode
+    export CCHROOT\=/var/folders/7q/cd9_45ds205_08hg8fp07f_h0000gn/C/com.apple.DeveloperTools/26.3-17C529/Xcode
+    export CHMOD\=/bin/chmod
+    export CHOWN\=/usr/sbin/chown
+    export CLANG_ANALYZER_NONNULL\=YES
+    export CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION\=YES_AGGRESSIVE
+    export CLANG_CACHE_FINE_GRAINED_OUTPUTS\=YES
+    export CLANG_CXX_LANGUAGE_STANDARD\=gnu++20
+    export CLANG_ENABLE_EXPLICIT_MODULES\=YES
+    export CLANG_ENABLE_MODULES\=YES
+    export CLANG_ENABLE_OBJC_ARC\=YES
+    export CLANG_ENABLE_OBJC_WEAK\=YES
+    export CLANG_MODULES_BUILD_SESSION_FILE\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation
+    export CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING\=YES
+    export CLANG_WARN_BOOL_CONVERSION\=YES
+    export CLANG_WARN_COMMA\=YES
+    export CLANG_WARN_CONSTANT_CONVERSION\=YES
+    export CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS\=YES
+    export CLANG_WARN_DIRECT_OBJC_ISA_USAGE\=YES_ERROR
+    export CLANG_WARN_DOCUMENTATION_COMMENTS\=YES
+    export CLANG_WARN_EMPTY_BODY\=YES
+    export CLANG_WARN_ENUM_CONVERSION\=YES
+    export CLANG_WARN_INFINITE_RECURSION\=YES
+    export CLANG_WARN_INT_CONVERSION\=YES
+    export CLANG_WARN_NON_LITERAL_NULL_CONVERSION\=YES
+    export CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF\=YES
+    export CLANG_WARN_OBJC_LITERAL_CONVERSION\=YES
+    export CLANG_WARN_OBJC_ROOT_CLASS\=YES_ERROR
+    export CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER\=YES
+    export CLANG_WARN_RANGE_LOOP_ANALYSIS\=YES
+    export CLANG_WARN_STRICT_PROTOTYPES\=YES
+    export CLANG_WARN_SUSPICIOUS_MOVE\=YES
+    export CLANG_WARN_UNGUARDED_AVAILABILITY\=YES_AGGRESSIVE
+    export CLANG_WARN_UNREACHABLE_CODE\=YES
+    export CLANG_WARN__DUPLICATE_METHOD_MATCH\=YES
+    export CLASS_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/JavaClasses
+    export CLEAN_PRECOMPS\=YES
+    export CLONE_HEADERS\=NO
+    export CODESIGNING_FOLDER_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/FinFlow.app
+    export CODE_SIGNING_ALLOWED\=YES
+    export CODE_SIGNING_REQUIRED\=YES
+    export CODE_SIGN_CONTEXT_CLASS\=XCiPhoneSimulatorCodeSignContext
+    export CODE_SIGN_IDENTITY\=-
+    export CODE_SIGN_INJECT_BASE_ENTITLEMENTS\=YES
+    export CODE_SIGN_STYLE\=Automatic
+    export COLOR_DIAGNOSTICS\=NO
+    export COMBINE_HIDPI_IMAGES\=NO
+    export COMPILATION_CACHE_CAS_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/CompilationCache.noindex
+    export COMPILATION_CACHE_KEEP_CAS_DIRECTORY\=YES
+    export COMPILER_INDEX_STORE_ENABLE\=Default
+    export COMPOSITE_SDK_DIRS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/CompositeSDKs
+    export COMPRESS_PNG_FILES\=YES
+    export CONFIGURATION\=Debug
+    export CONFIGURATION_BUILD_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator
+    export CONFIGURATION_TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator
+    export CONTENTS_FOLDER_PATH\=FinFlow.app
+    export CONTENTS_FOLDER_PATH_SHALLOW_BUNDLE_NO\=FinFlow.app/Contents
+    export CONTENTS_FOLDER_PATH_SHALLOW_BUNDLE_YES\=FinFlow.app
+    export COPYING_PRESERVES_HFS_DATA\=NO
+    export COPY_HEADERS_RUN_UNIFDEF\=NO
+    export COPY_PHASE_STRIP\=NO
+    export CORRESPONDING_DEVICE_PLATFORM_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform
+    export CORRESPONDING_DEVICE_PLATFORM_NAME\=iphoneos
+    export CORRESPONDING_DEVICE_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk
+    export CORRESPONDING_DEVICE_SDK_NAME\=iphoneos26.2
+    export CP\=/bin/cp
+    export CREATE_INFOPLIST_SECTION_IN_BINARY\=NO
+    export CURRENT_ARCH\=undefined_arch
+    export CURRENT_PROJECT_VERSION\=1
+    export CURRENT_VARIANT\=normal
+    export DEAD_CODE_STRIPPING\=YES
+    export DEBUGGING_SYMBOLS\=YES
+    export DEBUG_INFORMATION_FORMAT\=dwarf
+    export DEBUG_INFORMATION_VERSION\=compiler-default
+    export DEFAULT_COMPILER\=com.apple.compilers.llvm.clang.1_0
+    export DEFAULT_DEXT_INSTALL_PATH\=/System/Library/DriverExtensions
+    export DEFAULT_KEXT_INSTALL_PATH\=/System/Library/Extensions
+    export DEFINES_MODULE\=NO
+    export DEPLOYMENT_LOCATION\=NO
+    export DEPLOYMENT_POSTPROCESSING\=NO
+    export DEPLOYMENT_TARGET_SETTING_NAME\=IPHONEOS_DEPLOYMENT_TARGET
+    export DEPLOYMENT_TARGET_SUGGESTED_VALUES\=12.0\ 12.1\ 12.2\ 12.3\ 12.4\ 13.0\ 13.1\ 13.2\ 13.3\ 13.4\ 13.5\ 13.6\ 14.0\ 14.1\ 14.2\ 14.3\ 14.4\ 14.5\ 14.6\ 14.7\ 15.0\ 15.1\ 15.2\ 15.3\ 15.4\ 15.5\ 15.6\ 16.0\ 16.1\ 16.2\ 16.3\ 16.4\ 16.5\ 16.6\ 17.0\ 17.1\ 17.2\ 17.3\ 17.4\ 17.5\ 17.6\ 18.0\ 18.1\ 18.2\ 18.3\ 18.4\ 18.5\ 18.6\ 26.0\ 26.1\ 26.2
+    export DERIVED_FILES_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources
+    export DERIVED_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources
+    export DERIVED_SOURCES_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources
+    export DEVELOPER_APPLICATIONS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications
+    export DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/usr/bin
+    export DEVELOPER_DIR\=/Applications/Xcode.app/Contents/Developer
+    export DEVELOPER_FRAMEWORKS_DIR\=/Applications/Xcode.app/Contents/Developer/Library/Frameworks
+    export DEVELOPER_FRAMEWORKS_DIR_QUOTED\=/Applications/Xcode.app/Contents/Developer/Library/Frameworks
+    export DEVELOPER_LIBRARY_DIR\=/Applications/Xcode.app/Contents/Developer/Library
+    export DEVELOPER_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+    export DEVELOPER_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Tools
+    export DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/usr
+    export DEVELOPMENT_LANGUAGE\=en
+    export DEVELOPMENT_TEAM\=LC4F584F5W
+    export DIAGNOSE_MISSING_TARGET_DEPENDENCIES\=YES
+    export DIFF\=/usr/bin/diff
+    export DOCUMENTATION_FOLDER_PATH\=FinFlow.app/en.lproj/Documentation
+    export DONT_GENERATE_INFOPLIST_FILE\=NO
+    export DSTROOT\=/tmp/FinFlow.dst
+    export DT_TOOLCHAIN_DIR\=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+    export DWARF_DSYM_FILE_NAME\=FinFlow.app.dSYM
+    export DWARF_DSYM_FILE_SHOULD_ACCOMPANY_PRODUCT\=NO
+    export DWARF_DSYM_FOLDER_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator
+    export DYNAMIC_LIBRARY_EXTENSION\=dylib
+    export EAGER_COMPILATION_ALLOW_SCRIPTS\=YES
+    export EAGER_LINKING\=NO
+    export EFFECTIVE_PLATFORM_NAME\=-iphonesimulator
+    export EMBEDDED_CONTENT_CONTAINS_SWIFT\=NO
+    export EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE\=NO
+    export EMBED_PACKAGE_RESOURCE_BUNDLE_NAMES\=\ GoogleSignIn_GoogleSignIn\ GTMSessionFetcher_GTMSessionFetcherCore\ GTMAppAuth_GTMAppAuth\ GoogleUtilities_GoogleUtilities-UserDefaults\ GoogleUtilities_GoogleUtilities-Environment\ GoogleUtilities_GoogleUtilities-Logger\ Promises_FBLPromises\ AppAuth_AppAuthCore\ AppAuth_AppAuth\ GoogleSignIn_GoogleSignInSwift
+    export ENABLE_APP_SANDBOX\=NO
+    export ENABLE_CODE_COVERAGE\=YES
+    export ENABLE_CPLUSPLUS_BOUNDS_SAFE_BUFFERS\=NO
+    export ENABLE_C_BOUNDS_SAFETY\=NO
+    export ENABLE_DEBUG_DYLIB\=YES
+    export ENABLE_DEFAULT_HEADER_SEARCH_PATHS\=YES
+    export ENABLE_DEFAULT_SEARCH_PATHS\=YES
+    export ENABLE_ENHANCED_SECURITY\=NO
+    export ENABLE_HARDENED_RUNTIME\=NO
+    export ENABLE_HEADER_DEPENDENCIES\=YES
+    export ENABLE_INCOMING_NETWORK_CONNECTIONS\=NO
+    export ENABLE_ON_DEMAND_RESOURCES\=YES
+    export ENABLE_OUTGOING_NETWORK_CONNECTIONS\=NO
+    export ENABLE_POINTER_AUTHENTICATION\=NO
+    export ENABLE_PREVIEWS\=NO
+    export ENABLE_RESOURCE_ACCESS_AUDIO_INPUT\=NO
+    export ENABLE_RESOURCE_ACCESS_BLUETOOTH\=NO
+    export ENABLE_RESOURCE_ACCESS_CALENDARS\=NO
+    export ENABLE_RESOURCE_ACCESS_CAMERA\=NO
+    export ENABLE_RESOURCE_ACCESS_CONTACTS\=NO
+    export ENABLE_RESOURCE_ACCESS_LOCATION\=NO
+    export ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY\=NO
+    export ENABLE_RESOURCE_ACCESS_PRINTING\=NO
+    export ENABLE_RESOURCE_ACCESS_USB\=NO
+    export ENABLE_SDK_IMPORTS\=NO
+    export ENABLE_SECURITY_COMPILER_WARNINGS\=NO
+    export ENABLE_STRICT_OBJC_MSGSEND\=YES
+    export ENABLE_TESTABILITY\=YES
+    export ENABLE_TESTING_SEARCH_PATHS\=NO
+    export ENABLE_USER_SCRIPT_SANDBOXING\=YES
+    export ENABLE_XOJIT_PREVIEWS\=YES
+    export ENFORCE_VALID_ARCHS\=YES
+    export ENTITLEMENTS_ALLOWED\=NO
+    export ENTITLEMENTS_DESTINATION\=__entitlements
+    export ENTITLEMENTS_REQUIRED\=NO
+    export EXCLUDED_INSTALLSRC_SUBDIRECTORY_PATTERNS\=.DS_Store\ .svn\ .git\ .hg\ CVS
+    export EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES\=\*.nib\ \*.lproj\ \*.framework\ \*.gch\ \*.xcode\*\ \*.xcassets\ \*.icon\ \(\*\)\ .DS_Store\ CVS\ .svn\ .git\ .hg\ \*.pbproj\ \*.pbxproj
+    export EXECUTABLES_FOLDER_PATH\=FinFlow.app/Executables
+    export EXECUTABLE_BLANK_INJECTION_DYLIB_PATH\=FinFlow.app/__preview.dylib
+    export EXECUTABLE_DEBUG_DYLIB_INSTALL_NAME\=@rpath/FinFlow.debug.dylib
+    export EXECUTABLE_DEBUG_DYLIB_PATH\=FinFlow.app/FinFlow.debug.dylib
+    export EXECUTABLE_FOLDER_PATH\=FinFlow.app
+    export EXECUTABLE_FOLDER_PATH_SHALLOW_BUNDLE_NO\=FinFlow.app/MacOS
+    export EXECUTABLE_FOLDER_PATH_SHALLOW_BUNDLE_YES\=FinFlow.app
+    export EXECUTABLE_NAME\=FinFlow
+    export EXECUTABLE_PATH\=FinFlow.app/FinFlow
+    export EXPANDED_CODE_SIGN_IDENTITY\=-
+    export EXPANDED_CODE_SIGN_IDENTITY_NAME\=Sign\ to\ Run\ Locally
+    export EXTENSIONS_FOLDER_PATH\=FinFlow.app/Extensions
+    export FILE_LIST\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects/LinkFileList
+    export FIXED_FILES_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FixedFiles
+    export FRAMEWORKS_FOLDER_PATH\=FinFlow.app/Frameworks
+    export FRAMEWORK_FLAG_PREFIX\=-framework
+    export FRAMEWORK_SEARCH_PATHS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator\ 
+    export FRAMEWORK_VERSION\=A
+    export FULL_PRODUCT_NAME\=FinFlow.app
+    export FUSE_BUILD_PHASES\=YES
+    export FUSE_BUILD_SCRIPT_PHASES\=NO
+    export GCC3_VERSION\=3.3
+    export GCC_C_LANGUAGE_STANDARD\=gnu17
+    export GCC_DYNAMIC_NO_PIC\=NO
+    export GCC_INLINES_ARE_PRIVATE_EXTERN\=YES
+    export GCC_NO_COMMON_BLOCKS\=YES
+    export GCC_OBJC_LEGACY_DISPATCH\=YES
+    export GCC_OPTIMIZATION_LEVEL\=0
+    export GCC_PFE_FILE_C_DIALECTS\=c\ objective-c\ c++\ objective-c++
+    export GCC_PREPROCESSOR_DEFINITIONS\=DEBUG\=1\ 
+    export GCC_SYMBOLS_PRIVATE_EXTERN\=NO
+    export GCC_TREAT_WARNINGS_AS_ERRORS\=NO
+    export GCC_VERSION\=com.apple.compilers.llvm.clang.1_0
+    export GCC_VERSION_IDENTIFIER\=com_apple_compilers_llvm_clang_1_0
+    export GCC_WARN_64_TO_32_BIT_CONVERSION\=YES
+    export GCC_WARN_ABOUT_RETURN_TYPE\=YES_ERROR
+    export GCC_WARN_UNDECLARED_SELECTOR\=YES
+    export GCC_WARN_UNINITIALIZED_AUTOS\=YES_AGGRESSIVE
+    export GCC_WARN_UNUSED_FUNCTION\=YES
+    export GCC_WARN_UNUSED_VARIABLE\=YES
+    export GENERATED_MODULEMAP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator
+    export GENERATE_INFOPLIST_FILE\=YES
+    export GENERATE_INTERMEDIATE_TEXT_BASED_STUBS\=YES
+    export GENERATE_PKGINFO_FILE\=YES
+    export GENERATE_PRELINK_OBJECT_FILE\=NO
+    export GENERATE_PROFILING_CODE\=NO
+    export GENERATE_TEXT_BASED_STUBS\=NO
+    export GID\=20
+    export GROUP\=staff
+    export HEADERMAP_INCLUDES_FLAT_ENTRIES_FOR_TARGET_BEING_BUILT\=YES
+    export HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_ALL_PRODUCT_TYPES\=YES
+    export HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_TARGETS_NOT_BEING_BUILT\=YES
+    export HEADERMAP_INCLUDES_NONPUBLIC_NONPRIVATE_HEADERS\=YES
+    export HEADERMAP_INCLUDES_PROJECT_HEADERS\=YES
+    export HEADERMAP_USES_FRAMEWORK_PREFIX_ENTRIES\=YES
+    export HEADERMAP_USES_VFS\=NO
+    export HEADER_SEARCH_PATHS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth/.\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuthCore/.\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/promises/Sources/FBLPromises/include\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Logger/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Environment/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/third_party/IsAppEncrypted/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/UserDefaults/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/app-check/AppCheckCore/Sources/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/gtm-session-fetcher/Sources/Core/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleSignIn-iOS/GoogleSignIn/Sources/Public\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include\ 
+    export HOME\=/Users/nguyenvanbao
+    export HOST_ARCH\=arm64
+    export HOST_PLATFORM\=macosx
+    export ICONV\=/usr/bin/iconv
+    export IMPLICIT_DEPENDENCY_DOMAIN\=default
+    export INFOPLIST_ENABLE_CFBUNDLEICONS_MERGE\=YES
+    export INFOPLIST_EXPAND_BUILD_SETTINGS\=YES
+    export INFOPLIST_FILE\=FinFlow/Resources/Info.plist
+    export INFOPLIST_KEY_UIApplicationSceneManifest_Generation\=YES
+    export INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents\=YES
+    export INFOPLIST_KEY_UILaunchScreen_Generation\=YES
+    export INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad\=UIInterfaceOrientationPortrait\ UIInterfaceOrientationPortraitUpsideDown\ UIInterfaceOrientationLandscapeLeft\ UIInterfaceOrientationLandscapeRight
+    export INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone\=UIInterfaceOrientationPortrait\ UIInterfaceOrientationLandscapeLeft\ UIInterfaceOrientationLandscapeRight
+    export INFOPLIST_OUTPUT_FORMAT\=binary
+    export INFOPLIST_PATH\=FinFlow.app/Info.plist
+    export INFOPLIST_PREPROCESS\=NO
+    export INFOSTRINGS_PATH\=FinFlow.app/en.lproj/InfoPlist.strings
+    export INLINE_PRIVATE_FRAMEWORKS\=NO
+    export INSTALLAPI_IGNORE_SKIP_INSTALL\=YES
+    export INSTALLHDRS_COPY_PHASE\=NO
+    export INSTALLHDRS_SCRIPT_PHASE\=NO
+    export INSTALL_DIR\=/tmp/FinFlow.dst/Applications
+    export INSTALL_GROUP\=staff
+    export INSTALL_MODE_FLAG\=u+w,go-w,a+rX
+    export INSTALL_OWNER\=nguyenvanbao
+    export INSTALL_PATH\=/Applications
+    export INSTALL_ROOT\=/tmp/FinFlow.dst
+    export IPHONEOS_DEPLOYMENT_TARGET\=17.0
+    export IS_UNOPTIMIZED_BUILD\=YES
+    export JAVAC_DEFAULT_FLAGS\=-J-Xms64m\ -J-XX:NewSize\=4M\ -J-Dfile.encoding\=UTF8
+    export JAVA_APP_STUB\=/System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub
+    export JAVA_ARCHIVE_CLASSES\=YES
+    export JAVA_ARCHIVE_TYPE\=JAR
+    export JAVA_COMPILER\=/usr/bin/javac
+    export JAVA_FOLDER_PATH\=FinFlow.app/Java
+    export JAVA_FRAMEWORK_RESOURCES_DIRS\=Resources
+    export JAVA_JAR_FLAGS\=cv
+    export JAVA_SOURCE_SUBDIR\=.
+    export JAVA_USE_DEPENDENCIES\=YES
+    export JAVA_ZIP_FLAGS\=-urg
+    export JIKES_DEFAULT_FLAGS\=+E\ +OLDCSO
+    export KEEP_PRIVATE_EXTERNS\=NO
+    export LD_DEPENDENCY_INFO_FILE\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/undefined_arch/FinFlow_dependency_info.dat
+    export LD_ENTITLEMENTS_SECTION\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent
+    export LD_ENTITLEMENTS_SECTION_DER\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow.app-Simulated.xcent.der
+    export LD_EXPORT_SYMBOLS\=YES
+    export LD_GENERATE_MAP_FILE\=NO
+    export LD_MAP_FILE_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-LinkMap-normal-undefined_arch.txt
+    export LD_NO_PIE\=NO
+    export LD_QUOTE_LINKER_ARGUMENTS_FOR_COMPILER_DRIVER\=YES
+    export LD_RUNPATH_SEARCH_PATHS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks\ \ @executable_path/Frameworks
+    export LD_RUNPATH_SEARCH_PATHS_YES\=@loader_path/../Frameworks
+    export LD_SHARED_CACHE_ELIGIBLE\=Automatic
+    export LD_WARN_DUPLICATE_LIBRARIES\=NO
+    export LD_WARN_UNUSED_DYLIBS\=NO
+    export LEGACY_DEVELOPER_DIR\=/Applications/Xcode.app/Contents/PlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer
+    export LEX\=lex
+    export LIBRARY_DEXT_INSTALL_PATH\=/Library/DriverExtensions
+    export LIBRARY_FLAG_NOSPACE\=YES
+    export LIBRARY_FLAG_PREFIX\=-l
+    export LIBRARY_KEXT_INSTALL_PATH\=/Library/Extensions
+    export LIBRARY_SEARCH_PATHS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator\ 
+    export LINKER_DISPLAYS_MANGLED_NAMES\=NO
+    export LINK_FILE_LIST_normal_arm64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow.LinkFileList
+    export LINK_FILE_LIST_normal_x86_64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow.LinkFileList
+    export LINK_OBJC_RUNTIME\=YES
+    export LINK_WITH_STANDARD_LIBRARIES\=YES
+    export LLVM_TARGET_TRIPLE_OS_VERSION\=ios17.0
+    export LLVM_TARGET_TRIPLE_SUFFIX\=-simulator
+    export LLVM_TARGET_TRIPLE_VENDOR\=apple
+    export LM_AUX_CONST_METADATA_LIST_PATH_normal_arm64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow.SwiftConstValuesFileList
+    export LM_AUX_CONST_METADATA_LIST_PATH_normal_x86_64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow.SwiftConstValuesFileList
+    export LOCALIZATION_EXPORT_SUPPORTED\=YES
+    export LOCALIZATION_PREFERS_STRING_CATALOGS\=YES
+    export LOCALIZED_RESOURCES_FOLDER_PATH\=FinFlow.app/en.lproj
+    export LOCALIZED_STRING_MACRO_NAMES\=NSLocalizedString\ CFCopyLocalizedString
+    export LOCALIZED_STRING_SWIFTUI_SUPPORT\=YES
+    export LOCAL_ADMIN_APPS_DIR\=/Applications/Utilities
+    export LOCAL_APPS_DIR\=/Applications
+    export LOCAL_DEVELOPER_DIR\=/Library/Developer
+    export LOCAL_LIBRARY_DIR\=/Library
+    export LOCROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export LOCSYMROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export MACH_O_TYPE\=mh_execute
+    export MAC_OS_X_PRODUCT_BUILD_VERSION\=25D2128
+    export MAC_OS_X_VERSION_ACTUAL\=260301
+    export MAC_OS_X_VERSION_MAJOR\=260000
+    export MAC_OS_X_VERSION_MINOR\=260300
+    export MAKE_MERGEABLE\=NO
+    export MARKETING_VERSION\=1.0
+    export MERGEABLE_LIBRARY\=NO
+    export MERGED_BINARY_TYPE\=none
+    export MERGE_LINKED_LIBRARIES\=NO
+    export METAL_LIBRARY_FILE_BASE\=default
+    export METAL_LIBRARY_OUTPUT_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/FinFlow.app
+    export MODULES_FOLDER_PATH\=FinFlow.app/Modules
+    export MODULE_CACHE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+    export MTL_ENABLE_DEBUG_INFO\=INCLUDE_SOURCE
+    export MTL_FAST_MATH\=YES
+    export NATIVE_ARCH\=arm64
+    export NATIVE_ARCH_32_BIT\=arm
+    export NATIVE_ARCH_64_BIT\=arm64
+    export NATIVE_ARCH_ACTUAL\=arm64
+    export NO_COMMON\=YES
+    export OBJC_ABI_VERSION\=2
+    export OBJECT_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects
+    export OBJECT_FILE_DIR_normal\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal
+    export OBJROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex
+    export ONLY_ACTIVE_ARCH\=NO
+    export OS\=MACOS
+    export OSAC\=/usr/bin/osacompile
+    export OTHER_CFLAGS\=-fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Profile.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Planning.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Transaction.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Investment.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Wealth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignInSwift.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Identity.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuthCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Logger.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Environment.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/third-party-IsAppEncrypted.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-UserDefaults.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppCheckCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMAppAuth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMSessionFetcherCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignIn.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/FinFlowCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Dashboard.modulemap\ 
+    export OTHER_CPLUSPLUSFLAGS\=-fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Profile.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Planning.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Transaction.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Investment.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Wealth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignInSwift.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Identity.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuthCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Logger.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Environment.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/third-party-IsAppEncrypted.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-UserDefaults.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppCheckCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMAppAuth.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMSessionFetcherCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignIn.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/FinFlowCore.modulemap\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/Dashboard.modulemap\ 
+    export OTHER_LDFLAGS\=-Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ -Wl,-no_warn_duplicate_libraries\ \ -framework\ CoreGraphics\ -framework\ CoreText\ -framework\ Foundation\ -framework\ LocalAuthentication\ -framework\ Security\ -framework\ UIKit\ -framework\ Security\ -framework\ DeviceCheck
+    export OTHER_SWIFT_FLAGS\=-Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuth.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuthCore.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Logger.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Environment.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/third-party-IsAppEncrypted.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-UserDefaults.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppCheckCore.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMSessionFetcherCore.modulemap\ -Xcc\ -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignIn.modulemap\ 
+    export PACKAGE_TYPE\=com.apple.package-type.wrapper.application
+    export PASCAL_STRINGS\=YES
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Users/nguyenvanbao/.antigravity/antigravity/bin:/Users/nguyenvanbao/.nvm/versions/node/v20.19.5/bin:/Users/nguyenvanbao/.pyenv/shims:/Users/nguyenvanbao/.pyenv/bin:/opt/homebrew/opt/openjdk@21/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/Library/Apple/usr/bin:/Users/nguyenvanbao/.sdkman/candidates/java/current/bin:/Users/nguyenvanbao/.lmstudio/bin:/Users/nguyenvanbao/.antigravity/extensions/ms-python.debugpy-2025.18.0-darwin-arm64/bundled/scripts/noConfigScripts:/Users/nguyenvanbao/.antigravity/extensions/vscjava.vscode-java-debug-0.58.5-universal/bundled/scripts/noConfigScripts
+    export PATH_PREFIXES_EXCLUDED_FROM_HEADER_DEPENDENCIES\=/usr/include\ /usr/local/include\ /System/Library/Frameworks\ /System/Library/PrivateFrameworks\ /Applications/Xcode.app/Contents/Developer/Headers\ /Applications/Xcode.app/Contents/Developer/SDKs\ /Applications/Xcode.app/Contents/Developer/Platforms
+    export PBDEVELOPMENTPLIST_PATH\=FinFlow.app/pbdevelopment.plist
+    export PER_ARCH_MODULE_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/undefined_arch
+    export PER_ARCH_OBJECT_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/undefined_arch
+    export PER_VARIANT_OBJECT_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal
+    export PKGINFO_FILE_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/PkgInfo
+    export PKGINFO_PATH\=FinFlow.app/PkgInfo
+    export PLATFORM_DEVELOPER_APPLICATIONS_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications
+    export PLATFORM_DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin
+    export PLATFORM_DEVELOPER_LIBRARY_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library
+    export PLATFORM_DEVELOPER_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs
+    export PLATFORM_DEVELOPER_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools
+    export PLATFORM_DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr
+    export PLATFORM_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform
+    export PLATFORM_DISPLAY_NAME\=iOS\ Simulator
+    export PLATFORM_FAMILY_NAME\=iOS
+    export PLATFORM_NAME\=iphonesimulator
+    export PLATFORM_PREFERRED_ARCH\=x86_64
+    export PLATFORM_PRODUCT_BUILD_VERSION\=23C57
+    export PLATFORM_REQUIRES_SWIFT_AUTOLINK_EXTRACT\=NO
+    export PLATFORM_REQUIRES_SWIFT_MODULEWRAP\=NO
+    export PLIST_FILE_OUTPUT_FORMAT\=binary
+    export PLUGINS_FOLDER_PATH\=FinFlow.app/PlugIns
+    export PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR\=YES
+    export PRECOMP_DESTINATION_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/PrefixHeaders
+    export PRIVATE_HEADERS_FOLDER_PATH\=FinFlow.app/PrivateHeaders
+    export PROCESSED_INFOPLIST_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/undefined_arch/Processed-Info.plist
+    export PRODUCT_BUNDLE_IDENTIFIER\=nvb.FinFlowIos
+    export PRODUCT_BUNDLE_PACKAGE_TYPE\=APPL
+    export PRODUCT_MODULE_NAME\=FinFlow
+    export PRODUCT_NAME\=FinFlow
+    export PRODUCT_SETTINGS_PATH\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Resources/Info.plist
+    export PRODUCT_TYPE\=com.apple.product-type.application
+    export PROFILING_CODE\=NO
+    export PROJECT\=FinFlow
+    export PROJECT_DERIVED_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/DerivedSources
+    export PROJECT_DIR\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export PROJECT_FILE_PATH\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    export PROJECT_GUID\=63eef6a8f12d552cf271d30c1b4f2a3b
+    export PROJECT_NAME\=FinFlow
+    export PROJECT_TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build
+    export PROJECT_TEMP_ROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex
+    export PROVISIONING_PROFILE_REQUIRED\=NO
+    export PROVISIONING_PROFILE_REQUIRED_YES_YES\=YES
+    export PROVISIONING_PROFILE_SUPPORTED\=YES
+    export PUBLIC_HEADERS_FOLDER_PATH\=FinFlow.app/Headers
+    export RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET\=15.0
+    export RECURSIVE_SEARCH_PATHS_FOLLOW_SYMLINKS\=YES
+    export REMOVE_CVS_FROM_RESOURCES\=YES
+    export REMOVE_GIT_FROM_RESOURCES\=YES
+    export REMOVE_HEADERS_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_HG_FROM_RESOURCES\=YES
+    export REMOVE_STATIC_EXECUTABLES_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_SVN_FROM_RESOURCES\=YES
+    export RESCHEDULE_INDEPENDENT_HEADERS_PHASES\=YES
+    export REZ_COLLECTOR_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/ResourceManagerResources
+    export REZ_OBJECTS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/ResourceManagerResources/Objects
+    export REZ_SEARCH_PATHS\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator\ 
+    export RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES\=NO
+    export RUNTIME_EXCEPTION_ALLOW_JIT\=NO
+    export RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY\=NO
+    export RUNTIME_EXCEPTION_DEBUGGING_TOOL\=NO
+    export RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION\=NO
+    export RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION\=NO
+    export SCAN_ALL_SOURCE_FILES_FOR_INCLUDES\=NO
+    export SCRIPTS_FOLDER_PATH\=FinFlow.app/Scripts
+    export SCRIPT_INPUT_FILE_COUNT\=0
+    export SCRIPT_INPUT_FILE_LIST_COUNT\=0
+    export SCRIPT_OUTPUT_FILE_COUNT\=0
+    export SCRIPT_OUTPUT_FILE_LIST_COUNT\=0
+    export SDKROOT\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk
+    export SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk
+    export SDK_DIR_iphonesimulator\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk
+    export SDK_DIR_iphonesimulator26_2\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk
+    export SDK_NAME\=iphonesimulator26.2
+    export SDK_NAMES\=iphonesimulator26.2
+    export SDK_PRODUCT_BUILD_VERSION\=23C57
+    export SDK_STAT_CACHE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData
+    export SDK_STAT_CACHE_ENABLE\=YES
+    export SDK_STAT_CACHE_PATH\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache
+    export SDK_VERSION\=26.2
+    export SDK_VERSION_ACTUAL\=260200
+    export SDK_VERSION_MAJOR\=260000
+    export SDK_VERSION_MINOR\=260200
+    export SED\=/usr/bin/sed
+    export SEPARATE_STRIP\=NO
+    export SEPARATE_SYMBOL_EDIT\=NO
+    export SET_DIR_MODE_OWNER_GROUP\=YES
+    export SET_FILE_MODE_OWNER_GROUP\=NO
+    export SHALLOW_BUNDLE\=YES
+    export SHALLOW_BUNDLE_TRIPLE\=ios-simulator
+    export SHALLOW_BUNDLE_ios_macabi\=NO
+    export SHALLOW_BUNDLE_macos\=NO
+    export SHARED_DERIVED_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/DerivedSources
+    export SHARED_FRAMEWORKS_FOLDER_PATH\=FinFlow.app/SharedFrameworks
+    export SHARED_PRECOMPS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/PrecompiledHeaders
+    export SHARED_SUPPORT_FOLDER_PATH\=FinFlow.app/SharedSupport
+    export SKIP_INSTALL\=NO
+    export SOURCE_ROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export SRCROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    export STRINGSDATA_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/undefined_arch
+    export STRINGSDATA_ROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build
+    export STRINGS_FILE_INFOPLIST_RENAME\=YES
+    export STRINGS_FILE_OUTPUT_ENCODING\=binary
+    export STRING_CATALOG_GENERATE_SYMBOLS\=YES
+    export STRIP_BITCODE_FROM_COPIED_FILES\=NO
+    export STRIP_INSTALLED_PRODUCT\=NO
+    export STRIP_STYLE\=all
+    export STRIP_SWIFT_SYMBOLS\=YES
+    export SUPPORTED_DEVICE_FAMILIES\=1,2
+    export SUPPORTED_PLATFORMS\=iphoneos\ iphonesimulator
+    export SUPPORTS_MACCATALYST\=NO
+    export SUPPORTS_ON_DEMAND_RESOURCES\=YES
+    export SUPPORTS_TEXT_BASED_API\=NO
+    export SUPPRESS_WARNINGS\=NO
+    export SWIFT_ACTIVE_COMPILATION_CONDITIONS\=DEBUG\ 
+    export SWIFT_APPROACHABLE_CONCURRENCY\=YES
+    export SWIFT_DEFAULT_ACTOR_ISOLATION\=MainActor
+    export SWIFT_EMIT_CONST_VALUE_PROTOCOLS\=AppIntent\ EntityQuery\ AppEntity\ TransientEntity\ AppEnum\ AppShortcutProviding\ AppShortcutsProvider\ AnyResolverProviding\ AppIntentsPackage\ DynamicOptionsProvider\ _IntentValueRepresentable\ _AssistantIntentsProvider\ _GenerativeFunctionExtractable\ IntentValueQuery\ Resolver\ AppExtension\ ExtensionPointDefining
+    export SWIFT_EMIT_LOC_STRINGS\=YES
+    export SWIFT_ENABLE_EXPLICIT_MODULES\=YES
+    export SWIFT_OPTIMIZATION_LEVEL\=-Onone
+    export SWIFT_PLATFORM_TARGET_PREFIX\=ios
+    export SWIFT_RESPONSE_FILE_PATH_normal_arm64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow.SwiftFileList
+    export SWIFT_RESPONSE_FILE_PATH_normal_x86_64\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow.SwiftFileList
+    export SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY\=YES
+    export SWIFT_VERSION\=5.0
+    export SYMROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products
+    export SYSTEM_ADMIN_APPS_DIR\=/Applications/Utilities
+    export SYSTEM_APPS_DIR\=/Applications
+    export SYSTEM_CORE_SERVICES_DIR\=/System/Library/CoreServices
+    export SYSTEM_DEMOS_DIR\=/Applications/Extras
+    export SYSTEM_DEVELOPER_APPS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications
+    export SYSTEM_DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/usr/bin
+    export SYSTEM_DEVELOPER_DEMOS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Utilities/Built\ Examples
+    export SYSTEM_DEVELOPER_DIR\=/Applications/Xcode.app/Contents/Developer
+    export SYSTEM_DEVELOPER_DOC_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library
+    export SYSTEM_DEVELOPER_GRAPHICS_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Graphics\ Tools
+    export SYSTEM_DEVELOPER_JAVA_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Java\ Tools
+    export SYSTEM_DEVELOPER_PERFORMANCE_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Performance\ Tools
+    export SYSTEM_DEVELOPER_RELEASENOTES_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/releasenotes
+    export SYSTEM_DEVELOPER_TOOLS\=/Applications/Xcode.app/Contents/Developer/Tools
+    export SYSTEM_DEVELOPER_TOOLS_DOC_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/documentation/DeveloperTools
+    export SYSTEM_DEVELOPER_TOOLS_RELEASENOTES_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/releasenotes/DeveloperTools
+    export SYSTEM_DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/usr
+    export SYSTEM_DEVELOPER_UTILITIES_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Utilities
+    export SYSTEM_DEXT_INSTALL_PATH\=/System/Library/DriverExtensions
+    export SYSTEM_DOCUMENTATION_DIR\=/Library/Documentation
+    export SYSTEM_EXTENSIONS_FOLDER_PATH\=FinFlow.app/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_NO\=FinFlow.app/Library/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_YES\=FinFlow.app/SystemExtensions
+    export SYSTEM_KEXT_INSTALL_PATH\=/System/Library/Extensions
+    export SYSTEM_LIBRARY_DIR\=/System/Library
+    export TAPI_DEMANGLE\=YES
+    export TAPI_ENABLE_PROJECT_HEADERS\=NO
+    export TAPI_LANGUAGE\=objective-c
+    export TAPI_LANGUAGE_STANDARD\=compiler-default
+    export TAPI_USE_SRCROOT\=YES
+    export TAPI_VERIFY_MODE\=Pedantic
+    export TARGETED_DEVICE_FAMILY\=1,2
+    export TARGETNAME\=FinFlow
+    export TARGET_BUILD_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator
+    export TARGET_NAME\=FinFlow
+    export TARGET_TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build
+    export TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build
+    export TEMP_FILES_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build
+    export TEMP_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build
+    export TEMP_ROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex
+    export TEMP_SANDBOX_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/TemporaryTaskSandboxes
+    export TEST_FRAMEWORK_SEARCH_PATHS\=\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks
+    export TEST_LIBRARY_SEARCH_PATHS\=\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib
+    export TOOLCHAINS\=com.apple.dt.toolchain.XcodeDefault
+    export TOOLCHAIN_DIR\=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+    export TREAT_MISSING_BASELINES_AS_TEST_FAILURES\=NO
+    export TREAT_MISSING_SCRIPT_PHASE_OUTPUTS_AS_ERRORS\=NO
+    export TeamIdentifierPrefix\=LC4F584F5W.
+    export UID\=501
+    export UNINSTALLED_PRODUCTS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/UninstalledProducts
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH\=FinFlow.app
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_NO\=FinFlow.app/Resources
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_YES\=FinFlow.app
+    export UNSTRIPPED_PRODUCT\=NO
+    export USER\=nguyenvanbao
+    export USER_APPS_DIR\=/Users/nguyenvanbao/Applications
+    export USER_LIBRARY_DIR\=/Users/nguyenvanbao/Library
+    export USE_DYNAMIC_NO_PIC\=YES
+    export USE_HEADERMAP\=YES
+    export USE_HEADER_SYMLINKS\=NO
+    export VALIDATE_DEVELOPMENT_ASSET_PATHS\=YES_ERROR
+    export VALIDATE_PRODUCT\=NO
+    export VALID_ARCHS\=arm64\ x86_64
+    export VERBOSE_PBXCP\=NO
+    export VERSIONPLIST_PATH\=FinFlow.app/version.plist
+    export VERSION_INFO_BUILDER\=nguyenvanbao
+    export VERSION_INFO_FILE\=FinFlow_vers.c
+    export VERSION_INFO_STRING\=\"@\(\#\)PROGRAM:FinFlow\ \ PROJECT:FinFlow-1\"
+    export WORKSPACE_DIR\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    export WRAPPER_EXTENSION\=app
+    export WRAPPER_NAME\=FinFlow.app
+    export WRAPPER_SUFFIX\=.app
+    export WRAP_ASSET_PACKS_IN_SEPARATE_DIRECTORIES\=NO
+    export XCODE_APP_SUPPORT_DIR\=/Applications/Xcode.app/Contents/Developer/Library/Xcode
+    export XCODE_PRODUCT_BUILD_VERSION\=17C529
+    export XCODE_VERSION_ACTUAL\=2630
+    export XCODE_VERSION_MAJOR\=2600
+    export XCODE_VERSION_MINOR\=2630
+    export XPCSERVICES_FOLDER_PATH\=FinFlow.app/XPCServices
+    export YACC\=yacc
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS\=YES
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS_INCLUDE_WL\=YES
+    export _LD_MULTIARCH\=YES
+    export _WRAPPER_CONTENTS_DIR_SHALLOW_BUNDLE_NO\=/Contents
+    export _WRAPPER_PARENT_PATH_SHALLOW_BUNDLE_NO\=/..
+    export _WRAPPER_RESOURCES_DIR_SHALLOW_BUNDLE_NO\=/Resources
+    export __DIAGNOSE_DEPRECATED_ARCHS\=YES
+    export __IS_NOT_MACOS\=YES
+    export __IS_NOT_MACOS_macosx\=NO
+    export __IS_NOT_SIMULATOR\=NO
+    export __IS_NOT_SIMULATOR_simulator\=NO
+    export arch\=undefined_arch
+    export variant\=normal
+    /usr/bin/sandbox-exec -D SCRIPT_INPUT_FILE_0\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Script-A42D54942F58959200EDD686.sh -D SCRIPT_INPUT_ANCESTOR_0\=/ -D SCRIPT_INPUT_ANCESTOR_1\=/Users -D SCRIPT_INPUT_ANCESTOR_2\=/Users/nguyenvanbao -D SCRIPT_INPUT_ANCESTOR_3\=/Users/nguyenvanbao/Library -D SCRIPT_INPUT_ANCESTOR_4\=/Users/nguyenvanbao/Library/Developer -D SCRIPT_INPUT_ANCESTOR_5\=/Users/nguyenvanbao/Library/Developer/Xcode -D SCRIPT_INPUT_ANCESTOR_6\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData -D SCRIPT_INPUT_ANCESTOR_7\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby -D SCRIPT_INPUT_ANCESTOR_8\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build -D SCRIPT_INPUT_ANCESTOR_9\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex -D SCRIPT_INPUT_ANCESTOR_10\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build -D SCRIPT_INPUT_ANCESTOR_11\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator -D SCRIPT_INPUT_ANCESTOR_12\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build -D SRCROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -D PROJECT_DIR\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -D OBJROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex -D SYMROOT\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products -D DSTROOT\=/tmp/FinFlow.dst -D SHARED_PRECOMPS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/PrecompiledHeaders -D CACHE_ROOT\=/var/folders/7q/cd9_45ds205_08hg8fp07f_h0000gn/C/com.apple.DeveloperTools/26.3-17C529/Xcode -D CONFIGURATION_BUILD_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -D CONFIGURATION_TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator -D LOCROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -D LOCSYMROOT\=/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -D INDEX_PRECOMPS_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/PrecompiledHeaders -D INDEX_DATA_STORE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -D TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build -D TARGET_TEMP_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build -D DERIVED_FILE_DIR\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources -f /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/2e4cef894adec799bf11f36d116c336f.sb /bin/sh -c /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Script-A42D54942F58959200EDD686.sh
+Linting Swift files in current working directory
+Linting 'TransactionDateParser.swift' (1/159)
+Linting 'TransactionRepository.swift' (2/159)
+Linting 'AddTransactionUseCase.swift' (3/159)
+Linting 'Packages/Transaction/Package.swift' (4/159)
+Linting 'DeleteTransactionUseCase.swift' (5/159)
+Linting 'GetTransactionsUseCase.swift' (6/159)
+Linting 'GetTransactionChartUseCase.swift' (7/159)
+Linting 'AnalyzeTextUseCase.swift' (8/159)
+Linting 'GetTransactionSummaryUseCase.swift' (9/159)
+Linting 'UpdateTransactionUseCase.swift' (10/159)
+Linting 'GetCategoriesUseCase.swift' (11/159)
+Linting 'AddEditCategoryView.swift' (14/159)
+Linting 'CategoryListViewModel.swift' (12/159)
+Linting 'TransactionListViewModel.swift' (13/159)
+Linting 'AddTransactionViewModel.swift' (15/159)
+Linting 'CategoryListView.swift' (16/159)
+Linting 'TransactionAnalyticsView.swift' (17/159)
+Linting 'AddTransactionView.swift' (18/159)
+Linting 'TransactionListView.swift' (19/159)
+Linting 'WealthAccountRepository.swift' (20/159)
+Linting 'WealthAccountSectionView.swift' (21/159)
+Linting 'AddWealthAccountViewModel.swift' (22/159)
+Linting 'AddWealthAccountView.swift' (23/159)
+Linting 'WealthListView.swift' (24/159)
+Linting 'InvestmentRepository.swift' (25/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/TransactionAnalyticsView.swift:210:5: warning: Opening Brace Spacing Violation: Opening braces should be preceded by a single space and on the same line as the declaration (opening_brace)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/TransactionAnalyticsView.swift:284:13: warning: Opening Brace Spacing Violation: Opening braces should be preceded by a single space and on the same line as the declaration (opening_brace)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/TransactionAnalyticsView.swift:34:10: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/TransactionAnalyticsView.swift:67:97: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/TransactionAnalyticsView.swift:381:68: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+Linting 'InvestmentModels.swift' (26/159)
+Linting 'InvestmentRepositoryProtocol.swift' (27/159)
+Linting 'InvestmentAnalysisBundle.swift' (28/159)
+Linting 'StockAnalysisViewModel.swift' (29/159)
+Linting 'GetStockAnalysisUseCase.swift' (30/159)
+Linting 'ShareholderPieChart.swift' (31/159)
+Linting 'CompanyInfoCard.swift' (32/159)
+Linting 'MobileInsightSnapshot.swift' (33/159)
+Linting 'Packages/Wealth/Package.swift' (34/159)
+Linting 'ValuationChartGroup.swift' (35/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ShareholderPieChart.swift:30:21: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ShareholderPieChart.swift:87:17: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ShareholderPieChart.swift:90:17: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+Linting 'ChartFullscreenSupport.swift' (36/159)
+Linting 'FinancialPerformanceGrid.swift' (37/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/MobileInsightSnapshot.swift:96:1: warning: Trailing Newline Violation: Files should have a single trailing newline (trailing_newline)
+Linting 'Packages/Investment/Package.swift' (38/159)
+Linting 'FinancialChartsSection.swift' (39/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:253:21: warning: Hardcoded Colors Banned Violation: GUIDELINE: Prefer AppColors tokens. Use custom colors only when building base components or following specific HIG guidelines. (no_hardcoded_colors)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:257:29: warning: Hardcoded Colors Banned Violation: GUIDELINE: Prefer AppColors tokens. Use custom colors only when building base components or following specific HIG guidelines. (no_hardcoded_colors)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:284:35: warning: Hardcoded Colors Banned Violation: GUIDELINE: Prefer AppColors tokens. Use custom colors only when building base components or following specific HIG guidelines. (no_hardcoded_colors)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:305:35: warning: Hardcoded Colors Banned Violation: GUIDELINE: Prefer AppColors tokens. Use custom colors only when building base components or following specific HIG guidelines. (no_hardcoded_colors)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:165:25: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:188:13: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:234:13: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:256:29: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:296:37: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:317:29: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:325:29: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift:375:30: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+Linting 'StockAnalysisView.swift' (40/159)
+Linting 'DividendHistoryTable.swift' (41/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift:277:9: warning: Opening Brace Spacing Violation: Opening braces should be preceded by a single space and on the same line as the declaration (opening_brace)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift:464:9: warning: Opening Brace Spacing Violation: Opening braces should be preceded by a single space and on the same line as the declaration (opening_brace)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift:696:9: warning: Opening Brace Spacing Violation: Opening braces should be preceded by a single space and on the same line as the declaration (opening_brace)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift:647:66: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift:719:63: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+Linting 'InvestmentView.swift' (42/159)
+Linting 'PortfolioView.swift' (43/159)
+Linting 'RegisterUseCase.swift' (44/159)
+Linting 'AuthRepository.swift' (45/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Transaction/Sources/Transaction/Presentation/Views/AddTransactionView.swift:42:24: warning: Todo Violation: TODOs should be resolved (Implement real voice input (Sp...) (todo)
+Linting 'AuthRepositoryExtension.swift' (46/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Views/PortfolioView.swift:10:17: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+Linting 'LoginUseCase.swift' (47/159)
+Linting 'ForgotPasswordUseCase.swift' (48/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/DividendHistoryTable.swift:220:17: warning: Prefer AppTypography Violation: GUIDELINE: Prefer AppTypography tokens (should be Dynamic Type-based). Use system text styles only when a token is missing or you need a semantic text style for accessibility. (prefer_app_typography)
+Linting 'LoginViewModel.swift' (49/159)
+Linting 'LogoutUseCase.swift' (50/159)
+Linting 'ChangePasswordViewModel.swift' (51/159)
+Linting 'ForgotPasswordViewModel.swift' (52/159)
+Linting 'WelcomeBackViewModel.swift' (53/159)
+Linting 'UpdateProfileViewModel.swift' (54/159)
+Linting 'LockScreenViewModel.swift' (55/159)
+Linting 'AppLogoHeader.swift' (56/159)
+Linting 'EmailFieldWithOTP.swift' (57/159)
+Linting 'RegisterViewModel.swift' (58/159)
+Linting 'SocialLoginButton.swift' (59/159)
+Linting 'WelcomeHeaderView.swift' (60/159)
+Linting 'ChangePasswordView.swift' (61/159)
+Linting 'Packages/Identity/Package.swift' (63/159)
+Linting 'LoginView.swift' (62/159)
+Linting 'LockScreenView.swift' (64/159)
+Linting 'UpdateProfileView.swift' (65/159)
+Linting 'ForgotPasswordView.swift' (66/159)
+Linting 'WelcomeBackView.swift' (67/159)
+Linting 'RegisterView.swift' (68/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/CompanyInfoCard.swift:258:62: warning: Statement Position Violation: Else and catch should be on the same line, one space after the previous declaration (statement_position)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/CompanyInfoCard.swift:259:97: warning: Statement Position Violation: Else and catch should be on the same line, one space after the previous declaration (statement_position)
+Linting 'BudgetRepository.swift' (69/159)
+Linting 'BudgetListViewModel.swift' (70/159)
+Linting 'BudgetListView.swift' (71/159)
+Linting 'PlanningView.swift' (72/159)
+Linting 'AddBudgetView.swift' (73/159)
+Linting 'View+SettingsCard.swift' (74/159)
+Linting 'Color+Extensions.swift' (75/159)
+Linting 'BalanceLabel.swift' (76/159)
+Linting 'View+Alert.swift' (77/159)
+Linting 'CategorySelectionSheet.swift' (78/159)
+Linting 'IconTitleTrailingRow.swift' (79/159)
+Linting 'AISmartInputBar.swift' (80/159)
+Linting 'PINInputView.swift' (81/159)
+Linting 'LoadingOverlay.swift' (82/159)
+Linting 'DateRangeFilterSheet.swift' (83/159)
+Linting 'ChartSelectionPopover.swift' (84/159)
+Linting 'Packages/Identity/Sources/Identity/Presentation/Utils/BiometricAuthHandler.swift' (85/159)
+Linting 'EmptyStateView.swift' (86/159)
+Linting 'Packages/Planning/Package.swift' (87/159)
+Linting 'BudgetProgressCard.swift' (88/159)
+Linting 'FinancialHeroCard.swift' (89/159)
+Linting 'GlassField.swift' (90/159)
+Linting 'PINInputSheet.swift' (91/159)
+Linting 'PasswordConfirmationSheet.swift' (92/159)
+Linting 'AccountSelectionSheet.swift' (93/159)
+Linting 'SelectionSheet.swift' (94/159)
+Linting 'ProgressBar.swift' (95/159)
+Linting 'ButtonStyles.swift' (96/159)
+Linting 'Typography.swift' (97/159)
+Linting 'SheetContainer.swift' (98/159)
+Linting 'Packages/FinFlowCore/Package.swift' (99/159)
+Linting 'UILayout.swift' (100/159)
+Linting 'Assets.swift' (101/159)
+Linting 'Spacing.swift' (102/159)
+Linting 'Colors.swift' (103/159)
+Linting 'NetworkConfig.swift' (104/159)
+Linting 'PINManagerProtocol.swift' (105/159)
+Linting 'APIClient.swift' (106/159)
+Linting 'PINManager.swift' (107/159)
+Linting 'HTTPClientProtocol.swift' (108/159)
+Linting 'OTPInputHandler.swift' (109/159)
+Linting 'NavigationTypes.swift' (110/159)
+Linting 'AccountModels.swift' (111/159)
+Linting 'AppError.swift' (112/159)
+Linting 'CurrencyFormatter.swift' (113/159)
+Linting 'BudgetModels.swift' (114/159)
+Linting 'ProblemDetail.swift' (115/159)
+Linting 'DomainModels.swift' (116/159)
+Linting 'AuthModels.swift' (117/159)
+Linting 'AuthUseCaseProtocol.swift' (118/159)
+Linting 'ApiResponse.swift' (119/159)
+Linting 'TransactionModels.swift' (120/159)
+Linting 'RepositoryProtocols.swift' (121/159)
+Linting 'SessionManagerProtocol.swift' (122/159)
+Linting 'SessionState.swift' (123/159)
+Linting 'SessionManager.swift' (124/159)
+Linting 'UserDefaultsManager.swift' (125/159)
+Linting 'UserDefaultsManagerProtocol.swift' (126/159)
+Linting 'CacheService.swift' (127/159)
+Linting 'TokenStore.swift' (128/159)
+Linting 'AuthTokenStore.swift' (129/159)
+Linting 'KeychainService.swift' (130/159)
+Linting 'AppAlert.swift' (131/159)
+Linting 'Error+AppErrorAlert.swift' (132/159)
+Linting 'AppErrorAlert.swift' (133/159)
+Linting 'CreateBudgetUseCase.swift' (134/159)
+Linting 'DeleteBudgetUseCase.swift' (135/159)
+Linting 'DeleteWealthAccountUseCase.swift' (136/159)
+Linting 'UpdateBudgetUseCase.swift' (137/159)
+Linting 'GetWealthAccountTypesUseCase.swift' (138/159)
+Linting 'UpdateWealthAccountUseCase.swift' (139/159)
+Linting 'GetWealthAccountsUseCase.swift' (140/159)
+Linting 'CreateWealthAccountUseCase.swift' (141/159)
+Linting 'Logger.swift' (142/159)
+Linting 'HomeView.swift' (143/159)
+Linting 'GetBudgetsUseCase.swift' (144/159)
+Linting 'GetCategoriesUseCaseProtocol.swift' (145/159)
+Linting 'MainTabView.swift' (146/159)
+Linting 'SecuritySettingsViewModel.swift' (147/159)
+Linting 'Packages/FinFlowCore/Sources/FinFlowCore/Security/BiometricAuthHandler.swift' (148/159)
+Linting 'GetProfileUseCase.swift' (149/159)
+Linting 'CreatePINViewModel.swift' (150/159)
+Linting 'ProfileViewModel.swift' (151/159)
+Linting 'Packages/Dashboard/Package.swift' (152/159)
+Linting 'CreatePINWelcomeView.swift' (153/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Profile/Sources/Profile/Presentation/ViewModels/ProfileViewModel.swift:49:12: warning: Cyclomatic Complexity Violation: Function should have complexity 10 or less; currently complexity is 11 (cyclomatic_complexity)
+Linting 'AccountManagementViewModel.swift' (154/159)
+Linting 'SettingsRowIcon.swift' (155/159)
+Linting 'ProfileView.swift' (156/159)
+Linting 'ProfileHeaderCard.swift' (157/159)
+Linting 'CreatePINView.swift' (158/159)
+Linting 'Packages/Profile/Package.swift' (159/159)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:108:18: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:222:30: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:247:22: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:266:22: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:300:31: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:310:22: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:368:22: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:469:18: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:483:18: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1122:16: warning: Large Tuple Violation: Tuples should have at most 2 members (large_tuple)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:253:73: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:270:64: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:313:73: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:371:64: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1047:40: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1105:162: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1208:172: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1467:125: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:1725:166: warning: Trailing Comma Violation: Collection literals should not have trailing commas (trailing_comma)
+Done linting! Found 51 violations, 0 serious in 159 files.
+
+RegisterExecutionPolicyException /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Identity.o (in target 'Identity' from project 'Identity')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Identity
+    builtin-RegisterExecutionPolicyException /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/Identity.o
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Investment (in target 'Investment' from project 'Investment')
+EmitSwiftModule normal arm64 (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ Investment (in target 'Investment' from project 'Investment')
+
+EmitSwiftModule normal x86_64 (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    
+
+SwiftCompile normal arm64 Compiling\ FinancialChartsSection.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift (in target 'Investment' from project 'Investment')
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:533:37: error: cannot find '$scrollLabel' in scope
+            .chartScrollPosition(x: $scrollLabel)
+                                    ^~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:536:32: error: cannot find '$selectedLabel' in scope
+                selectedLabel: $selectedLabel,
+                               ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:537:33: error: cannot find '$displayedLabel' in scope
+                displayedLabel: $displayedLabel,
+                                ^~~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:541:20: error: cannot find 'scrollLabel' in scope
+                if scrollLabel.isEmpty { scrollLabel = initialScrollLabel }
+                   ^~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:541:42: error: cannot find 'scrollLabel' in scope
+                if scrollLabel.isEmpty { scrollLabel = initialScrollLabel }
+                                         ^~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:554:39: error: cannot find 'displayedLabel' in scope
+            if fullScreen, let year = displayedLabel {
+                                      ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:562:17: error: cannot find 'displayedLabel' in scope
+        .zIndex(displayedLabel == nil ? 0 : 1)
+                ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:533:14: error: generic parameter 'some Plottable' could not be inferred
+            .chartScrollPosition(x: $scrollLabel)
+             ^
+Charts.View.chartScrollPosition:2:25: note: in call to function 'chartScrollPosition(x:)'
+nonisolated public func chartScrollPosition(x: Binding<some Plottable>) -> some View
+                        ^
+
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Data/InvestmentRepository.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Domain/InvestmentAnalysisBundle.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Domain/InvestmentModels.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Domain/InvestmentRepositoryProtocol.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Domain/UseCases/GetStockAnalysisUseCase.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ChartFullscreenSupport.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/CompanyInfoCard.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/DividendHistoryTable.swift -primary-file /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialPerformanceGrid.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/MobileInsightSnapshot.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ShareholderPieChart.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/ValuationChartGroup.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/ViewModels/StockAnalysisViewModel.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Views/InvestmentView.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Views/PortfolioView.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Views/StockAnalysisView.swift -emit-dependencies-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.d -emit-const-values-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.swiftconstvalues -emit-reference-dependencies-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.swiftdeps -serialize-diagnostics-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.dia -target arm64-apple-ios17.0-simulator -module-can-import-version UIKit 9126.2.4.1 9126.2.4 -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment-dependencies-2.json -Xllvm -aarch64-use-tbi -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -I /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -swift-version 6 -enforce-exclusivity\=checked -Onone -D SWIFT_PACKAGE -D DEBUG -D SWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -D Xcode -serialize-debugging-options -const-gather-protocols-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/Investment_const_extract_protocols.json -enable-experimental-feature DebugDescriptionMacro -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj -enable-anonymous-context-mangled-names -file-compilation-dir /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/swift-overrides.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources-normal/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name Investment -package-name investment -frontend-parseable-output -disable-clang-spi -target-sdk-version 26.2 -target-sdk-name iphonesimulator26.2 -clang-target arm64-apple-ios26.2-simulator -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.o -index-unit-output-path /Investment.build/Debug-iphonesimulator/Investment.build/Objects-normal/arm64/FinancialChartsSection.o -index-store-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -index-system-modules
+SwiftCompile normal x86_64 Compiling\ FinancialChartsSection.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift (in target 'Investment' from project 'Investment')
+SwiftCompile normal x86_64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift (in target 'Investment' from project 'Investment')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow.xcodeproj
+    
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:533:37: error: cannot find '$scrollLabel' in scope
+            .chartScrollPosition(x: $scrollLabel)
+                                    ^~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:536:32: error: cannot find '$selectedLabel' in scope
+                selectedLabel: $selectedLabel,
+                               ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:537:33: error: cannot find '$displayedLabel' in scope
+                displayedLabel: $displayedLabel,
+                                ^~~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:541:20: error: cannot find 'scrollLabel' in scope
+                if scrollLabel.isEmpty { scrollLabel = initialScrollLabel }
+                   ^~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:541:42: error: cannot find 'scrollLabel' in scope
+                if scrollLabel.isEmpty { scrollLabel = initialScrollLabel }
+                                         ^~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:554:39: error: cannot find 'displayedLabel' in scope
+            if fullScreen, let year = displayedLabel {
+                                      ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:562:17: error: cannot find 'displayedLabel' in scope
+        .zIndex(displayedLabel == nil ? 0 : 1)
+                ^~~~~~~~~~~~~~
+/Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/Packages/Investment/Sources/Investment/Presentation/Components/FinancialChartsSection.swift:533:14: error: generic parameter 'some Plottable' could not be inferred
+            .chartScrollPosition(x: $scrollLabel)
+             ^
+Charts.View.chartScrollPosition:2:25: note: in call to function 'chartScrollPosition(x:)'
+nonisolated public func chartScrollPosition(x: Binding<some Plottable>) -> some View
+                        ^
+
+SwiftDriver FinFlow normal arm64 com.apple.xcode.tools.swift.compiler (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name FinFlow -Onone -enforce-exclusivity\=checked @/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow.SwiftFileList -DDEBUG -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuth.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuthCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Logger.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Environment.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/third-party-IsAppEncrypted.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-UserDefaults.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppCheckCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMSessionFetcherCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignIn.modulemap -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow_const_extract_protocols.json -Xcc -iquote -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-generated-files.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-own-target-headers.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow-63eef6a8f12d552cf271d30c1b4f2a3b-VFS-iphonesimulator/all-product-headers.yaml -Xcc -iquote -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-project-headers.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuthCore -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/promises/Sources/FBLPromises/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Logger/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Environment/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/third_party/IsAppEncrypted/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/UserDefaults/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/app-check/AppCheckCore/Sources/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/gtm-session-fetcher/Sources/Core/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleSignIn-iOS/GoogleSignIn/Sources/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources-normal/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources/arm64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/arm64/FinFlow-Swift.h -working-directory /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -experimental-emit-module-separately -disable-cmo
+
+SwiftDriver FinFlow normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name FinFlow -Onone -enforce-exclusivity\=checked @/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow.SwiftFileList -DDEBUG -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuth.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppAuthCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Logger.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-Environment.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/third-party-IsAppEncrypted.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleUtilities-UserDefaults.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/AppCheckCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GTMSessionFetcherCore.modulemap -Xcc -fmodule-map-file\=/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/GeneratedModuleMaps-iphonesimulator/GoogleSignIn.modulemap -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target x86_64-apple-ios17.0-simulator -g -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/PackageFrameworks -F /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.2-23C57-7d00a8b37fbd7999ea79df8ebc024bf0.sdkstatcache -output-file-map /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow_const_extract_protocols.json -Xcc -iquote -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-generated-files.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-own-target-headers.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow-63eef6a8f12d552cf271d30c1b4f2a3b-VFS-iphonesimulator/all-product-headers.yaml -Xcc -iquote -Xcc /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/FinFlow-project-headers.hmap -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuthCore -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/promises/Sources/FBLPromises/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Logger/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/Environment/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/third_party/IsAppEncrypted/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleUtilities/GoogleUtilities/UserDefaults/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/app-check/AppCheckCore/Sources/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/gtm-session-fetcher/Sources/Core/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/SourcePackages/checkouts/GoogleSignIn-iOS/GoogleSignIn/Sources/Public -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources-normal/x86_64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources/x86_64 -Xcc -I/Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/Objects-normal/x86_64/FinFlow-Swift.h -working-directory /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos -experimental-emit-module-separately -disable-cmo
+
+CompileAssetCatalogVariant thinned /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Products/Debug-iphonesimulator/FinFlow.app /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Resources/Assets.xcassets (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Resources/Assets.xcassets --compile /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 17.0 --platform iphonesimulator
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/GTMSessionFetcherCore-8R2L23TQHNWU4MW6YR31O25GV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/GTMSessionFetcherCore-4Y6QIGO31IEQSZ70489ZJ3T9Z.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/GoogleSignIn-EE65S200IJ8K57ZAKJF5KCAJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/GoogleSignIn-BWUQ3DU8PL9F6IY4A4EWTTJB.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ FinFlow (in target 'FinFlow' from project 'FinFlow')
+
+EmitSwiftModule normal arm64 (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal arm64 Compiling\ GeneratedAssetSymbols.swift /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/Library/Developer/Xcode/DerivedData/FinFlow-gdxuhxjpqkatyoeexybemumxouby/Build/Intermediates.noindex/FinFlow.build/Debug-iphonesimulator/FinFlow.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal arm64 Compiling\ DependencyContainer+Identity.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer+Identity.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer+Identity.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ FinFlow (in target 'FinFlow' from project 'FinFlow')
+
+EmitSwiftModule normal x86_64 (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal arm64 Compiling\ DependencyContainer+AppViews.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer+AppViews.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer+AppViews.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal arm64 Compiling\ FinFlowIosApp.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/App/FinFlowIosApp.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/App/FinFlowIosApp.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal x86_64 Compiling\ DependencyContainer.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal x86_64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftCompile normal x86_64 Compiling\ AppConfig.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/Configuration/AppConfig.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal x86_64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/Configuration/AppConfig.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling DependencyContainer+Identity.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 Compiling\ DependencyContainer.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling DependencyContainer.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 Compiling\ AppConfig.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/Configuration/AppConfig.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal arm64 /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/Configuration/AppConfig.swift (in target 'FinFlow' from project 'FinFlow')
+    cd /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling GeneratedAssetSymbols.swift (in target 'FinFlow' from project 'FinFlow')
+
+SwiftCompile normal x86_64 Compiling\ DependencyContainer+Identity.swift /Users/nguyenvanbao/MyWorkspace/FinFlow_v2/FinFlow_Project/FinFlowIos/FinFlow/Core/DI/DependencyContainer+Identity.swift (in target 'FinFlow' from project 'FinFlow')
+
+note: Run script build phase 'SwiftLint' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'FinFlow' from project 'FinFlow')

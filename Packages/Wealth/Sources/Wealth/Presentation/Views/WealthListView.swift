@@ -39,6 +39,7 @@ public struct WealthListView: View {
     @State private var accountToEdit: WealthAccountResponse?
     @State private var accountToDelete: WealthAccountResponse?
     @State private var showDeleteConfirmation = false
+    @State private var hasRequestedInitialLoad = false
 
     public init(
         router: any AppRouterProtocol,
@@ -58,13 +59,29 @@ public struct WealthListView: View {
         self.sessionManager = sessionManager
     }
 
-    private func loadData() async {
+    private func loadData(force: Bool = false) async {
+        if !force {
+            if hasRequestedInitialLoad {
+                return
+            }
+            hasRequestedInitialLoad = true
+        }
+
+        if isLoading {
+            return
+        }
+
         isLoading = true
         loadError = nil
         defer { isLoading = false }
         do {
             accounts = try await getWealthAccountsUseCase.execute()
         } catch {
+            // Khi user chuyển tab nhanh, Task .task / .refreshable có thể bị hủy.
+            // Bỏ qua CancellationError để tránh show alert vô lý.
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 loadError = .authWithAction(
                     message: AppErrorAlert.sessionExpiredMessage
@@ -167,7 +184,7 @@ public struct WealthListView: View {
             }
         }
         .task { await loadData() }
-        .refreshable { await loadData() }
+        .refreshable { await loadData(force: true) }
         .alertHandler(
             Binding(
                 get: { loadError },
@@ -184,7 +201,7 @@ public struct WealthListView: View {
                         sessionManager: sessionManager,
                         onSuccess: {
                             showAddAccount = false
-                            Task { await loadData() }
+                            Task { await loadData(force: true) }
                         }
                     )
                 )
@@ -202,7 +219,7 @@ public struct WealthListView: View {
                         existingAccount: account,
                         onSuccess: {
                             accountToEdit = nil
-                            Task { await loadData() }
+                            Task { await loadData(force: true) }
                         }
                     )
                 )
@@ -229,8 +246,11 @@ public struct WealthListView: View {
     private func deleteAccount(_ account: WealthAccountResponse) async {
         do {
             try await deleteWealthAccountUseCase.execute(id: account.id)
-            await loadData()
+            await loadData(force: true)
         } catch {
+            if error is CancellationError {
+                return
+            }
             if let appError = error as? AppError, case .unauthorized = appError {
                 loadError = .authWithAction(
                     message: AppErrorAlert.sessionExpiredMessage
