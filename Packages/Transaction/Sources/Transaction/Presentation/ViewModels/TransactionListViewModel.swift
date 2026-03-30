@@ -242,6 +242,8 @@ public class TransactionListViewModel {
             // Refresh summary and chart
             summary = try await getSummaryUseCase.execute()
             await fetchChartData()
+            // Giống lưu/sửa giao dịch: các tab khác (ví dụ Kế hoạch) lắng nghe để refetch ngân sách / spent.
+            NotificationCenter.default.post(name: .transactionDidSave, object: nil)
         } catch {
             handleError(error)
         }

@@ -37,7 +37,8 @@ public struct PrimaryButtonStyle: ButtonStyle {
                 ? AnyShapeStyle(AppColors.primary.gradient)
                 : AnyShapeStyle(AppColors.buttonDisabled)
         )
-        .foregroundStyle(AppColors.textInverted)
+        // Keep disabled button readable (avoid white-on-light-grey).
+        .foregroundStyle(isEnabled ? AppColors.textInverted : AppColors.primary)
         .cornerRadius(CornerRadius.medium)
         .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
         .animation(.spring(response: 0.2), value: configuration.isPressed)

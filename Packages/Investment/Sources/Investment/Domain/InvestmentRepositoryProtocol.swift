@@ -1,4 +1,5 @@
 import Foundation
+import FinFlowCore
 
 public protocol InvestmentRepositoryProtocol: Sendable {
     func getAnalysis(
@@ -21,8 +22,19 @@ public protocol InvestmentRepositoryProtocol: Sendable {
         showQuarterly: Bool?
     ) async throws -> [ValuationDataPoint]
 
+    func getDailyValuations(symbol: String, startDate: Date, endDate: Date) async throws -> [DailyValuationDataPoint]
+
     func getDividends(
         symbol: String,
         annualLimit: Int?
     ) async throws -> [DividendDataPoint]
+
+    func suggestCompanies(
+        query: String,
+        limit: Int?
+    ) async throws -> [CompanySuggestionResponse]
+
+    func getCompanyIndustries(
+        symbols: [String]
+    ) async throws -> [CompanyIndustryResponse]
 }

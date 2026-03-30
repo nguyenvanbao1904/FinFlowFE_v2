@@ -35,6 +35,7 @@
 		A4DA90012F608B3D00777712 /* Planning */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Planning; path = ../Packages/Planning; sourceTree = SOURCE_ROOT; };
 		A4DA90292F61822800777712 /* Investment */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Investment; path = ../Packages/Investment; sourceTree = "<group>"; };
 		A4DA902A2F61822800777712 /* Wealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Wealth; path = ../Packages/Wealth; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		A4167F512EFDB5A60001AB0B /* Exceptions for "FinFlow" folder in "FinFlow" target */ = {

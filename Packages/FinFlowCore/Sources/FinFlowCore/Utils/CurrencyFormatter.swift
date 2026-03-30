@@ -70,6 +70,34 @@ public enum CurrencyFormatter {
         return hasLeadingMinus ? "-" + formatted : formatted
     }
 
+    /// Parse formatted currency text to numeric value (e.g., "1.500.000" -> 1500000).
+    public static func parseCurrencyInput(_ input: String) -> Double? {
+        let normalized = input
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: ",", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return nil }
+        return Double(normalized)
+    }
+
+    /// Parse integer-only input to numeric value; returns nil for decimal values.
+    public static func parseIntegerInput(_ input: String) -> Double? {
+        let normalized = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return nil }
+        if normalized.contains(".") || normalized.contains(",") { return nil }
+        guard let intValue = Int(normalized.filter { "0123456789-".contains($0) }) else { return nil }
+        return Double(intValue)
+    }
+
+    /// Parse percent input, supporting comma and dot decimal separators.
+    public static func parsePercentInput(_ input: String) -> Double? {
+        let normalized = input
+            .replacingOccurrences(of: ",", with: ".")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return nil }
+        return Double(normalized)
+    }
+
     /// Format large numbers for axis labels (e.g., 1500000 → "1.5M")
     public static func formatAxisValue(_ value: Int) -> String {
         let doubleVal = Double(value)

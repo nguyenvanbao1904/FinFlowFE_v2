@@ -5,6 +5,8 @@ public struct StockAnalysisView: View {
     @Bindable var viewModel: StockAnalysisViewModel
     @State private var searchText = ""
     @State private var financialShowQuarterly = true
+    /// Mặc định theo ngày (API Finfo + chỉ số theo từng ngày); chọn «Quý» trên segmented để xem điểm cuối kỳ.
+    @State private var valuationGranularity: ValuationSeriesGranularity = .daily
 
     public init(viewModel: StockAnalysisViewModel) {
         self.viewModel = viewModel
@@ -152,6 +154,8 @@ public struct StockAnalysisView: View {
 
         ValuationChartGroup(
             valuations: viewModel.valuations,
+            dailyValuations: viewModel.dailyValuations,
+            granularity: $valuationGranularity,
             overview: overview,
             showQuarterly: true,
             onRequestFullHistory: {
@@ -165,6 +169,14 @@ public struct StockAnalysisView: View {
                         startDate: startDate,
                         endDate: endDate,
                         showQuarterly: showQuarterly
+                    )
+                }
+            },
+            onRequestDailyValuations: { startDate, endDate in
+                Task {
+                    await viewModel.loadDailyValuationsForRange(
+                        startDate: startDate,
+                        endDate: endDate
                     )
                 }
             }

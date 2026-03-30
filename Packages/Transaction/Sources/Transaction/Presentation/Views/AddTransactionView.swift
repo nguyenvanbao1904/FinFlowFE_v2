@@ -157,10 +157,19 @@ public struct AddTransactionView: View {
 
     private var typeSelectorSection: some View {
         HStack(spacing: Spacing.md) {
-            typeButton(title: "Chi tiêu", isSelected: !viewModel.isIncome, color: AppColors.google) {
+            TypeOptionButton(
+                title: "Chi tiêu",
+                isSelected: !viewModel.isIncome,
+                color: AppColors.google
+            ) {
                 withAnimation { viewModel.isIncome = false }
             }
-            typeButton(title: "Thu nhập", isSelected: viewModel.isIncome, color: AppColors.success) {
+
+            TypeOptionButton(
+                title: "Thu nhập",
+                isSelected: viewModel.isIncome,
+                color: AppColors.success
+            ) {
                 withAnimation { viewModel.isIncome = true }
             }
         }
@@ -275,36 +284,6 @@ public struct AddTransactionView: View {
     }
 
     // MARK: - Helpers
-
-    private func typeButton(
-        title: String, isSelected: Bool, color: Color, action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(AppTypography.subheadline)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.sm)
-                .background {
-                    if isSelected {
-                        color.opacity(OpacityLevel.light)
-                    } else {
-                        Rectangle().fill(AppColors.cardBackground)
-                    }
-                }
-                .foregroundColor(isSelected ? color : .secondary)
-                .cornerRadius(CornerRadius.medium)
-                .overlay(
-                    RoundedRectangle(cornerRadius: CornerRadius.medium)
-                        .stroke(
-                            isSelected
-                                ? color.opacity(OpacityLevel.strong)
-                                : AppColors.disabled.opacity(OpacityLevel.medium),
-                            lineWidth: BorderWidth.thin)
-                )
-        }
-        .buttonStyle(.borderless)
-    }
 
     private func triggerAIAnalysis(text: String) {
         UIApplication.shared.sendAction(

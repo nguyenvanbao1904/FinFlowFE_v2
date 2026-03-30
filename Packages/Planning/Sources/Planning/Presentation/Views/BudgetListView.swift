@@ -91,6 +91,10 @@ public struct BudgetListView: View {
         .onReceive(NotificationCenter.default.publisher(for: .budgetDidSave)) { _ in
             Task { await viewModel.loadBudgets(force: true) }
         }
+        // Chi tiêu theo danh mục làm thay đổi spentAmount trên API — cần refetch khi lưu/sửa giao dịch (tab Giao dịch phát `.transactionDidSave`).
+        .onReceive(NotificationCenter.default.publisher(for: .transactionDidSave)) { _ in
+            Task { await viewModel.loadBudgets(force: true) }
+        }
         .alertHandler(Binding(
             get: { viewModel.loadError },
             set: { viewModel.loadError = $0 }

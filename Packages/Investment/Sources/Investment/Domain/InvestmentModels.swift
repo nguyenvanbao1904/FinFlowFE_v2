@@ -5,6 +5,8 @@ public struct StockOverview: Equatable, Sendable {
     public let symbol: String
     public let companyName: String
     public let exchange: String
+    /// Ví dụ `BANK` — P/S theo ngày không áp dụng (backend chỉ tính DTT kiểu non-bank).
+    public let companyType: String?
     /// Mã ICB — nhãn ngành lấy từ bảng `industries` (API join), không duplicate trên company.
     public let industryIcbCode: String?
     /// Nhãn ngành hiển thị (từ `industries.label` hoặc mock).
@@ -18,18 +20,64 @@ public struct StockOverview: Equatable, Sendable {
     public let bvps: Double
     public let cplh: Double // Cổ phiếu lưu hành (tỷ)
     
-    // Valuation compared to median
+    // Valuation vs lịch sử (trung vị + trung bình trên các quý có chỉ số trong DB)
     public let currentPE: Double
     public let medianPE: Double
+    public let meanPE: Double?
     public let currentPB: Double
     public let medianPB: Double
+    public let meanPB: Double?
     public let currentPS: Double
     public let medianPS: Double
-    
-    public init(symbol: String, companyName: String, exchange: String, industryIcbCode: String? = nil, industryLabel: String, description: String, roe: Double, roa: Double, eps: Double, bvps: Double, cplh: Double, currentPE: Double, medianPE: Double, currentPB: Double, medianPB: Double, currentPS: Double, medianPS: Double) {
+    public let meanPS: Double?
+
+    /// Bội số theo giá VPS gần nhất (backend: close hoặc last fallback) và BCTC (EPS TTM, BVPS, DTT TTM…).
+    public let livePE: Double?
+    public let livePB: Double?
+    public let livePS: Double?
+    public let livePriceVnd: Double?
+    public let livePriceSource: String?
+
+    public var displayPE: Double { livePE ?? currentPE }
+    public var displayPB: Double { livePB ?? currentPB }
+    public var displayPS: Double { livePS ?? currentPS }
+
+    public var isBankCompany: Bool {
+        (companyType ?? "").trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "BANK"
+    }
+
+    public init(
+        symbol: String,
+        companyName: String,
+        exchange: String,
+        companyType: String? = nil,
+        industryIcbCode: String? = nil,
+        industryLabel: String,
+        description: String,
+        roe: Double,
+        roa: Double,
+        eps: Double,
+        bvps: Double,
+        cplh: Double,
+        currentPE: Double,
+        medianPE: Double,
+        meanPE: Double? = nil,
+        currentPB: Double,
+        medianPB: Double,
+        meanPB: Double? = nil,
+        currentPS: Double,
+        medianPS: Double,
+        meanPS: Double? = nil,
+        livePE: Double? = nil,
+        livePB: Double? = nil,
+        livePS: Double? = nil,
+        livePriceVnd: Double? = nil,
+        livePriceSource: String? = nil
+    ) {
         self.symbol = symbol
         self.companyName = companyName
         self.exchange = exchange
+        self.companyType = companyType
         self.industryIcbCode = industryIcbCode
         self.industryLabel = industryLabel
         self.description = description
@@ -40,10 +88,18 @@ public struct StockOverview: Equatable, Sendable {
         self.cplh = cplh
         self.currentPE = currentPE
         self.medianPE = medianPE
+        self.meanPE = meanPE
         self.currentPB = currentPB
         self.medianPB = medianPB
+        self.meanPB = meanPB
         self.currentPS = currentPS
         self.medianPS = medianPS
+        self.meanPS = meanPS
+        self.livePE = livePE
+        self.livePB = livePB
+        self.livePS = livePS
+        self.livePriceVnd = livePriceVnd
+        self.livePriceSource = livePriceSource
     }
 }
 
@@ -59,6 +115,27 @@ public struct ShareholderDataPoint: Identifiable, Equatable, Sendable {
         self.percentage = percentage
         self.quantity = quantity
     }
+}
+
+/// Chuỗi định giá theo ngày (API `.../valuations/daily`).
+public struct DailyValuationDataPoint: Identifiable, Equatable, Sendable {
+    public var id: String { date }
+    public let date: String
+    public let pe: Double?
+    public let pb: Double?
+    public let ps: Double?
+
+    public init(date: String, pe: Double?, pb: Double?, ps: Double?) {
+        self.date = date
+        self.pe = pe
+        self.pb = pb
+        self.ps = ps
+    }
+}
+
+public enum ValuationSeriesGranularity: String, CaseIterable, Sendable {
+    case quarterly = "Quý"
+    case daily = "Ngày"
 }
 
 // MARK: - Time-series Financial Data

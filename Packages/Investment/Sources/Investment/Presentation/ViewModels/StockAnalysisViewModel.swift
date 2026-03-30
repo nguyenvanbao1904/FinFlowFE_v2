@@ -7,6 +7,7 @@ public final class StockAnalysisViewModel {
     public var overview: StockOverview?
     public var shareholders: [ShareholderDataPoint] = []
     public var valuations: [ValuationDataPoint] = []
+    public var dailyValuations: [DailyValuationDataPoint] = []
     public var financials: FinancialDataSeries?
     public var dividends: [DividendDataPoint] = []
 
@@ -21,6 +22,7 @@ public final class StockAnalysisViewModel {
     private var didLoadFullValuations = false
     private var didLoadFullDividends = false
     private var valuationsRangeRequestId: Int = 0
+    private var dailyValuationsRangeRequestId: Int = 0
 
     public init(
         getStockAnalysisUseCase: GetStockAnalysisUseCase,
@@ -35,6 +37,7 @@ public final class StockAnalysisViewModel {
         didLoadFullFinancials = false
         didLoadFullValuations = false
         didLoadFullDividends = false
+        dailyValuations = []
         isLoading = true
         defer { isLoading = false }
 
@@ -51,6 +54,10 @@ public final class StockAnalysisViewModel {
             financials = result.financials
             dividends = result.dividends
             error = nil
+            // Bundle snapshot caps dividends; fetch full series for charts (same as fullscreen `onRequestFullHistory`).
+            Task { @MainActor in
+                await loadFullDividendsIfNeeded()
+            }
         } catch {
             // Giống các tab khác: bỏ qua khi Task bị huỷ (chuyển tab nhanh).
             if error is CancellationError {
@@ -139,13 +146,43 @@ public final class StockAnalysisViewModel {
         }
     }
 
-    public func loadFullDividendsIfNeeded() async {
-        guard !didLoadFullDividends, !isLoadingFullHistory, !currentSymbol.isEmpty else { return }
+    public func loadDailyValuationsForRange(startDate: Date, endDate: Date) async {
+        guard !currentSymbol.isEmpty else { return }
+
+        dailyValuationsRangeRequestId += 1
+        let requestId = dailyValuationsRangeRequestId
+
         isLoadingFullHistory = true
         defer { isLoadingFullHistory = false }
 
         do {
-            dividends = try await getStockAnalysisUseCase.executeDividends(symbol: currentSymbol)
+            let points = try await getStockAnalysisUseCase.executeDailyValuations(
+                symbol: currentSymbol,
+                startDate: startDate,
+                endDate: endDate
+            )
+            guard requestId == dailyValuationsRangeRequestId else { return }
+            dailyValuations = points
+            error = nil
+        } catch {
+            if error is CancellationError {
+                return
+            }
+            guard requestId == dailyValuationsRangeRequestId else { return }
+            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Định Giá Theo Ngày")
+        }
+    }
+
+    public func loadFullDividendsIfNeeded() async {
+        guard !didLoadFullDividends, !isLoadingFullHistory, !currentSymbol.isEmpty else { return }
+        let symbol = currentSymbol
+        isLoadingFullHistory = true
+        defer { isLoadingFullHistory = false }
+
+        do {
+            let full = try await getStockAnalysisUseCase.executeDividends(symbol: symbol)
+            guard symbol == currentSymbol else { return }
+            dividends = full
             didLoadFullDividends = true
             error = nil
         } catch {

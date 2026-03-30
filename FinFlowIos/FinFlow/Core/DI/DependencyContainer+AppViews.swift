@@ -101,6 +101,27 @@ extension DependencyContainer {
             viewModel: makeLockScreenViewModel(user: user, biometricAvailable: biometricAvailable))
     }
 
+    /// Một `HomeViewModel` cho cả phiên dashboard (cache trên `DependencyContainer`).
+    @MainActor
+    func homeViewModelForDashboard() -> HomeViewModel {
+        if let cached = cachedHomeViewModel {
+            return cached
+        }
+        let homeDashboardService = HomeDashboardServiceImpl(
+            getTransactionSummary: GetTransactionSummaryUseCase(repository: transactionRepository),
+            getBudgets: GetBudgetsUseCase(repository: budgetRepository),
+            getPortfolios: GetPortfoliosUseCase(repository: portfolioRepository),
+            getPortfolioAssets: GetPortfolioAssetsUseCase(repository: portfolioRepository),
+            getPortfolioHealth: GetPortfolioHealthUseCase(repository: portfolioRepository)
+        )
+        let vm = HomeViewModel(
+            dashboardService: homeDashboardService,
+            sessionManager: sessionManager
+        )
+        cachedHomeViewModel = vm
+        return vm
+    }
+
     // Factory cho Main Tab View
     func makeMainTabView<Destination: View>(
         router: any AppRouterProtocol,
@@ -110,6 +131,9 @@ extension DependencyContainer {
             fatalError("Router must be AppRouter")
         }
         @Bindable var observableRouter = appRouter
+
+        let homeViewModel = homeViewModelForDashboard()
+        let homeView = HomeView(router: router, viewModel: homeViewModel)
 
         let transactionView = makeTransactionListView(router: router)
 
@@ -125,6 +149,7 @@ extension DependencyContainer {
             planningPath: $observableRouter.planningPath,
             wealthPath: $observableRouter.wealthPath,
             investmentPath: $observableRouter.investmentPath,
+            homeView: homeView,
             transactionView: transactionView,
             planningView: planningView,
             wealthView: wealthView,
@@ -177,12 +202,28 @@ extension DependencyContainer {
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
         let getStockAnalysisUseCase = GetStockAnalysisUseCase(repository: investmentRepository)
+        let getCompanyIndustriesUseCase = GetCompanyIndustriesUseCase(repository: investmentRepository)
+        let suggestCompaniesUseCase = SuggestCompaniesUseCase(repository: investmentRepository)
         let getPortfoliosUseCase = GetPortfoliosUseCase(repository: portfolioRepository)
+        let getPortfolioAssetsUseCase = GetPortfolioAssetsUseCase(repository: portfolioRepository)
         let createPortfolioUseCase = CreatePortfolioUseCase(repository: portfolioRepository)
+        let createTradeTransactionUseCase = CreateTradeTransactionUseCase(repository: portfolioRepository)
+        let importPortfolioSnapshotUseCase = ImportPortfolioSnapshotUseCase(repository: portfolioRepository)
+        let getPortfolioHealthUseCase = GetPortfolioHealthUseCase(repository: portfolioRepository)
+        let getPortfolioVsMarketUseCase = GetPortfolioVsMarketUseCase(repository: portfolioRepository)
+        let getPortfolioPerformanceUseCase = GetPortfolioPerformanceUseCase(repository: portfolioRepository)
         return InvestmentView(
             getStockAnalysisUseCase: getStockAnalysisUseCase,
+            getCompanyIndustriesUseCase: getCompanyIndustriesUseCase,
+            suggestCompaniesUseCase: suggestCompaniesUseCase,
             getPortfoliosUseCase: getPortfoliosUseCase,
+            getPortfolioAssetsUseCase: getPortfolioAssetsUseCase,
             createPortfolioUseCase: createPortfolioUseCase,
+            createTradeTransactionUseCase: createTradeTransactionUseCase,
+            importPortfolioSnapshotUseCase: importPortfolioSnapshotUseCase,
+            getPortfolioHealthUseCase: getPortfolioHealthUseCase,
+            getPortfolioVsMarketUseCase: getPortfolioVsMarketUseCase,
+            getPortfolioPerformanceUseCase: getPortfolioPerformanceUseCase,
             sessionManager: sessionManager
         )
     }

@@ -57,4 +57,7 @@ public enum UILayout {
     /// Social login button dimensions
     public static let socialButtonWidth: CGFloat = 80
     public static let socialButtonHeight: CGFloat = 55
+
+    /// Profile / account chip in navigation bar (inner circle behind SF Symbol)
+    public static let navBarProfileIconChip: CGFloat = 36
 }

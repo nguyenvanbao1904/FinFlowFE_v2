@@ -16,62 +16,33 @@ public struct MobileInsightSnapshot: View {
             Text("Snapshot tài chính")
                 .font(AppTypography.headline)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Spacing.sm) {
-                snapshotCard(
+            LazyVGrid(columns: SnapshotGridLayout.twoColumns, spacing: SnapshotGridLayout.spacing) {
+                CompactMetricCard(
                     title: "ROE",
                     value: String(format: "%.2f%%", overview.roe),
-                    accent: AppColors.chartGrowthStrong,
-                    trend: trendText(overview.roe, threshold: 15)
+                    caption: trendText(overview.roe, threshold: 15),
+                    accent: AppColors.chartGrowthStrong
                 )
-                snapshotCard(
+                CompactMetricCard(
                     title: "ROA",
                     value: String(format: "%.2f%%", overview.roa),
-                    accent: AppColors.chartCapitalDeposits,
-                    trend: trendText(overview.roa, threshold: 2.5)
+                    caption: trendText(overview.roa, threshold: 2.5),
+                    accent: AppColors.chartCapitalDeposits
                 )
-                snapshotCard(
+                CompactMetricCard(
                     title: "Định giá P/E",
-                    value: String(format: "%.2f", overview.currentPE),
-                    accent: AppColors.chartRevenue,
-                    trend: valuationTrend(current: overview.currentPE, median: overview.medianPE)
+                    value: String(format: "%.2f", overview.displayPE),
+                    caption: valuationTrend(current: overview.displayPE, median: overview.medianPE, mean: overview.meanPE),
+                    accent: AppColors.chartRevenue
                 )
-                snapshotCard(
+                CompactMetricCard(
                     title: "Định giá P/B",
-                    value: String(format: "%.2f", overview.currentPB),
-                    accent: AppColors.chartProfit,
-                    trend: valuationTrend(current: overview.currentPB, median: overview.medianPB)
+                    value: String(format: "%.2f", overview.displayPB),
+                    caption: valuationTrend(current: overview.displayPB, median: overview.medianPB, mean: overview.meanPB),
+                    accent: AppColors.chartProfit
                 )
             }
         }
-    }
-
-    private func snapshotCard(title: String, value: String, accent: Color, trend: String) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(title)
-                .font(AppTypography.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-
-            Text(value)
-                .font(AppTypography.headline)
-                .fontWeight(.bold)
-                .foregroundStyle(AppColors.apple)
-                .lineLimit(1)
-
-            Text(trend)
-                .font(AppTypography.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-
-            Rectangle()
-                .fill(accent.opacity(0.85))
-                .frame(height: 4)
-                .clipShape(RoundedRectangle(cornerRadius: 2))
-        }
-        .padding(Spacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppColors.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
     }
 
     private func trendText(_ value: Double, threshold: Double) -> String {
@@ -84,13 +55,24 @@ public struct MobileInsightSnapshot: View {
         return "Thấp, cần cải thiện hiệu quả"
     }
 
-    private func valuationTrend(current: Double, median: Double) -> String {
-        if median <= 0 { return "Không đủ dữ liệu so sánh" }
-        let pct = abs(current - median) / median * 100
-        if pct < 5 { return "Gần trung vị ngành" }
-        return current < median
-            ? String(format: "Thấp hơn trung vị %.0f%%", pct)
-            : String(format: "Cao hơn trung vị %.0f%%", pct)
+    private func valuationTrend(current: Double, median: Double, mean: Double?) -> String {
+        var lines: [String] = []
+        if median > 0 {
+            let pct = abs(current - median) / median * 100
+            if pct < 5 {
+                lines.append("Gần trung vị lịch sử")
+            } else if current < median {
+                lines.append(String(format: "Thấp hơn TV %.0f%%", pct))
+            } else {
+                lines.append(String(format: "Cao hơn TV %.0f%%", pct))
+            }
+        } else {
+            lines.append("Chưa có TV lịch sử")
+        }
+        if let m = mean, m.isFinite, m > 0 {
+            lines.append(String(format: "TB lịch sử: %.2f", m))
+        }
+        return lines.joined(separator: "\n")
     }
 }
 

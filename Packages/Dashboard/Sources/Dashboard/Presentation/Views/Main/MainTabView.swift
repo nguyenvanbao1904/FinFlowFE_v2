@@ -9,6 +9,7 @@ import SwiftUI
 import FinFlowCore
 
 public struct MainTabView<
+    HomeContent: View,
     TransactionContent: View,
     PlanningContent: View,
     WealthContent: View,
@@ -22,6 +23,7 @@ public struct MainTabView<
     @Binding private var wealthPath: [AppRoute]
     @Binding private var investmentPath: [AppRoute]
 
+    private let homeView: HomeContent
     private let transactionView: TransactionContent
     private let planningView: PlanningContent
     private let wealthView: WealthContent
@@ -37,6 +39,7 @@ public struct MainTabView<
         planningPath: Binding<[AppRoute]>,
         wealthPath: Binding<[AppRoute]>,
         investmentPath: Binding<[AppRoute]>,
+        homeView: HomeContent,
         transactionView: TransactionContent,
         planningView: PlanningContent,
         wealthView: WealthContent,
@@ -49,6 +52,7 @@ public struct MainTabView<
         self._planningPath = planningPath
         self._wealthPath = wealthPath
         self._investmentPath = investmentPath
+        self.homeView = homeView
         self.transactionView = transactionView
         self.planningView = planningView
         self.wealthView = wealthView
@@ -61,7 +65,7 @@ public struct MainTabView<
         TabView(selection: $activeTab) {
             // Tab 1: Home
             NavigationStack(path: $homePath) {
-                HomeView(router: router)
+                homeView
                     .navigationDestination(for: AppRoute.self) { route in
                         destinationFactory(route)
                     }

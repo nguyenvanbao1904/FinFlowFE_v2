@@ -2,14 +2,14 @@ import Charts
 import FinFlowCore
 import SwiftUI
 
-/// Dividend history shown as compact charts for mobile.
+/// Yearly dividend bars (cash + stock); scroll/X/Y behavior shared with `DividendHorizontalChartLayout` + Y helpers below.
 public struct DividendHistoryTable: View {
     let dividends: [DividendDataPoint]
     let onRequestFullHistory: (() -> Void)?
     @State private var showCashFullscreen = false
     @State private var showStockFullscreen = false
-    @State private var cashScrollYear: String = ""
-    @State private var stockScrollYear: String = ""
+    @State private var cashScrollYear = ""
+    @State private var stockScrollYear = ""
     @State private var selectedCashYear: String?
     @State private var selectedStockYear: String?
 
@@ -18,18 +18,73 @@ public struct DividendHistoryTable: View {
         self.onRequestFullHistory = onRequestFullHistory
     }
 
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "dd/MM/yyyy"
-        return f
-    }()
-
     private struct YearlyDividendSummary: Identifiable {
         let year: Int
         let cashValuePerShare: Double
         let stockPercent: Double
 
         var id: Int { year }
+    }
+
+    private enum DividendBarSeriesAttributes {
+        case cash
+        case stock
+
+        var plotYLabel: String {
+            switch self {
+            case .cash: return "Cổ tức tiền"
+            case .stock: return "Cổ tức cổ phiếu (%)"
+            }
+        }
+
+        var yKeyPath: KeyPath<YearlyDividendSummary, Double> {
+            switch self {
+            case .cash: return \.cashValuePerShare
+            case .stock: return \.stockPercent
+            }
+        }
+
+        var barColor: Color {
+            switch self {
+            case .cash: return AppColors.chartProfit
+            case .stock: return AppColors.primary
+            }
+        }
+
+        var selectionSubtitle: String {
+            switch self {
+            case .cash: return "Cổ tức tiền"
+            case .stock: return "Cổ tức cổ phiếu"
+            }
+        }
+
+        var metricTitle: String {
+            switch self {
+            case .cash: return "Tiền mặt"
+            case .stock: return "Cổ phiếu thưởng"
+            }
+        }
+
+        func yDomain(_ maxValue: Double) -> ClosedRange<Double> {
+            switch self {
+            case .cash: return dividendCashYDomain(maxValue: maxValue)
+            case .stock: return dividendStockPercentYDomain(maxValue: maxValue)
+            }
+        }
+
+        func formatAxisValue(_ v: Double) -> String {
+            switch self {
+            case .cash: return String(format: "%.0f", v)
+            case .stock: return String(format: "%.0f%%", v)
+            }
+        }
+
+        func formatMetric(_ row: YearlyDividendSummary) -> String {
+            switch self {
+            case .cash: return String(format: "%.0f đ/CP", row.cashValuePerShare)
+            case .stock: return String(format: "%.1f%%", row.stockPercent)
+            }
+        }
     }
 
     private var yearly: [YearlyDividendSummary] {
@@ -55,6 +110,7 @@ public struct DividendHistoryTable: View {
     }
 
     private var labels: [String] { yearly.map { String($0.year) } }
+    private var years: [Int] { yearly.map(\.year) }
     private var inlineVisibleLength: Int { min(6, max(1, yearly.count)) }
     private var fullVisibleLength: Int { min(10, max(1, yearly.count)) }
     private var initialInlineScrollLabel: String {
@@ -62,6 +118,11 @@ public struct DividendHistoryTable: View {
     }
     private var initialFullScrollLabel: String {
         labels.isEmpty ? "" : labels[max(labels.count - fullVisibleLength, 0)]
+    }
+
+    private func needsDividendHorizontalScroll(fullScreen: Bool) -> Bool {
+        let cap = fullScreen ? fullVisibleLength : inlineVisibleLength
+        return yearly.count > cap
     }
 
     public var body: some View {
@@ -91,24 +152,33 @@ public struct DividendHistoryTable: View {
                     .font(AppTypography.caption)
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
-                fullScreenButton {
-                    showCashFullscreen = true
-                }
+                fullScreenButton { showCashFullscreen = true }
             }
-            cashChart(fullScreen: false)
-                .frame(height: 160)
+            yearlyDividendBarChart(
+                fullScreen: false,
+                scrollYear: $cashScrollYear,
+                selectedYear: $selectedCashYear,
+                attributes: .cash
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 160)
             legendRow(label: "Cổ tức tiền", color: AppColors.chartProfit)
         }
         .fullScreenCover(isPresented: $showCashFullscreen) {
             ChartFullscreenContainer(title: "Cổ tức tiền (đ/CP) theo năm") {
                 GeometryReader { proxy in
                     let chartHeight = ChartFullscreenSupport.preferredChartHeight(for: proxy.size)
-                    cashChart(fullScreen: true)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: chartHeight)
-                        .padding(Spacing.md)
-                        .background(AppColors.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
+                    yearlyDividendBarChart(
+                        fullScreen: true,
+                        scrollYear: $cashScrollYear,
+                        selectedYear: $selectedCashYear,
+                        attributes: .cash
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: chartHeight)
+                    .padding(Spacing.md)
+                    .background(AppColors.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
                 }
             }
         }
@@ -125,24 +195,33 @@ public struct DividendHistoryTable: View {
                     .font(AppTypography.caption)
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
-                fullScreenButton {
-                    showStockFullscreen = true
-                }
+                fullScreenButton { showStockFullscreen = true }
             }
-            stockChart(fullScreen: false)
-                .frame(height: 160)
+            yearlyDividendBarChart(
+                fullScreen: false,
+                scrollYear: $stockScrollYear,
+                selectedYear: $selectedStockYear,
+                attributes: .stock
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 160)
             legendRow(label: "Cổ tức cổ phiếu (%)", color: AppColors.primary)
         }
         .fullScreenCover(isPresented: $showStockFullscreen) {
             ChartFullscreenContainer(title: "Cổ tức cổ phiếu (%) theo năm") {
                 GeometryReader { proxy in
                     let chartHeight = ChartFullscreenSupport.preferredChartHeight(for: proxy.size)
-                    stockChart(fullScreen: true)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: chartHeight)
-                        .padding(Spacing.md)
-                        .background(AppColors.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
+                    yearlyDividendBarChart(
+                        fullScreen: true,
+                        scrollYear: $stockScrollYear,
+                        selectedYear: $selectedStockYear,
+                        attributes: .stock
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: chartHeight)
+                    .padding(Spacing.md)
+                    .background(AppColors.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
                 }
             }
         }
@@ -152,24 +231,30 @@ public struct DividendHistoryTable: View {
         }
     }
 
-    private func cashChart(fullScreen: Bool) -> some View {
-        ZStack(alignment: .topTrailing) {
+    private func yearlyDividendBarChart(
+        fullScreen: Bool,
+        scrollYear: Binding<String>,
+        selectedYear: Binding<String?>,
+        attributes: DividendBarSeriesAttributes
+    ) -> some View {
+        let maxY = yearly.map { $0[keyPath: attributes.yKeyPath] }.max() ?? 0
+        return ZStack(alignment: .topTrailing) {
             Chart(yearly) { item in
                 BarMark(
                     x: .value("Năm", String(item.year)),
-                    y: .value("Cổ tức tiền", item.cashValuePerShare)
+                    y: .value(attributes.plotYLabel, item[keyPath: attributes.yKeyPath])
                 )
-                .foregroundStyle(AppColors.chartProfit)
+                .foregroundStyle(attributes.barColor)
             }
-            .chartXSelection(value: $selectedCashYear)
-            if let label = selectedCashYear,
+            .chartXSelection(value: selectedYear)
+            if let label = selectedYear.wrappedValue,
                let summary = summary(for: label)
             {
                 selectionCard(
                     title: label,
-                    subtitle: "Cổ tức tiền",
+                    subtitle: attributes.selectionSubtitle,
                     metrics: [
-                        (label: "Tiền mặt", value: String(format: "%.0f đ/CP", summary.cashValuePerShare), color: AppColors.chartProfit)
+                        (label: attributes.metricTitle, value: attributes.formatMetric(summary), color: attributes.barColor),
                     ]
                 )
                 .frame(maxWidth: 220)
@@ -177,12 +262,13 @@ public struct DividendHistoryTable: View {
                 .padding(.trailing, Spacing.xs)
             }
         }
+        .chartYScale(domain: attributes.yDomain(maxY))
         .chartYAxis {
             AxisMarks(position: .leading) { value in
                 AxisGridLine().foregroundStyle(AppColors.chartGridLine)
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
-                        Text(String(format: "%.0f", v))
+                        Text(attributes.formatAxisValue(v))
                     }
                 }
             }
@@ -198,66 +284,26 @@ public struct DividendHistoryTable: View {
                 }
             }
         }
-        .chartScrollableAxes(.horizontal)
-        .chartXVisibleDomain(length: fullScreen ? fullVisibleLength : inlineVisibleLength)
-        .chartScrollPosition(x: fullScreen ? .constant(initialFullScrollLabel) : $cashScrollYear)
-        .onAppear {
-            if cashScrollYear.isEmpty { cashScrollYear = initialInlineScrollLabel }
+        .modifier(
+            DividendHorizontalChartLayout(
+                labels: labels,
+                needsScroll: needsDividendHorizontalScroll(fullScreen: fullScreen),
+                fullScreen: fullScreen,
+                inlineVisibleLength: inlineVisibleLength,
+                fullVisibleLength: fullVisibleLength,
+                scrollYear: scrollYear,
+                initialInlineScrollLabel: initialInlineScrollLabel,
+                initialFullScrollLabel: initialFullScrollLabel
+            )
+        )
+        .onChange(of: years) { _, _ in
+            syncScrollYearForDividendChart(fullScreen: fullScreen, scrollYear: scrollYear)
         }
     }
 
-    private func stockChart(fullScreen: Bool) -> some View {
-        ZStack(alignment: .topTrailing) {
-            Chart(yearly) { item in
-                BarMark(
-                    x: .value("Năm", String(item.year)),
-                    y: .value("Cổ tức cổ phiếu (%)", item.stockPercent)
-                )
-                .foregroundStyle(AppColors.primary)
-            }
-            .chartXSelection(value: $selectedStockYear)
-            if let label = selectedStockYear,
-               let summary = summary(for: label)
-            {
-                selectionCard(
-                    title: label,
-                    subtitle: "Cổ tức cổ phiếu",
-                    metrics: [
-                        (label: "Cổ phiếu thưởng", value: String(format: "%.1f%%", summary.stockPercent), color: AppColors.primary)
-                    ]
-                )
-                .frame(maxWidth: 220)
-                .padding(.top, Spacing.xs)
-                .padding(.trailing, Spacing.xs)
-            }
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine().foregroundStyle(AppColors.chartGridLine)
-                AxisValueLabel {
-                    if let v = value.as(Double.self) {
-                        Text(String(format: "%.0f%%", v))
-                    }
-                }
-            }
-        }
-        .chartXAxis {
-            AxisMarks { value in
-                AxisGridLine().foregroundStyle(AppColors.chartGridLine)
-                AxisValueLabel {
-                    if let label = value.as(String.self),
-                       shouldShowChartLabel(label, labels: labels, fullScreen: fullScreen) {
-                        Text(label)
-                    }
-                }
-            }
-        }
-        .chartScrollableAxes(.horizontal)
-        .chartXVisibleDomain(length: fullScreen ? fullVisibleLength : inlineVisibleLength)
-        .chartScrollPosition(x: fullScreen ? .constant(initialFullScrollLabel) : $stockScrollYear)
-        .onAppear {
-            if stockScrollYear.isEmpty { stockScrollYear = initialInlineScrollLabel }
-        }
+    private func syncScrollYearForDividendChart(fullScreen: Bool, scrollYear: Binding<String>) {
+        guard needsDividendHorizontalScroll(fullScreen: fullScreen), !labels.isEmpty else { return }
+        scrollYear.wrappedValue = fullScreen ? initialFullScrollLabel : initialInlineScrollLabel
     }
 
     private func fullScreenButton(action: @escaping () -> Void) -> some View {
@@ -326,10 +372,6 @@ public struct DividendHistoryTable: View {
     }
 
     private func parseStockPercent(from ratio: String) -> Double {
-        // Support multiple backend formats:
-        // - "100:15" => 15%
-        // - "0.15"   => 15%
-        // - "15" / "15%" => 15%
         let raw = ratio
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: ",", with: ".")
@@ -350,6 +392,68 @@ public struct DividendHistoryTable: View {
         guard let value = Double(normalized) else { return 0 }
         if raw.contains("%") { return value }
         return value <= 1 ? value * 100 : value
+    }
+}
+
+// MARK: - Y domain
+
+private func dividendCashYDomain(maxValue: Double) -> ClosedRange<Double> {
+    let headroom = 0.12
+    guard maxValue > 0 else { return 0 ... 1 }
+    let padded = maxValue * (1.0 + headroom)
+    let t = pow(10.0, floor(log10(max(padded, 1e-9))))
+    let step = [0.25, 0.5, 1, 2, 5, 10].map { $0 * t }.first { $0 >= padded / 5 } ?? (10 * t)
+    let upper = max(ceil(padded / step) * step, maxValue * 1.001)
+    return 0 ... upper
+}
+
+private func dividendStockPercentYDomain(maxValue: Double) -> ClosedRange<Double> {
+    let headroom = 0.12
+    guard maxValue > 0 else { return 0 ... 1 }
+    let padded = maxValue * (1.0 + headroom)
+    let upper = max(ceil(padded / 10.0) * 10.0, maxValue + 1)
+    return 0 ... upper
+}
+
+// MARK: - Horizontal layout
+
+private struct DividendHorizontalChartLayout: ViewModifier {
+    let labels: [String]
+    let needsScroll: Bool
+    let fullScreen: Bool
+    let inlineVisibleLength: Int
+    let fullVisibleLength: Int
+    @Binding var scrollYear: String
+    let initialInlineScrollLabel: String
+    let initialFullScrollLabel: String
+
+    func body(content: Content) -> some View {
+        Group {
+            if needsScroll {
+                if fullScreen {
+                    content
+                        .chartScrollableAxes(.horizontal)
+                        .chartXVisibleDomain(length: fullVisibleLength)
+                        .chartScrollPosition(x: .constant(initialFullScrollLabel))
+                } else {
+                    content
+                        .chartScrollableAxes(.horizontal)
+                        .chartXVisibleDomain(length: inlineVisibleLength)
+                        .chartScrollPosition(x: inlineScrollPositionBinding)
+                }
+            } else {
+                content
+                    .chartXScale(domain: labels)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var inlineScrollPositionBinding: Binding<String> {
+        Binding(
+            get: { scrollYear.isEmpty ? initialInlineScrollLabel : scrollYear },
+            set: { scrollYear = $0 }
+        )
     }
 }
 

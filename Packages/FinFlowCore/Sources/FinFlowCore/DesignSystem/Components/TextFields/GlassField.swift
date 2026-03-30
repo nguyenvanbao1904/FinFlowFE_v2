@@ -23,6 +23,7 @@ public struct GlassField: View {
     // MARK: - Properties
 
     public let icon: String
+    public let showsIcon: Bool
     public let placeholder: String
     @Binding public var text: String
     public let isSecure: Bool
@@ -38,6 +39,7 @@ public struct GlassField: View {
         text: Binding<String>,
         placeholder: String,
         icon: String,
+        showsIcon: Bool = true,
         isSecure: Bool = false,
         keyboardType: KeyboardType = .default,
         onFocusChange: ((Bool) -> Void)? = nil
@@ -45,6 +47,7 @@ public struct GlassField: View {
         self._text = text
         self.placeholder = placeholder
         self.icon = icon
+        self.showsIcon = showsIcon
         self.isSecure = isSecure
         self.keyboardType = keyboardType
         self.onFocusChange = onFocusChange
@@ -54,10 +57,11 @@ public struct GlassField: View {
 
     public var body: some View {
         HStack(spacing: Spacing.sm) {
-            // Icon
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-                .frame(width: UILayout.iconSize)
+            if showsIcon {
+                Image(systemName: icon)
+                    .foregroundStyle(.secondary)
+                    .frame(width: UILayout.iconSize)
+            }
 
             // Input field (secure or text)
             inputField

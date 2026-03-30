@@ -81,6 +81,8 @@ struct AppRootView: View {
                 NavigationStack {
                     makeDestination(for: route)
                 }
+                .presentationDetents(route == .finFlowBotChat ? [.medium, .large] : [.large])
+                .presentationDragIndicator(route == .finFlowBotChat ? .visible : .hidden)
             }
 
             // Privacy Blur Overlay
@@ -93,6 +95,11 @@ struct AppRootView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase: newPhase)
+        }
+        .onChange(of: observableRouter.root) { _, newRoot in
+            if newRoot != .dashboard {
+                container.resetCachedHomeViewModel()
+            }
         }
     }
 
@@ -177,6 +184,8 @@ struct AppRootView: View {
             container.makeAddBudgetView(router: router)
         case .editBudget(let budget):
             container.makeAddBudgetView(router: router, budgetToEdit: budget)
+        case .finFlowBotChat:
+            FinFlowBotChatPlaceholderView()
         }
     }
 }

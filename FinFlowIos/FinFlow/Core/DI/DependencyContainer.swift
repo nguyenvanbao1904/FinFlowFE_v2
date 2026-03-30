@@ -111,6 +111,15 @@ public class DependencyContainer {
 
     }
 
+    // MARK: - Dashboard (cache ViewModel)
+
+    /// Một `HomeViewModel` cho phiên dashboard. `AppRootView` render lại khi mở sheet / đổi router — nếu tạo VM mới mỗi lần sẽ mất `snapshot` (task load có thể bị cancel).
+    var cachedHomeViewModel: HomeViewModel?
+
+    func resetCachedHomeViewModel() {
+        cachedHomeViewModel = nil
+    }
+
     // MARK: - Auth State
 
     func isUserAuthenticated() async -> Bool {

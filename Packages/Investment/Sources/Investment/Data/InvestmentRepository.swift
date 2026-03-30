@@ -82,6 +82,22 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
         return mapValuations(response)
     }
 
+    public func getDailyValuations(symbol: String, startDate: Date, endDate: Date) async throws -> [DailyValuationDataPoint] {
+        let normalized = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let s = dateFormatter.string(from: startDate)
+        let e = dateFormatter.string(from: endDate)
+        let endpoint =
+            "/investments/companies/\(normalized)/analysis/valuations/daily?startDate=\(s)&endDate=\(e)"
+        let response: [DailyValuationDTO] = try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+        return mapDailyValuations(response)
+    }
+
     public func getDividends(
         symbol: String,
         annualLimit: Int?
@@ -102,12 +118,55 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
         return mapDividends(response)
     }
 
+    public func suggestCompanies(
+        query: String,
+        limit: Int?
+    ) async throws -> [CompanySuggestionResponse] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return [] }
+
+        var queryItems: [String] = ["q=\(urlEncode(trimmed))"]
+        if let limit, limit > 0 {
+            queryItems.append("limit=\(min(limit, 20))")
+        }
+        let endpoint = "/investments/companies/suggest?" + queryItems.joined(separator: "&")
+
+        return try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
+    public func getCompanyIndustries(symbols: [String]) async throws -> [CompanyIndustryResponse] {
+        let normalized = symbols
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+            .filter { !$0.isEmpty }
+        if normalized.isEmpty { return [] }
+
+        let query = normalized
+            .map { "symbols=\(urlEncode($0))" }
+            .joined(separator: "&")
+        let endpoint = "/investments/companies/industries?" + query
+
+        return try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
     private func map(dto: InvestmentAnalysisDTO) -> InvestmentAnalysisBundle {
         let overviewDTO = dto.overview
         let overview = StockOverview(
             symbol: overviewDTO.symbol,
             companyName: overviewDTO.companyName ?? "",
             exchange: overviewDTO.exchange ?? "",
+            companyType: overviewDTO.companyType,
             industryIcbCode: overviewDTO.industryIcbCode,
             industryLabel: overviewDTO.industryLabel ?? "",
             description: overviewDTO.description ?? "",
@@ -118,10 +177,18 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
             cplh: normalizeSharesToBillion(overviewDTO.cplh) ?? 0,
             currentPE: overviewDTO.currentPE ?? 0,
             medianPE: overviewDTO.medianPE ?? 0,
+            meanPE: overviewDTO.meanPE,
             currentPB: overviewDTO.currentPB ?? 0,
             medianPB: overviewDTO.medianPB ?? 0,
+            meanPB: overviewDTO.meanPB,
             currentPS: overviewDTO.currentPS ?? 0,
-            medianPS: overviewDTO.medianPS ?? 0
+            medianPS: overviewDTO.medianPS ?? 0,
+            meanPS: overviewDTO.meanPS,
+            livePE: overviewDTO.livePe,
+            livePB: overviewDTO.livePb,
+            livePS: overviewDTO.livePs,
+            livePriceVnd: overviewDTO.livePriceVnd,
+            livePriceSource: overviewDTO.livePriceSource
         )
 
         let shareholders = dto.shareholders.map {
@@ -222,6 +289,17 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
         }
     }
 
+    private func mapDailyValuations(_ rows: [DailyValuationDTO]) -> [DailyValuationDataPoint] {
+        rows.map {
+            DailyValuationDataPoint(
+                date: $0.date ?? "",
+                pe: $0.pe,
+                pb: $0.pb,
+                ps: $0.ps
+            )
+        }
+    }
+
     private func mapDividends(_ dividends: [DividendDTO]) -> [DividendDataPoint] {
         dividends.map {
             DividendDataPoint(
@@ -264,6 +342,10 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
         }
         let query = queryItems.isEmpty ? "" : "?" + queryItems.joined(separator: "&")
         return "/investments/companies/\(normalized)/\(pathSuffix)\(query)"
+    }
+
+    private func urlEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
     }
 
     private func parseDate(_ value: String?) -> Date? {
@@ -311,10 +393,18 @@ private struct OverviewDTO: Codable, Sendable {
     let cplh: Double?
     let currentPE: Double?
     let medianPE: Double?
+    let meanPE: Double?
     let currentPB: Double?
     let medianPB: Double?
+    let meanPB: Double?
     let currentPS: Double?
     let medianPS: Double?
+    let meanPS: Double?
+    let livePe: Double?
+    let livePb: Double?
+    let livePs: Double?
+    let livePriceVnd: Double?
+    let livePriceSource: String?
 }
 
 private struct ShareholderDTO: Codable, Sendable {
@@ -326,6 +416,13 @@ private struct ShareholderDTO: Codable, Sendable {
 private struct ValuationDTO: Codable, Sendable {
     let year: Int?
     let quarter: Int?
+    let pe: Double?
+    let pb: Double?
+    let ps: Double?
+}
+
+private struct DailyValuationDTO: Codable, Sendable {
+    let date: String?
     let pe: Double?
     let pb: Double?
     let ps: Double?

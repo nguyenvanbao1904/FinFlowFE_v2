@@ -114,4 +114,11 @@ public final class AppRouter: AppRouterProtocol {
     public func dismissSheet() {
         presentedSheet = nil
     }
+
+    public func selectTab(_ tab: AppTab) {
+        if presentedSheet != nil {
+            dismissSheet()
+        }
+        activeTab = tab
+    }
 }

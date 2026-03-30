@@ -2252,6 +2252,27 @@ private struct InteractiveRoeRoaChart: View {
         return max(140, height - legendReserved)
     }
 
+    /// Trục Y giống Charts khi tự scale (như sau fullscreen): **sàn 0**, trần = làm tròn lên bội **10** sau khi nhân max với (1 + %).
+    /// Chỉ `max×1.12` (~22) vẫn để tick cao nhất ~20 → vẫn “chạm nóc”; làm tròn 10 → 0…30 như ảnh 2.
+    private enum RoeRoaYAxisScale {
+        static let topRatio: Double = 0.12
+        private static let niceStep: Double = 10
+
+        static func domain(values: [Double]) -> ClosedRange<Double> {
+            guard !values.isEmpty else { return 0 ... 1 }
+            let maxV = values.max()!
+            let padded = maxV * (1.0 + topRatio)
+            let upperRounded = ceil(padded / niceStep) * niceStep
+            let upper = max(upperRounded, maxV + 1)
+            return 0 ... upper
+        }
+    }
+
+    private var roeRoaYScaleDomain: ClosedRange<Double> {
+        let values = data.flatMap { [$0.roe, $0.roa].compactMap { $0 } }
+        return RoeRoaYAxisScale.domain(values: values)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
@@ -2272,6 +2293,8 @@ private struct InteractiveRoeRoaChart: View {
                 }
             }
             .chartForegroundStyleScale(["ROE": AppColors.chartGrowthStrong, "ROA": AppColors.chartCapitalDeposits])
+            .chartYScale(domain: roeRoaYScaleDomain)
+            .id("roeRoaY-\(roeRoaYScaleDomain.lowerBound)-\(roeRoaYScaleDomain.upperBound)")
             .chartYAxis {
                 AxisMarks(position: .leading) { _ in
                     AxisGridLine().foregroundStyle(AppColors.chartGridLine)
@@ -2690,15 +2713,15 @@ private struct InteractiveNonBankAssetQualityChart: View {
         }
         return max(140, height - legendReserved)
     }
-    /// Giống chart Doanh thu & YoY: một domain Y (tỷ), trục trái % map tuyến tính −100…+100.
+    /// Giống chart Doanh thu & YoY: một domain Y (tỷ), trục trái % map tuyến tính 0…100.
     private var barDomain: ClosedRange<Double> {
         unifiedBarDomain(values: points.map(\.totalAssets))
     }
 
-    private let leftAxisPctDomain: ClosedRange<Double> = -100 ... 100
+    private let leftAxisPctDomain: ClosedRange<Double> = 0 ... 100
 
     private func scalePctToBarDomain(_ pct: Double) -> Double {
-        let pctClamped = min(max(pct, -100), 100)
+        let pctClamped = min(max(pct, 0), 100)
         let bMin = barDomain.lowerBound
         let bMax = barDomain.upperBound
         let bSpan = bMax - bMin
@@ -2785,7 +2808,7 @@ private struct InteractiveNonBankAssetQualityChart: View {
 
                 AxisMarks(
                     position: .leading,
-                    values: [-100.0, -50.0, 0.0, 50.0, 100.0].map { scalePctToBarDomain($0) }
+                    values: [0.0, 25.0, 50.0, 75.0, 100.0].map { scalePctToBarDomain($0) }
                 ) { value in
                     AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(0.35))
                     AxisValueLabel {
@@ -2886,7 +2909,7 @@ private struct InteractiveNonBankAssetQualityChart: View {
         ]
     }
     private func lineYValue(for point: AssetQualityPoint) -> Double {
-        let pct = min(max(point.receivableRatioPct, -100), 100)
+        let pct = min(max(point.receivableRatioPct, 0), 100)
         return scalePctToBarDomain(pct)
     }
 

@@ -83,6 +83,37 @@ public protocol BudgetRepositoryProtocol: Sendable {
 public protocol PortfolioRepositoryProtocol: Sendable {
     func getPortfolios() async throws -> [PortfolioResponse]
     func createPortfolio(request: CreatePortfolioRequest) async throws -> PortfolioResponse
+
+    func getPortfolioAssets(portfolioId: String) async throws -> [PortfolioAssetResponse]
+    func createPortfolioAsset(
+        portfolioId: String,
+        request: CreatePortfolioAssetRequest
+    ) async throws -> PortfolioAssetResponse
+
+    func createTradeTransaction(
+        portfolioId: String,
+        request: CreateTradeTransactionRequest
+    ) async throws -> EmptyResponse
+
+    func importPortfolioSnapshot(
+        portfolioId: String,
+        request: ImportPortfolioSnapshotRequest
+    ) async throws -> EmptyResponse
+
+    func getPortfolioHealth(
+        portfolioId: String,
+        quarters: Int
+    ) async throws -> PortfolioHealthResponse
+
+    func getPortfolioBenchmark(
+        portfolioId: String,
+        code: String
+    ) async throws -> PortfolioMarketBenchmarkResponse
+
+    func getPortfolioPerformance(
+        portfolioId: String,
+        range: String
+    ) async throws -> PortfolioPerformanceResponse
 }
 
 // MARK: - Composite Protocol (Backward Compatibility)

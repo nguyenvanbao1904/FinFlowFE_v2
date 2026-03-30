@@ -151,6 +151,7 @@ public struct AnalyzeTransactionResponse: Codable, Sendable {
 }
 
 extension Notification.Name {
+    /// Đăng sau khi thêm/sửa giao dịch thành công, hoặc sau khi xóa (ảnh hưởng chi tiêu / ngân sách).
     public static let transactionDidSave = Notification.Name("transactionDidSave")
 }
 

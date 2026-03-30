@@ -53,6 +53,9 @@ public protocol AppRouterProtocol: AnyObject {
 
     /// Dismiss the global sheet
     func dismissSheet()
+
+    /// Switch the main tab bar selection (e.g. home hub shortcuts).
+    func selectTab(_ tab: AppTab)
 }
 
 /// Centralized enum for all navigation destinations.
@@ -76,6 +79,9 @@ public enum AppRoute: Hashable, Sendable {
     case categoryList
     case addBudget
     case editBudget(BudgetResponse)
+
+    /// Chat với FinFlow Bot (placeholder — sẽ thay bằng màn chat AI).
+    case finFlowBotChat
 }
 
 extension AppRoute: Identifiable {

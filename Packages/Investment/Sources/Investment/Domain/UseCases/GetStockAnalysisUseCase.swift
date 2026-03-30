@@ -47,6 +47,10 @@ public struct GetStockAnalysisUseCase: Sendable {
         )
     }
 
+    public func executeDailyValuations(symbol: String, startDate: Date, endDate: Date) async throws -> [DailyValuationDataPoint] {
+        try await repository.getDailyValuations(symbol: symbol, startDate: startDate, endDate: endDate)
+    }
+
     public func executeDividends(
         symbol: String,
         annualLimit: Int? = nil
