@@ -47,139 +47,57 @@ public struct AISmartInputBar: View {
 
     public var body: some View {
         HStack(spacing: Spacing.xs) {
-            // AI Text Input Field
-            inputField
+            AISmartInputField(
+                text: $text,
+                isAnalyzing: $isAnalyzing,
+                placeholder: placeholder,
+                onSubmit: onSubmit,
+                isFocused: $isFocused
+            )
 
-            // Voice Button
             if showVoiceButton {
                 voiceButton
             }
 
-            // Camera Button
             if showCameraButton {
                 cameraButton
             }
         }
     }
 
-    // MARK: - Input Field
-
-    private var inputField: some View {
-        HStack {
-            Image(systemName: "sparkles")
-                .foregroundColor(isAnalyzing ? AppColors.accent : AppColors.primary)
-                .rotationEffect(.degrees(isAnalyzing ? 360 : 0))
-                .animation(
-                    isAnalyzing
-                        ? Animation.linear(duration: 2).repeatForever(autoreverses: false)
-                        : .default,
-                    value: isAnalyzing
-                )
-
-            TextField(placeholder, text: $text)
-                .font(AppTypography.body)
-                .foregroundColor(.primary)
-                .focused($isFocused)
-                .onSubmit {
-                    if !text.isEmpty {
-                        onSubmit(text)
-                    }
-                }
-
-            if !text.isEmpty && !isAnalyzing {
-                Button {
-                    onSubmit(text)
-                } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(AppTypography.title)
-                        .foregroundColor(AppColors.primary)
-                }
-            }
-        }
-        .padding(.horizontal, Spacing.sm)
-        .padding(.vertical, Spacing.xs)
-        .background(AppColors.cardBackground)
-        .cornerRadius(CornerRadius.pill)
-        .overlay(
-            RoundedRectangle(cornerRadius: CornerRadius.pill)
-                .stroke(
-                    isFocused || isAnalyzing
-                        ? LinearGradient(
-                            colors: [
-                                AppColors.primary,
-                                AppColors.accent.opacity(OpacityLevel.high)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        : LinearGradient(
-                            colors: [
-                                AppColors.disabled.opacity(OpacityLevel.medium),
-                                AppColors.disabled.opacity(OpacityLevel.medium)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                    lineWidth: isFocused || isAnalyzing
-                        ? BorderWidth.medium : BorderWidth.thin
-                )
+    private var voiceButton: some View {
+        AISmartCircleActionButton(
+            systemImage: "mic.fill",
+            iconColor: AppColors.textInverted,
+            fill: AnyShapeStyle(
+                isAnalyzing
+                    ? LinearGradient(
+                        colors: [AppColors.accent, AppColors.primary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    : LinearGradient(
+                        colors: [AppColors.primary, AppColors.primary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+            ),
+            borderColor: nil,
+            action: onVoice
         )
         .shadow(
-            color: isFocused || isAnalyzing
-                ? AppColors.accent.opacity(OpacityLevel.low) : .clear,
-            radius: Spacing.xs, x: 0, y: Spacing.xs / 2
+            color: AppColors.primary.opacity(OpacityLevel.low),
+            radius: 5, x: 0, y: 2
         )
     }
 
-    // MARK: - Voice Button
-
-    private var voiceButton: some View {
-        Button {
-            onVoice()
-        } label: {
-            Image(systemName: "mic.fill")
-                .font(AppTypography.iconMedium)
-                .foregroundStyle(AppColors.textInverted)
-                .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
-                .background(
-                    isAnalyzing
-                        ? LinearGradient(
-                            colors: [AppColors.accent, AppColors.primary],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                        : LinearGradient(
-                            colors: [AppColors.primary, AppColors.primary],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                )
-                .clipShape(Circle())
-                .shadow(
-                    color: AppColors.primary.opacity(OpacityLevel.low),
-                    radius: 5, x: 0, y: 2
-                )
-        }
-    }
-
-    // MARK: - Camera Button
-
     private var cameraButton: some View {
-        Button {
-            onCamera()
-        } label: {
-            Image(systemName: "camera.viewfinder")
-                .font(AppTypography.iconMedium)
-                .foregroundColor(AppColors.primary)
-                .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
-                .background(AppColors.cardBackground)
-                .clipShape(Circle())
-                .overlay(
-                    Circle().stroke(
-                        AppColors.disabled.opacity(OpacityLevel.medium),
-                        lineWidth: BorderWidth.thin
-                    )
-                )
-        }
+        AISmartCircleActionButton(
+            systemImage: "camera.viewfinder",
+            iconColor: AppColors.primary,
+            fill: AnyShapeStyle(AppColors.cardBackground),
+            borderColor: AppColors.disabled.opacity(OpacityLevel.medium),
+            action: onCamera
+        )
     }
 }

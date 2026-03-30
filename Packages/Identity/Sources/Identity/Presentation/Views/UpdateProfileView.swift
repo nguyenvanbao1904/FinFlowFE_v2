@@ -40,7 +40,7 @@ public struct UpdateProfileView: View {
                         // Date of birth picker
                         HStack(spacing: Spacing.sm) {
                             Image(systemName: "calendar")
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                                 .frame(width: UILayout.iconSize)
 
                             DatePicker(
@@ -51,7 +51,7 @@ public struct UpdateProfileView: View {
                         .padding(.vertical, Spacing.sm)
                         .padding(.horizontal, Spacing.sm)
                         .background(AppColors.cardBackground)
-                        .cornerRadius(CornerRadius.medium)
+                        .clipShape(.rect(cornerRadius: CornerRadius.medium))
                         .overlay(
                             RoundedRectangle(cornerRadius: CornerRadius.medium)
                                 .stroke(AppColors.glassBorder, lineWidth: 0.5)
@@ -62,7 +62,7 @@ public struct UpdateProfileView: View {
 
                     if let error = viewModel.error {
                         Text(error.localizedDescription)
-                            .foregroundColor(AppColors.google)
+                            .foregroundStyle(AppColors.google)
                             .font(AppTypography.caption)
                             .padding(.horizontal)
                     }

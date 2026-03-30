@@ -37,10 +37,10 @@ public struct ForgotPasswordView: View {
                             // Inline OTP view to fix FocusState warning
                             VStack(spacing: Spacing.lg) {
                                 Text("Mã OTP đã được gửi đến")
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                                 Text(viewModel.email)
                                     .font(AppTypography.headline)
-                                    .foregroundColor(AppColors.primary)
+                                    .foregroundStyle(AppColors.primary)
 
                                 PINCodeInput(
                                     pin: $vm.otpCode,
@@ -61,7 +61,7 @@ public struct ForgotPasswordView: View {
                                     Task { await viewModel.sendOtp() }
                                 }
                                 .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             }
                             .task(id: viewModel.step) {
                                 // Activate focus when entering OTP step
@@ -92,7 +92,7 @@ public struct ForgotPasswordView: View {
         return VStack(spacing: Spacing.lg) {
             Text("Nhập email của bạn để nhận mã xác thực OTP")
                 .font(AppTypography.body)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
             // Dùng EmailFieldWithOTP component (giống RegisterView)
@@ -127,7 +127,7 @@ public struct ForgotPasswordView: View {
         return VStack(spacing: Spacing.lg) {
             Text("Thiết lập mật khẩu mới")
                 .font(AppTypography.headline)
-                .foregroundColor(AppColors.primary)  // Used AppColors.primary for emphasis
+                .foregroundStyle(AppColors.primary)  // Used AppColors.primary for emphasis
 
             GlassField(
                 text: $vm.password, placeholder: "Mật khẩu mới", icon: "lock.fill", isSecure: true)

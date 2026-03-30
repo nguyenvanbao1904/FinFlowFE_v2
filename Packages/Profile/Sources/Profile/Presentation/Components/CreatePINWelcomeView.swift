@@ -73,7 +73,7 @@ struct CreatePINWelcomeView: View {
                     )
                 )
                 .foregroundStyle(AppColors.textInverted)
-                .cornerRadius(CornerRadius.medium)
+                .clipShape(.rect(cornerRadius: CornerRadius.medium))
                 .shadow(color: AppColors.primary.opacity(0.5), radius: 15, y: 8)
             }
             .padding(.horizontal, Spacing.md)

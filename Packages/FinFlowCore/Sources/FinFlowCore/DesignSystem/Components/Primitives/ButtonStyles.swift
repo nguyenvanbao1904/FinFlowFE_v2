@@ -39,7 +39,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
         )
         // Keep disabled button readable (avoid white-on-light-grey).
         .foregroundStyle(isEnabled ? AppColors.textInverted : AppColors.primary)
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
         .animation(.spring(response: 0.2), value: configuration.isPressed)
         .opacity(isLoading ? 0.7 : 1.0)
@@ -61,7 +61,7 @@ public struct SecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, Spacing.sm)
             .background(AppColors.cardBackground)
             .foregroundStyle(AppColors.primary)
-            .cornerRadius(CornerRadius.medium)
+            .clipShape(.rect(cornerRadius: CornerRadius.medium))
             .overlay(
                 RoundedRectangle(cornerRadius: CornerRadius.medium)
                     .stroke(AppColors.primary, lineWidth: BorderWidth.thin)

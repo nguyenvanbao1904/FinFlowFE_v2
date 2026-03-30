@@ -78,11 +78,11 @@ extension SelectionSheet where ItemView == AnyView {
                 HStack {
                     Text(item.description)
                         .font(AppTypography.body)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     Spacer()
                     if isSelected {
                         Image(systemName: "checkmark")
-                            .foregroundColor(AppColors.primary)
+                            .foregroundStyle(AppColors.primary)
                     }
                 }
             )

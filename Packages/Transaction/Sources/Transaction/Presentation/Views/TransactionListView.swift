@@ -145,7 +145,10 @@ public struct TransactionListView: View {
     private var historyTab: some View {
         List {
             Section {
-                summaryCard
+                TransactionSummaryCard(
+                    summary: viewModel.displaySummary,
+                    isLoading: viewModel.isLoading
+                )
                     .listRowInsets(
                         EdgeInsets(
                             top: Spacing.sm, leading: .zero, bottom: Spacing.sm, trailing: .zero)
@@ -199,26 +202,28 @@ public struct TransactionListView: View {
                 ForEach(viewModel.groupedTransactions, id: \.title) { group in
                     Section {
                         ForEach(group.items) { transaction in
-                            IconTitleTrailingRow(
-                                icon: transaction.category.icon ?? "tag",
-                                color: Color(hex: transaction.category.color),
-                                title: transaction.note ?? transaction.category.name,
-                                subtitle: transaction.category.name,
-                                trailing: {
-                                    Text(
-                                        CurrencyFormatter.formatWithSign(
-                                            transaction.amount,
-                                            isIncome: transaction.type == .income
-                                        )
-                                    )
-                                    .font(AppTypography.headline)
-                                    .foregroundStyle(
-                                        transaction.type == .income ? AppColors.success : .primary)
-                                }
-                            )
-                            .onTapGesture {
+                            Button {
                                 viewModel.presentEditTransaction(transaction)
+                            } label: {
+                                IconTitleTrailingRow(
+                                    icon: transaction.category.icon ?? "tag",
+                                    color: Color(hex: transaction.category.color),
+                                    title: transaction.note ?? transaction.category.name,
+                                    subtitle: transaction.category.name,
+                                    trailing: {
+                                        Text(
+                                            CurrencyFormatter.formatWithSign(
+                                                transaction.amount,
+                                                isIncome: transaction.type == .income
+                                            )
+                                        )
+                                        .font(AppTypography.headline)
+                                        .foregroundStyle(
+                                            transaction.type == .income ? AppColors.success : .primary)
+                                    }
+                                )
                             }
+                            .buttonStyle(.plain)
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     transactionToDelete = transaction
@@ -282,63 +287,6 @@ public struct TransactionListView: View {
                 Task { await viewModel.fetchChartData() }
             }
         )
-    }
-
-    // MARK: - Components
-
-    private var summaryCard: some View {
-        FinancialHeroCard(
-            title: "Tổng số dư",
-            mainAmount: viewModel.displaySummary.map {
-                CurrencyFormatter.formatBalance($0.totalBalance)
-            } ?? "--"
-        ) {
-            if !viewModel.isLoading {
-                HStack(spacing: Spacing.xl) {
-                    // Income Section
-                    VStack(spacing: Spacing.xs) {
-                        HStack(spacing: Spacing.xs / 2) {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundStyle(AppColors.textInverted)
-                            Text("Thu nhập")
-                                .font(AppTypography.caption)
-                        }
-                        Text(
-                            viewModel.displaySummary.map {
-                                CurrencyFormatter.formatWithSign($0.totalIncome, isIncome: true)
-                            } ?? "--"
-                        )
-                        .font(AppTypography.headline)
-                        .fontWeight(.semibold)
-                    }
-
-                    Divider()
-                        .frame(height: Spacing.xl)
-                        .background(AppColors.textInverted.opacity(OpacityLevel.light))
-
-                    // Expense Section
-                    VStack(spacing: Spacing.xs) {
-                        HStack(spacing: Spacing.xs / 2) {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .foregroundStyle(AppColors.textInverted)
-                            Text("Chi tiêu")
-                                .font(AppTypography.caption)
-                        }
-                        Text(
-                            viewModel.displaySummary.map {
-                                CurrencyFormatter.formatWithSign($0.totalExpense, isIncome: false)
-                            } ?? "--"
-                        )
-                        .font(AppTypography.headline)
-                        .fontWeight(.semibold)
-                    }
-                }
-                .padding(.top, Spacing.sm)
-            } else {
-                ProgressView()
-                    .frame(height: Spacing.xl)
-            }
-        }
     }
 
 }

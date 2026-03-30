@@ -74,7 +74,7 @@ public struct GlassField: View {
         .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .stroke(

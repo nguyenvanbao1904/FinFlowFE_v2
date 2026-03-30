@@ -55,7 +55,7 @@ struct SocialLoginButton: View {
             }
             .frame(width: UILayout.socialButtonWidth, height: UILayout.socialButtonHeight)
             .background(AppColors.cardBackground)
-            .cornerRadius(CornerRadius.small)
+            .clipShape(.rect(cornerRadius: CornerRadius.small))
             .overlay(
                 RoundedRectangle(cornerRadius: CornerRadius.small)
                     .stroke(AppColors.glassBorder, lineWidth: 0.5)

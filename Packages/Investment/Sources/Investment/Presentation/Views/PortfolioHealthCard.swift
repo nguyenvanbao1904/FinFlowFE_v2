@@ -38,7 +38,7 @@ struct PortfolioHealthCard: View {
         }
         .padding(AppSpacing.md)
         .background(AppColors.cardBackground)
-        .cornerRadius(CornerRadius.large)
+        .clipShape(.rect(cornerRadius: CornerRadius.large))
     }
 
     private var footnote: String {

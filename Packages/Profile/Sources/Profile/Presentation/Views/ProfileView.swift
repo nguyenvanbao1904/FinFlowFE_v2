@@ -12,11 +12,16 @@ import FinFlowCore
 import SwiftUI
 
 public struct ProfileView: View {
+    private enum ActiveSheet: String, Identifiable {
+        case restorationAlert
+        var id: String { rawValue }
+    }
+
     @State private var profileVM: ProfileViewModel
     @State private var securityVM: SecuritySettingsViewModel
     @State private var accountVM: AccountManagementViewModel
     @State private var verificationPIN: String = ""
-    @State private var showRestorationAlert = false
+    @State private var activeSheet: ActiveSheet?
     @Environment(\.dismiss) private var dismiss
 
     public init(
@@ -31,168 +36,27 @@ public struct ProfileView: View {
 
     public var body: some View {
         @Bindable var profileVM = profileVM
-        @Bindable var securityVM = securityVM
-        @Bindable var accountVM = accountVM
 
         Group {
             if profileVM.isLoading && profileVM.profile == nil {
-                VStack(spacing: Spacing.md) {
-                    Spacer()
-                    ProgressView("Đang tải dữ liệu...")
-                        .tint(AppColors.primary)
-                    Spacer()
-                }
+                ProfileLoadingStateView()
             } else if profileVM.hasAuthExpiredError {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
+                ProfileAuthExpiredStateView()
             } else if profileVM.hasLoadError {
-                // Retry View
-                VStack(spacing: Spacing.sm) {
-                    Spacer()
-                    Text("Không thể tải dữ liệu")
-                        .font(AppTypography.headline)
-                    Text("Vui lòng kiểm tra kết nối mạng và thử lại.")
-                        .font(AppTypography.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    Button("Thử lại") {
-                        Task { await profileVM.refresh() }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(profileVM.isLoading)
-                    Spacer()
-                }
+                ProfileErrorRetryView(
+                    onRetry: { Task { await profileVM.refresh() } },
+                    isLoading: profileVM.isLoading
+                )
             } else {
-                List {
-                            // SECTION 1: User Info
-                            if let profile = profileVM.profile {
-                                Section {
-                                    Button {
-                                        dismiss()
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                            profileVM.navigateToUpdateProfile()
-                                        }
-                                    } label: {
-                                        HStack(spacing: Spacing.lg) {
-                                            // Avatar
-                                            ZStack {
-                                                Circle()
-                                                    .fill(AppColors.primary.opacity(0.1))
-                                                    .frame(
-                                                        width: UILayout.avatarSize * 1.2,
-                                                        height: UILayout.avatarSize * 1.2)
-
-                                                Text(profile.initials)
-                                                    .font(AppTypography.displaySmall)
-                                                    .foregroundStyle(AppColors.primary)
-                                            }
-
-                                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                                Text(
-                                                    profile.fullName.isEmpty
-                                                        ? profile.email : profile.fullName
-                                                )
-                                                .font(AppTypography.headline)
-                                                .foregroundStyle(.primary)
-
-                                                if !profile.fullName.isEmpty {
-                                                    Text(profile.email)
-                                                        .font(AppTypography.subheadline)
-                                                        .foregroundStyle(.secondary)
-                                                }
-                                            }
-                                            Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .font(AppTypography.caption)
-                                                .foregroundStyle(.tertiary)
-                                        }
-                                        .padding(.vertical, Spacing.xs)
-                                    }
-                                }
-                            }
-
-                            // SECTION 2: Security Settings
-                            Section {
-                                // Biometric Toggle
-                                HStack {
-                                    SettingsRowIcon(icon: "faceid", color: AppColors.primary)
-                                    Toggle(
-                                        isOn: Binding(
-                                            get: { securityVM.isBiometricEnabled },
-                                            set: { securityVM.toggleBiometric($0) }
-                                        )
-                                    ) {
-                                        Text("Đăng nhập sinh trắc học")
-                                            .font(AppTypography.body)
-                                    }
-                                }
-                            } header: {
-                                Text("Bảo mật")
-                                    .font(AppTypography.caption)
-                            } footer: {
-                                Text("Sử dụng Face ID hoặc Touch ID để đăng nhập nhanh hơn.")
-                                    .font(AppTypography.caption)
-                            }
-
-                            // SECTION 3: Account Settings
-                            Section {
-                                Button {
-                                    dismiss()
-                                    // Chờ một chút để sheet đóng rồi mới chuyển trang
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        accountVM.navigateToChangePassword()
-                                    }
-                                } label: {
-                                    HStack {
-                                        SettingsRowIcon(icon: "lock.rotation", color: .gray)
-                                        Text(
-                                            (profileVM.profile?.hasPassword == false)
-                                                ? "Tạo mật khẩu" : "Đổi mật khẩu"
-                                        )
-                                        .font(AppTypography.body)
-                                        .foregroundStyle(.primary)
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(AppTypography.caption)
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                }
-
-                                Button(role: .destructive) {
-                                    accountVM.initiateAccountDeletion()
-                                } label: {
-                                    HStack {
-                                        SettingsRowIcon(icon: "trash.fill", color: .red)
-                                        Text("Xóa tài khoản")
-                                            .font(AppTypography.body)
-                                    }
-                                }
-                            } header: {
-                                Text("Tài khoản")
-                                    .font(AppTypography.caption)
-                            }
-
-                            // SECTION 4: Logout
-                            Section {
-                                Button {
-                                    Task { await accountVM.logout() }
-                                } label: {
-                                    HStack {
-                                        Spacer()
-                                        Text("Đăng xuất")
-                                            .font(AppTypography.body)
-                                            .foregroundStyle(AppColors.google)
-                                            .fontWeight(.medium)
-                                        Spacer()
-                                    }
-                                }
-                            }
-                        }
-                        .listStyle(.insetGrouped)  // The "Apple Settings" style
-                        .refreshable { await profileVM.refresh() }
+                ProfileSettingsListContent(
+                    profileVM: profileVM,
+                    securityVM: securityVM,
+                    accountVM: accountVM,
+                    onDismiss: { dismiss() },
+                    onNavigateUpdateProfile: {
+                        profileVM.navigateToUpdateProfile()
+                    }
+                )
             }
         }
         .navigationTitle("Tài khoản")
@@ -203,7 +67,7 @@ public struct ProfileView: View {
                     dismiss()
                 }
                 .fontWeight(.bold)
-                .foregroundColor(AppColors.primary)
+                .foregroundStyle(AppColors.primary)
             }
         }
         .task {
@@ -252,30 +116,19 @@ public struct ProfileView: View {
         )
         .onAppear {
             if case .authenticated(_, let isRestored) = accountVM.sessionManager.state, isRestored {
-                showRestorationAlert = true
+                activeSheet = .restorationAlert
             }
         }
         // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $showRestorationAlert) {
-            VStack(spacing: Spacing.lg) {
-                Text("Chào mừng quay lại!")
-                    .font(AppTypography.title)
-                    .fontWeight(.bold)
-                Text("Tài khoản của bạn đã được khôi phục thành công.")
-                    .font(AppTypography.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                Button("OK") {
-                    showRestorationAlert = false
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.top)
-            }
-            .padding(Spacing.xl)
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-            .interactiveDismissDisabled()
+        .sheet(item: $activeSheet) { _ in
+            AccountRestorationSheetView(
+                isPresented: Binding(
+                    get: { activeSheet == .restorationAlert },
+                    set: { isPresented in
+                        if !isPresented { activeSheet = nil }
+                    }
+                )
+            )
         }
         .alert(
             "Xóa tài khoản",

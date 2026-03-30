@@ -2,8 +2,13 @@ import FinFlowCore
 import SwiftUI
 
 public struct CategoryListView: View {
+    private enum ActiveSheet: String, Identifiable {
+        case addCategory
+        var id: String { rawValue }
+    }
+
     @State private var viewModel: CategoryListViewModel
-    @State private var showAddCategory = false
+    @State private var activeSheet: ActiveSheet?
     @State private var categoryToEdit: CategoryResponse?
     @State private var categoryToDelete: CategoryResponse?
     @State private var showDeleteConfirmation = false
@@ -39,7 +44,7 @@ public struct CategoryListView: View {
                     subtitle:
                         "Danh mục hệ thống sẽ hiển thị sau khi đồng bộ. Bạn cũng có thể thêm danh mục riêng.",
                     buttonTitle: "Thêm danh mục",
-                    action: { showAddCategory = true }
+                    action: { activeSheet = .addCategory }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(AppColors.appBackground)
@@ -69,7 +74,7 @@ public struct CategoryListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showAddCategory = true
+                    activeSheet = .addCategory
                 } label: {
                     Image(systemName: "plus")
                         .fontWeight(.semibold)
@@ -85,12 +90,12 @@ public struct CategoryListView: View {
             await viewModel.loadCategories(force: true)
         }
         // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $showAddCategory) {
+        .sheet(item: $activeSheet) { _ in
             NavigationStack {
                 AddEditCategoryView(
                     viewModel: viewModel,
                     categoryToEdit: nil,
-                    onDismiss: { showAddCategory = false }
+                    onDismiss: { activeSheet = nil }
                 )
             }
         }
@@ -121,25 +126,26 @@ public struct CategoryListView: View {
     }
 
     private func categoryRow(_ category: CategoryResponse) -> some View {
-        IconTitleTrailingRow(
-            icon: category.icon ?? "tag",
-            color: Color(hex: category.color),
-            title: category.name,
-            subtitle: nil
-        ) {
-            if !category.systemCategory {
-                Image(systemName: "chevron.right")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .opacity(category.systemCategory ? 0.6 : 1.0)
-        .contentShape(Rectangle())
-        .allowsHitTesting(!category.systemCategory)
-        .onTapGesture {
+        Button {
             guard !category.systemCategory else { return }
             categoryToEdit = category
+        } label: {
+            IconTitleTrailingRow(
+                icon: category.icon ?? "tag",
+                color: Color(hex: category.color),
+                title: category.name,
+                subtitle: nil
+            ) {
+                if !category.systemCategory {
+                    Image(systemName: "chevron.right")
+                        .font(AppTypography.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
+        .buttonStyle(.plain)
+        .disabled(category.systemCategory)
+        .opacity(category.systemCategory ? 0.6 : 1.0)
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             if !category.systemCategory {
                 Button(role: .destructive) {

@@ -53,7 +53,7 @@ public struct SheetContainer<Content: View>: View {
                             Button("Hủy") {
                                 dismiss()
                             }
-                            .foregroundColor(AppColors.primary)
+                            .foregroundStyle(AppColors.primary)
                         }
                     }
                 }

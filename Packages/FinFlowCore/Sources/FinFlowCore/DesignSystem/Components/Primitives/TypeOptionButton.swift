@@ -34,8 +34,8 @@ public struct TypeOptionButton: View {
                         Rectangle().fill(AppColors.cardBackground)
                     }
                 }
-                .foregroundColor(isSelected ? color : .secondary)
-                .cornerRadius(CornerRadius.medium)
+                .foregroundStyle(isSelected ? color : .secondary)
+                .clipShape(.rect(cornerRadius: CornerRadius.medium))
                 .overlay(
                     RoundedRectangle(cornerRadius: CornerRadius.medium)
                         .stroke(

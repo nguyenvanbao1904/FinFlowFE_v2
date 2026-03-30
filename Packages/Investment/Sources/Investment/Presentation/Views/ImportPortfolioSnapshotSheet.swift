@@ -150,7 +150,7 @@ public struct ImportPortfolioSnapshotSheet: View {
                                 .padding(.vertical, Spacing.xs)
                                 .padding(.horizontal, Spacing.xs)
                                 .background(AppColors.settingsCardBackground)
-                                .cornerRadius(CornerRadius.medium)
+                                .clipShape(.rect(cornerRadius: CornerRadius.medium))
                             }
                         }
                     }

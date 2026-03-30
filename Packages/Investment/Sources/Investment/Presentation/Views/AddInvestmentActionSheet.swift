@@ -89,7 +89,7 @@ public struct AddInvestmentActionSheet: View {
             .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity)
             .background(AppColors.settingsCardBackground)
-            .cornerRadius(CornerRadius.large)
+            .clipShape(.rect(cornerRadius: CornerRadius.large))
         }
         .buttonStyle(.plain)
     }

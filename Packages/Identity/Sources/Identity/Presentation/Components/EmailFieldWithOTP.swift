@@ -81,7 +81,7 @@ struct EmailFieldWithOTP: View {
                 HStack {
                     Text(message)
                         .font(AppTypography.caption)
-                        .foregroundColor(
+                        .foregroundStyle(
                             message.contains("✅") ? AppColors.success : AppColors.google)
                     Spacer()
                 }
@@ -121,7 +121,7 @@ private struct EmailFieldRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "envelope")
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .frame(width: UILayout.iconSize)
 
             TextField("Email", text: $email)
@@ -136,7 +136,7 @@ private struct EmailFieldRow: View {
                     ProgressView().scaleEffect(0.8)
                 } else if isVerified {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(AppColors.primary)
+                        .foregroundStyle(AppColors.primary)
                 } else if showButton {
                     SendOTPButton(
                         isSending: isSending,
@@ -150,7 +150,7 @@ private struct EmailFieldRow: View {
         .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .stroke(
@@ -173,13 +173,13 @@ private struct OTPFieldRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "key")
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .frame(width: UILayout.iconSize)
 
             TextField("Nhập mã OTP", text: $otpCode, axis: .horizontal)
                 .keyboardType(.numberPad)
                 .textContentType(.oneTimeCode)
-                .disableAutocorrection(true)
+                .autocorrectionDisabled(true)
                 .textInputAutocapitalization(.never)
                 .focused($isFocused)
                 .onAppear {
@@ -196,7 +196,7 @@ private struct OTPFieldRow: View {
                 } else {
                     Text("Xác nhận")
                         .font(AppTypography.labelSmall)
-                        .foregroundColor(
+                        .foregroundStyle(
                             otpCode.count == 6 ? AppColors.primary : .gray)
                 }
             }
@@ -205,7 +205,7 @@ private struct OTPFieldRow: View {
         .padding(.vertical, Spacing.sm)
         .padding(.horizontal, Spacing.sm)
         .background(AppColors.cardBackground)
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .stroke(AppColors.glassBorder, lineWidth: 0.5)
@@ -230,7 +230,7 @@ private struct SendOTPButton: View {
             } else {
                 Text(cooldown > 0 ? "\(cooldown)s" : "Gửi mã")
                     .font(AppTypography.labelSmall)
-                    .foregroundColor(
+                    .foregroundStyle(
                         (canSend && cooldown == 0) ? AppColors.primary : .gray)
             }
         }

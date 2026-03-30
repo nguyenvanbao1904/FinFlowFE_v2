@@ -63,65 +63,47 @@ public struct MainTabView<
 
     public var body: some View {
         TabView(selection: $activeTab) {
-            // Tab 1: Home
-            NavigationStack(path: $homePath) {
-                homeView
-                    .navigationDestination(for: AppRoute.self) { route in
-                        destinationFactory(route)
-                    }
-            }
+            tabRoot(path: $homePath, content: homeView)
             .tabItem {
                 Label("Trang chủ", systemImage: "house.fill")
             }
             .tag(AppTab.home)
 
-            // Tab 2: Transaction
-            NavigationStack(path: $transactionPath) {
-                transactionView
-                    .navigationDestination(for: AppRoute.self) { route in
-                        destinationFactory(route)
-                    }
-            }
+            tabRoot(path: $transactionPath, content: transactionView)
             .tabItem {
                 Label("Giao dịch", systemImage: "list.clipboard.fill")
             }
             .tag(AppTab.transaction)
 
-            // Tab 3: Planning (Budget)
-            NavigationStack(path: $planningPath) {
-                planningView
-                    .navigationDestination(for: AppRoute.self) { route in
-                        destinationFactory(route)
-                    }
-            }
+            tabRoot(path: $planningPath, content: planningView)
             .tabItem {
                 Label("Kế hoạch", systemImage: "target")
             }
             .tag(AppTab.planning)
 
-            // Tab 4: Wealth (Tài sản)
-            NavigationStack(path: $wealthPath) {
-                wealthView
-                    .navigationDestination(for: AppRoute.self) { route in
-                        destinationFactory(route)
-                    }
-            }
+            tabRoot(path: $wealthPath, content: wealthView)
             .tabItem {
                 Label("Tài sản", systemImage: "chart.pie.fill")
             }
             .tag(AppTab.wealth)
 
-            // Tab 5: Investment
-            NavigationStack(path: $investmentPath) {
-                investmentView
-                    .navigationDestination(for: AppRoute.self) { route in
-                        destinationFactory(route)
-                    }
-            }
+            tabRoot(path: $investmentPath, content: investmentView)
             .tabItem {
                 Label("Đầu tư", systemImage: "chart.line.uptrend.xyaxis")
             }
             .tag(AppTab.investment)
+        }
+    }
+
+    private func tabRoot<Content: View>(
+        path: Binding<[AppRoute]>,
+        content: Content
+    ) -> some View {
+        NavigationStack(path: path) {
+            content
+                .navigationDestination(for: AppRoute.self) { route in
+                    destinationFactory(route)
+                }
         }
     }
 }

@@ -186,7 +186,7 @@ public struct BudgetListView: View {
         }
         .padding(Spacing.md)
         .background(AppColors.google.opacity(OpacityLevel.ultraLight))
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
                 .stroke(AppColors.google.opacity(OpacityLevel.low), lineWidth: BorderWidth.thin)

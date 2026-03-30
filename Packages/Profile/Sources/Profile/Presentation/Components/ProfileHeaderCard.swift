@@ -19,23 +19,23 @@ public struct ProfileHeaderCard: View {
                 Text(profile.initials)
                     .font(AppTypography.title)
                     .fontWeight(.bold)
-                    .foregroundColor(AppColors.primary)
+                    .foregroundStyle(AppColors.primary)
             }
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(profile.fullName)
                     .font(AppTypography.headline)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
 
                 Text(profile.email)
                     .font(AppTypography.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
         }
         .padding()
         .background(AppColors.textInverted)
-        .cornerRadius(12)
+        .clipShape(.rect(cornerRadius: 12))
     }
 }

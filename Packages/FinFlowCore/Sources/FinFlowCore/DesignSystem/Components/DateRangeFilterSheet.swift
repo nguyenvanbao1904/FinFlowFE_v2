@@ -132,7 +132,7 @@ private struct DateRangeFilterContent: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, Spacing.md)
                             .background(AppColors.cardBackground)
-                            .cornerRadius(CornerRadius.medium)
+                            .clipShape(.rect(cornerRadius: CornerRadius.medium))
                     }
 
                     Button {
@@ -151,7 +151,7 @@ private struct DateRangeFilterContent: View {
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .cornerRadius(CornerRadius.medium)
+                            .clipShape(.rect(cornerRadius: CornerRadius.medium))
                     }
                     .disabled(startDate == nil || endDate == nil)
                     .opacity(startDate == nil || endDate == nil ? 0.5 : 1.0)
@@ -265,7 +265,7 @@ private struct PresetButton: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.sm)
                 .background(AppColors.primary.opacity(0.1))
-                .cornerRadius(CornerRadius.small)
+                .clipShape(.rect(cornerRadius: CornerRadius.small))
         }
     }
 }

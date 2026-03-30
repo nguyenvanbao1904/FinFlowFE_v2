@@ -8,21 +8,13 @@ enum AccountListTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-private struct AccountSectionConfig {
-    let sectionHeader: String
-    let title: String
-    let subtitle: String
-    let amount: Double
-}
-
-private struct AccountSectionActions {
-    let onEdit: (WealthAccountResponse) -> Void
-    let onDelete: (WealthAccountResponse) -> Void
-    let onAdd: () -> Void
-}
-
 /// Main view for the Wealth tab: list of accounts (thanh khoản + tài sản & nợ).
 public struct WealthListView: View {
+    private enum ActiveSheet: String, Identifiable {
+        case addAccount
+        var id: String { rawValue }
+    }
+
     private let router: any AppRouterProtocol
     private let getWealthAccountsUseCase: GetWealthAccountsUseCase
     private let getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase
@@ -31,7 +23,7 @@ public struct WealthListView: View {
     private let deleteWealthAccountUseCase: DeleteWealthAccountUseCase
     private let sessionManager: any SessionManagerProtocol
 
-    @State private var showAddAccount = false
+    @State private var activeSheet: ActiveSheet?
     @State private var selectedTab: AccountListTab = .liquidity
     @State private var accounts: [WealthAccountResponse] = []
     @State private var isLoading = false
@@ -127,7 +119,7 @@ public struct WealthListView: View {
             Group {
                 switch selectedTab {
                 case .liquidity:
-                    accountSection(
+                    WealthAccountSectionList(
                         config: AccountSectionConfig(
                             sectionHeader: "Tài khoản khả dụng",
                             title: "Tổng số dư (Thanh khoản)",
@@ -142,11 +134,11 @@ public struct WealthListView: View {
                                 accountToDelete = $0
                                 showDeleteConfirmation = true
                             },
-                            onAdd: { showAddAccount = true }
+                            onAdd: { activeSheet = .addAccount }
                         )
                     )
                 case .assets:
-                    accountSection(
+                    WealthAccountSectionList(
                         config: AccountSectionConfig(
                             sectionHeader: "Tài sản & Nợ",
                             title: "Tài sản ròng",
@@ -161,7 +153,7 @@ public struct WealthListView: View {
                                 accountToDelete = $0
                                 showDeleteConfirmation = true
                             },
-                            onAdd: { showAddAccount = true }
+                            onAdd: { activeSheet = .addAccount }
                         )
                     )
                 }
@@ -174,7 +166,7 @@ public struct WealthListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showAddAccount = true
+                    activeSheet = .addAccount
                 } label: {
                     Image(systemName: "plus")
                         .fontWeight(.semibold)
@@ -192,7 +184,7 @@ public struct WealthListView: View {
             )
         )
         // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $showAddAccount) {
+        .sheet(item: $activeSheet) { _ in
             NavigationStack {
                 AddWealthAccountView(
                     viewModel: AddWealthAccountViewModel(
@@ -200,7 +192,7 @@ public struct WealthListView: View {
                         createWealthAccountUseCase: createWealthAccountUseCase,
                         sessionManager: sessionManager,
                         onSuccess: {
-                            showAddAccount = false
+                            activeSheet = nil
                             Task { await loadData(force: true) }
                         }
                     )
@@ -265,100 +257,4 @@ public struct WealthListView: View {
         }
     }
 
-    @ViewBuilder
-    private func accountSection(
-        config: AccountSectionConfig,
-        items: [WealthAccountResponse],
-        isLoading: Bool,
-        actions: AccountSectionActions
-    ) -> some View {
-        List {
-            Section {
-                Group {
-                    if isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(Spacing.lg)
-                    } else {
-                        FinancialHeroCard(
-                            title: config.title,
-                            mainAmount: CurrencyFormatter.format(config.amount),
-                            subtitle: config.subtitle
-                        )
-                    }
-                }
-                .listRowInsets(
-                    EdgeInsets(top: Spacing.sm, leading: .zero, bottom: Spacing.sm, trailing: .zero)
-                )
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section {
-                if items.isEmpty && !isLoading {
-                    EmptyStateView(
-                        icon: "creditcard",
-                        title: "Chưa có tài khoản nào",
-                        subtitle: "Thêm ví hoặc tài khoản để bắt đầu theo dõi tài sản",
-                        buttonTitle: "Thêm tài khoản",
-                        action: actions.onAdd
-                    )
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                } else {
-                    ForEach(items) { account in
-                        AccountRowView(account: account)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                actions.onEdit(account)
-                            }
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    actions.onDelete(account)
-                                } label: {
-                                    Label("Xóa", systemImage: "trash")
-                                }
-                            }
-                            .contextMenu {
-                                Button {
-                                    actions.onEdit(account)
-                                } label: {
-                                    Label("Sửa", systemImage: "pencil")
-                                }
-                                Button(role: .destructive) {
-                                    actions.onDelete(account)
-                                } label: {
-                                    Label("Xóa", systemImage: "trash")
-                                }
-                            }
-                    }
-                }
-            } header: {
-                Text(config.sectionHeader)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: Spacing.xl)
-        }
-    }
-}
-
-// MARK: - Account Row
-
-private struct AccountRowView: View {
-    let account: WealthAccountResponse
-
-    var body: some View {
-        IconTitleTrailingRow(
-            icon: account.accountType.icon,
-            color: Color(hex: account.accountType.color),
-            title: account.name,
-            subtitle: nil,
-            trailing: {
-                BalanceLabel(balance: account.balance)
-                    .font(AppTypography.headline)
-            }
-        )
-    }
 }

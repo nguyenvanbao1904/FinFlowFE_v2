@@ -46,7 +46,7 @@ public struct SymbolSuggestionsList: View {
             }
         }
         .background(AppColors.settingsCardBackground)
-        .cornerRadius(CornerRadius.medium)
+        .clipShape(.rect(cornerRadius: CornerRadius.medium))
     }
 }
 

@@ -7,6 +7,13 @@ import FinFlowCore
 import SwiftUI
 
 public struct AddTransactionView: View {
+    private enum ActiveSheet: String, Identifiable {
+        case categoryPicker
+        case accountPicker
+
+        var id: String { rawValue }
+    }
+
     // Removed unused router property
 
     // ViewModel
@@ -20,9 +27,7 @@ public struct AddTransactionView: View {
     @State private var showMagicEffect: Bool = false
 
     // Category Selection State
-    @State private var showCategoryPicker: Bool = false
-
-    @State private var showAccountPicker: Bool = false
+    @State private var activeSheet: ActiveSheet?
 
     public init(viewModel: AddTransactionViewModel) {
         self._viewModel = State(initialValue: viewModel)
@@ -92,27 +97,38 @@ public struct AddTransactionView: View {
                 Button("Hủy") {
                     viewModel.cancel()
                 }
-                .foregroundColor(AppColors.primary)
+                .foregroundStyle(AppColors.primary)
             }
         }
         .task {
             await viewModel.fetchCategories()
         }
         // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $showCategoryPicker) {
-            CategorySelectionSheet(
-                isPresented: $showCategoryPicker,
-                selectedCategory: $viewModel.selectedCategory,
-                categories: viewModel.filteredCategories
-            )
-        }
-        // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $showAccountPicker) {
-            AccountSelectionSheet(
-                isPresented: $showAccountPicker,
-                selectedAccount: $viewModel.selectedAccount,
-                accounts: viewModel.transactionEligibleAccounts
-            )
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .categoryPicker:
+                CategorySelectionSheet(
+                    isPresented: Binding(
+                        get: { activeSheet == .categoryPicker },
+                        set: { isPresented in
+                            if !isPresented { activeSheet = nil }
+                        }
+                    ),
+                    selectedCategory: $viewModel.selectedCategory,
+                    categories: viewModel.filteredCategories
+                )
+            case .accountPicker:
+                AccountSelectionSheet(
+                    isPresented: Binding(
+                        get: { activeSheet == .accountPicker },
+                        set: { isPresented in
+                            if !isPresented { activeSheet = nil }
+                        }
+                    ),
+                    selectedAccount: $viewModel.selectedAccount,
+                    accounts: viewModel.transactionEligibleAccounts
+                )
+            }
         }
         .alertHandler(
             Binding<AppErrorAlert?>(
@@ -128,17 +144,17 @@ public struct AddTransactionView: View {
         VStack(spacing: Spacing.xs) {
             Text("Số tiền")
                 .font(AppTypography.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
 
             HStack(alignment: .center, spacing: Spacing.xs / 2) {
                 Text("₫")
                     .font(AppTypography.displayMedium)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
 
                 TextField("0", text: $viewModel.amount)
                     .keyboardType(.numberPad)
                     .font(AppTypography.displayXL)
-                    .foregroundColor(viewModel.isIncome ? AppColors.success : AppColors.google)
+                    .foregroundStyle(viewModel.isIncome ? AppColors.success : AppColors.google)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .frame(height: Layout.inputRowHeight)
@@ -180,7 +196,7 @@ public struct AddTransactionView: View {
         Section {
             // Category Selector
             Button {
-                showCategoryPicker = true
+                activeSheet = .categoryPicker
             } label: {
                 HStack {
                     ZStack {
@@ -193,7 +209,7 @@ public struct AddTransactionView: View {
                         Image(
                             systemName: viewModel.selectedCategory?.icon ?? "square.grid.2x2.fill"
                         )
-                        .foregroundColor(AppColors.accent)
+                        .foregroundStyle(AppColors.accent)
                         .font(AppTypography.iconMedium)
                         .rotationEffect(.degrees(showMagicEffect ? 360 : 0))
                     }
@@ -201,15 +217,15 @@ public struct AddTransactionView: View {
                     VStack(alignment: .leading, spacing: Spacing.xs / 2) {
                         Text("Danh mục")
                             .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(viewModel.selectedCategory?.name ?? "Chọn danh mục")
                             .font(AppTypography.body)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                             .contentTransition(.numericText())  // iOS 16+ fluid text transition
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(AppTypography.caption)
                 }
             }
@@ -219,7 +235,7 @@ public struct AddTransactionView: View {
             // Account Selector (transaction-eligible only)
             Button {
                 if !viewModel.transactionEligibleAccounts.isEmpty {
-                    showAccountPicker = true
+                    activeSheet = .accountPicker
                 } else {
                     viewModel.alert = AppError
                         .validationError("Chưa có tài khoản khả dụng. Thêm tài khoản trong tab \"Tài sản\".")
@@ -233,17 +249,17 @@ public struct AddTransactionView: View {
                             .fill(iconColor.opacity(OpacityLevel.ultraLight))
                             .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
                         Image(systemName: viewModel.selectedAccount?.accountType.icon ?? "banknote.fill")
-                            .foregroundColor(iconColor)
+                            .foregroundStyle(iconColor)
                             .font(AppTypography.iconMedium)
                     }
 
                     VStack(alignment: .leading, spacing: Spacing.xs / 2) {
                         Text("Tài khoản")
                             .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(viewModel.selectedAccount?.name ?? "Chọn tài khoản")
                             .font(AppTypography.body)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                     }
                     Spacer()
 
@@ -253,7 +269,7 @@ public struct AddTransactionView: View {
                     }
 
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(AppTypography.caption)
                         .padding(.leading, Spacing.xs)
                 }
@@ -263,22 +279,22 @@ public struct AddTransactionView: View {
             // Note Field
             HStack {
                 Image(systemName: "pencil")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(width: Spacing.touchTarget)
 
                 TextField("Ví dụ: Ăn sáng tại phở Hùng...", text: $viewModel.note)
                     .font(AppTypography.body)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
             .listRowBackground(showMagicEffect ? AppColors.primary.opacity(0.1) : nil)
 
             // Date Picker
             HStack {
                 Image(systemName: "calendar")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(width: Spacing.touchTarget)
                 DatePicker("Ngày", selection: $viewModel.date, displayedComponents: .date)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
         }
     }

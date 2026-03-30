@@ -2,8 +2,14 @@ import FinFlowCore
 import SwiftUI
 
 public struct AddWealthAccountView: View {
+    private enum ActiveSheet: String, Identifiable {
+        case accountTypePicker
+        var id: String { rawValue }
+    }
+
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: AddWealthAccountViewModel
+    @State private var activeSheet: ActiveSheet?
 
     public init(viewModel: AddWealthAccountViewModel) {
         self._viewModel = State(initialValue: viewModel)
@@ -67,7 +73,7 @@ public struct AddWealthAccountView: View {
 
             Section {
                 Button {
-                    viewModel.showTypePicker = true
+                    activeSheet = .accountTypePicker
                 } label: {
                     HStack {
                         Image(systemName: "tag")
@@ -110,7 +116,7 @@ public struct AddWealthAccountView: View {
             }
         }
         // swiftlint:disable:next no_direct_sheet_or_cover
-        .sheet(isPresented: $viewModel.showTypePicker) {
+        .sheet(item: $activeSheet) { _ in
             typePickerSheet
         }
         .alertHandler(
@@ -135,7 +141,7 @@ public struct AddWealthAccountView: View {
                     ForEach(viewModel.accountTypes) { typeOption in
                         Button {
                             viewModel.selectedAccountType = typeOption
-                            viewModel.showTypePicker = false
+                            activeSheet = nil
                         } label: {
                             let typeColor = Color(hex: typeOption.color)
                             HStack(spacing: Spacing.md) {
@@ -168,7 +174,7 @@ public struct AddWealthAccountView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Đóng") {
-                        viewModel.showTypePicker = false
+                        activeSheet = nil
                     }
                 }
             }

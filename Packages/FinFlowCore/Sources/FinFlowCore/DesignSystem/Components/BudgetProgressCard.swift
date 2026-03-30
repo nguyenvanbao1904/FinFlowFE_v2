@@ -140,7 +140,7 @@ public struct BudgetProgressCard: View {
             }
             .padding(Spacing.md)
             .background(AppColors.cardBackground)
-            .cornerRadius(CornerRadius.large)
+            .clipShape(.rect(cornerRadius: CornerRadius.large))
             .overlay(
                 RoundedRectangle(cornerRadius: CornerRadius.large)
                     .stroke(

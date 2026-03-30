@@ -89,7 +89,7 @@ public struct FinancialHeroCard<Content: View>: View {
                     lineWidth: 1
                 )
         )
-        .cornerRadius(CornerRadius.large)
+        .clipShape(.rect(cornerRadius: CornerRadius.large))
         .shadow(
             color: AppColors.primary.opacity(0.3),
             radius: Spacing.sm,

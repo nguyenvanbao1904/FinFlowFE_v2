@@ -7,16 +7,8 @@ import FinFlowCore
 import SwiftUI
 
 public struct TransactionAnalyticsView: View {
-    private struct AIInsight: Identifiable {
-        let id: String
-        let title: String
-        let message: String
-        let icon: String
-        let color: Color
-    }
-
-    private let insights: [AIInsight] = [
-        AIInsight(
+    private let insights: [TransactionAIInsight] = [
+        TransactionAIInsight(
             id: "spending-warning",
             title: "Cảnh báo chi tiêu",
             message:
@@ -24,7 +16,7 @@ public struct TransactionAnalyticsView: View {
             icon: "exclamationmark.triangle.fill",
             color: AppColors.primary
         ),
-        AIInsight(
+        TransactionAIInsight(
             id: "financial-tip",
             title: "Mẹo Tài Chính",
             message:
@@ -178,7 +170,7 @@ public struct TransactionAnalyticsView: View {
             .listRowInsets(EdgeInsets())
 
             // 3. AI Insights Section
-            aiInsightsSection
+            TransactionAnalyticsAIInsightsSection(insights: insights)
 
             Section {
                 Button {
@@ -234,7 +226,7 @@ public struct TransactionAnalyticsView: View {
             Button(action: onNavigateBack) {
                 Image(systemName: "chevron.left")
                     .font(AppTypography.body)
-                    .foregroundColor(AppColors.primary)
+                    .foregroundStyle(AppColors.primary)
                     .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
             }
@@ -243,12 +235,12 @@ public struct TransactionAnalyticsView: View {
             Spacer()
             Text(chartData?.periodLabel ?? "Biến động Số Dư")
                 .font(AppTypography.headline)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
             Spacer()
             Button(action: onNavigateForward) {
                 Image(systemName: "chevron.right")
                     .font(AppTypography.body)
-                    .foregroundColor(
+                    .foregroundStyle(
                         canGoForward ? AppColors.primary : .secondary.opacity(OpacityLevel.low)
                     )
                     .frame(width: 36, height: 36)
@@ -263,41 +255,32 @@ public struct TransactionAnalyticsView: View {
     @ViewBuilder
     private var chartContent: some View {
         if isChartLoading {
-            chartStateView(icon: nil, title: nil, showProgress: true)
+            TransactionAnalyticsChartStateView(
+                icon: nil,
+                title: nil,
+                showProgress: true,
+                hasLoadError: hasLoadError,
+                onRetry: onRetry
+            )
         } else if hasLoadError {
-            chartStateView(icon: "wifi.exclamationmark", title: "Không thể tải thống kê")
+            TransactionAnalyticsChartStateView(
+                icon: "wifi.exclamationmark",
+                title: "Không thể tải thống kê",
+                showProgress: false,
+                hasLoadError: hasLoadError,
+                onRetry: onRetry
+            )
         } else if !hasPlottableChartValues {
-            chartStateView(icon: "chart.bar.xaxis", title: "Chưa có dữ liệu thống kê")
+            TransactionAnalyticsChartStateView(
+                icon: "chart.bar.xaxis",
+                title: "Chưa có dữ liệu thống kê",
+                showProgress: false,
+                hasLoadError: hasLoadError,
+                onRetry: onRetry
+            )
         } else {
             chartBarView
         }
-    }
-
-    @ViewBuilder
-    private func chartStateView(icon: String?, title: String?, showProgress: Bool = false)
-        -> some View
-    {
-        VStack(spacing: AppSpacing.sm) {
-            if showProgress {
-                ProgressView()
-            } else {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(AppTypography.displayLarge)
-                        .foregroundColor(.secondary.opacity(OpacityLevel.strong))
-                }
-                if let title {
-                    Text(title)
-                        .font(AppTypography.body)
-                        .foregroundColor(.secondary)
-                }
-                if hasLoadError, let onRetry {
-                    Button("Thử lại") { onRetry() }
-                        .buttonStyle(.borderedProminent)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 250)
     }
 
     private var chartBarView: some View {
@@ -530,49 +513,6 @@ public struct TransactionAnalyticsView: View {
         f.dateFormat = "dd/MM/yyyy"
         return f
     }()
-
-    @ViewBuilder
-    private var aiInsightsSection: some View {
-        Section {
-            ForEach(insights) { insight in
-                insightRow(insight)
-                    .padding(.vertical, AppSpacing.xs)
-            }
-        } header: {
-            HStack(spacing: AppSpacing.sm) {
-                Image(systemName: "sparkles")
-                    .foregroundColor(AppColors.accent)
-                Text("Trợ lý AI Phân Tích")
-                    .font(AppTypography.headline)
-                    .foregroundColor(.primary)
-            }
-            .textCase(nil)
-        }
-    }
-
-    private func insightRow(_ insight: AIInsight) -> some View {
-        HStack(alignment: .top, spacing: AppSpacing.sm) {
-            Circle()
-                .fill(insight.color.opacity(OpacityLevel.light))
-                .frame(width: AppSpacing.iconMedium, height: AppSpacing.iconMedium)
-                .overlay {
-                    Image(systemName: insight.icon)
-                        .foregroundColor(insight.color)
-                        .font(AppTypography.caption)
-                }
-
-            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                Text(insight.title)
-                    .font(AppTypography.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                Text(insight.message)
-                    .font(AppTypography.caption)
-                    .foregroundColor(.secondary)
-                    .lineSpacing(AppSpacing.xs / 2)
-            }
-        }
-    }
 
     // MARK: - Bar Detail Overlay
 

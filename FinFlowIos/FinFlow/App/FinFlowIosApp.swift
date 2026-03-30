@@ -200,10 +200,10 @@ struct PrivacyBlurView: View {
             VStack(spacing: Spacing.sm) {
                 Image(systemName: "lock.shield.fill")
                     .font(AppTypography.displayXL)
-                    .foregroundColor(AppColors.disabled)
+                    .foregroundStyle(AppColors.disabled)
                 Text("FinFlow Protected")
                     .font(AppTypography.headline)
-                    .foregroundColor(AppColors.disabled)
+                    .foregroundStyle(AppColors.disabled)
             }
         }
     }
