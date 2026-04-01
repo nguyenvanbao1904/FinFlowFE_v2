@@ -333,11 +333,14 @@ extension DependencyContainer {
         let getTransactionsUseCase = GetTransactionsUseCase(repository: transactionRepository)
         let getSummaryUseCase = GetTransactionSummaryUseCase(repository: transactionRepository)
         let getChartUseCase = GetTransactionChartUseCase(repository: transactionRepository)
+        let getAnalyticsInsightsUseCase = GetTransactionAnalyticsInsightsUseCase(
+            repository: transactionRepository)
         let deleteTransactionUseCase = DeleteTransactionUseCase(repository: transactionRepository)
         let viewModel = TransactionListViewModel(
             getTransactionsUseCase: getTransactionsUseCase,
             getSummaryUseCase: getSummaryUseCase,
             getChartUseCase: getChartUseCase,
+            getAnalyticsInsightsUseCase: getAnalyticsInsightsUseCase,
             deleteTransactionUseCase: deleteTransactionUseCase,
             router: router,
             sessionManager: sessionManager

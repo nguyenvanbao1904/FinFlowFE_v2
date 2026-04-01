@@ -179,6 +179,18 @@ public class AddTransactionViewModel {
             } else {
                 self.selectedCategory = filteredCategories.first
             }
+
+            if let suggestedAccountId = response.suggestedAccountId,
+                let account = transactionEligibleAccounts.first(where: { $0.id == suggestedAccountId }) {
+                self.selectedAccount = account
+            }
+
+            if let suggestedTransactionDate = response.transactionDate,
+                let parsedDate = TransactionDateParser.parseBackendLocalDateTime(
+                    suggestedTransactionDate
+                ) {
+                self.date = parsedDate
+            }
         } catch {
             handleError(error, defaultTitle: "Lỗi Phân Tích")
         }

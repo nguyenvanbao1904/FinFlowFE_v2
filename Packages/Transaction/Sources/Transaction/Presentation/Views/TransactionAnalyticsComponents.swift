@@ -1,12 +1,20 @@
 import FinFlowCore
 import SwiftUI
 
-struct TransactionAIInsight: Identifiable {
-    let id: String
-    let title: String
-    let message: String
-    let icon: String
-    let color: Color
+public struct TransactionAIInsight: Identifiable {
+    public let id: String
+    public let title: String
+    public let message: String
+    public let icon: String
+    public let color: Color
+
+    public init(id: String, title: String, message: String, icon: String, color: Color) {
+        self.id = id
+        self.title = title
+        self.message = message
+        self.icon = icon
+        self.color = color
+    }
 }
 
 struct TransactionAnalyticsAIInsightsSection: View {

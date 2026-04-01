@@ -80,6 +80,12 @@ public struct TransactionListView: View {
         .task {
             await viewModel.fetchInitialDataIfNeeded()
         }
+        .onChange(of: selectedTab) { _, newValue in
+            guard newValue == .analytics else { return }
+            Task {
+                await viewModel.loadAnalyticsTabDataIfNeeded()
+            }
+        }
         .dateRangeFilterSheet(
             isPresented: $viewModel.showFilterSheet,
             startDate: $viewModel.filterStartDate,
@@ -93,7 +99,7 @@ public struct TransactionListView: View {
         )
         .onReceive(NotificationCenter.default.publisher(for: .transactionDidSave)) { _ in
             Task {
-                await viewModel.fetchData(isInitial: true, refreshAnalytics: true)
+                await viewModel.refreshAfterTransactionMutation()
             }
         }
         .alertHandler(
@@ -177,7 +183,11 @@ public struct TransactionListView: View {
                             .multilineTextAlignment(.center)
                         Button("Thử lại") {
                             Task {
-                                await viewModel.fetchData(isInitial: true, refreshAnalytics: true)
+                                viewModel.markAnalyticsInsightsStale()
+                                await viewModel.fetchData(
+                                    isInitial: true,
+                                    refreshSummaryAndChart: true
+                                )
                             }
                         }
                         .buttonStyle(.borderedProminent)
@@ -269,6 +279,7 @@ public struct TransactionListView: View {
     private var analyticsTab: some View {
         TransactionAnalyticsView(
             summary: viewModel.summary,
+            insights: mappedInsights(viewModel.aiInsights),
             chartData: viewModel.chartData,
             currentRange: viewModel.chartRange,
             onRangeChange: { newRange in
@@ -287,6 +298,28 @@ public struct TransactionListView: View {
                 Task { await viewModel.fetchChartData() }
             }
         )
+    }
+
+    private func mappedInsights(_ source: [AnalyticsInsightResponse]) -> [TransactionAIInsight] {
+        source.map { item in
+            let icon: String
+            let color: Color
+            switch item.type {
+            case .warning:
+                icon = "exclamationmark.triangle.fill"
+                color = AppColors.primary
+            case .tip:
+                icon = "leaf.fill"
+                color = AppColors.success
+            }
+            return TransactionAIInsight(
+                id: item.id,
+                title: item.title,
+                message: item.message,
+                icon: icon,
+                color: color
+            )
+        }
     }
 
 }

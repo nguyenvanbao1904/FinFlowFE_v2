@@ -135,18 +135,58 @@ public struct AnalyzeTransactionResponse: Codable, Sendable {
     public let amount: Double?
     public let type: TransactionType
     public let suggestedCategoryId: String?
+    public let suggestedAccountId: String?
     public let note: String?
     public let transactionDate: String?
 
     public init(
-        amount: Double?, type: TransactionType, suggestedCategoryId: String?, note: String?,
+        amount: Double?, type: TransactionType, suggestedCategoryId: String?, suggestedAccountId: String?,
+        note: String?,
         transactionDate: String?
     ) {
         self.amount = amount
         self.type = type
         self.suggestedCategoryId = suggestedCategoryId
+        self.suggestedAccountId = suggestedAccountId
         self.note = note
         self.transactionDate = transactionDate
+    }
+}
+
+public enum AnalyticsInsightType: String, Codable, Sendable {
+    case warning = "WARNING"
+    case tip = "TIP"
+}
+
+public struct AnalyticsInsightResponse: Codable, Sendable, Identifiable {
+    public let id: String
+    public let type: AnalyticsInsightType
+    public let title: String
+    public let message: String
+    public let confidence: Double?
+
+    public init(
+        id: String,
+        type: AnalyticsInsightType,
+        title: String,
+        message: String,
+        confidence: Double? = nil
+    ) {
+        self.id = id
+        self.type = type
+        self.title = title
+        self.message = message
+        self.confidence = confidence
+    }
+}
+
+public struct TransactionAnalyticsInsightsResponse: Codable, Sendable {
+    public let insights: [AnalyticsInsightResponse]
+    public let cached: Bool
+
+    public init(insights: [AnalyticsInsightResponse], cached: Bool) {
+        self.insights = insights
+        self.cached = cached
     }
 }
 

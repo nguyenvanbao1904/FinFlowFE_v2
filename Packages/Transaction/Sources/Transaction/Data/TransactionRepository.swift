@@ -107,6 +107,16 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
         )
     }
 
+    public func getAnalyticsInsights() async throws -> TransactionAnalyticsInsightsResponse {
+        return try await client.request(
+            endpoint: "/transactions/analytics-insights",
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
     public func getChart(range: ChartRange, referenceDate: Date) async throws
         -> TransactionChartResponse {
         let dateStr = queryDateFormatter.string(from: referenceDate)

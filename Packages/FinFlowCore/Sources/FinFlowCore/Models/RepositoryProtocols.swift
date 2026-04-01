@@ -52,6 +52,7 @@ public protocol TransactionRepositoryProtocol: Sendable {
     func getTransactionSummary() async throws -> TransactionSummaryResponse
     func analyzeTransaction(request: AnalyzeTransactionRequest) async throws
         -> AnalyzeTransactionResponse
+    func getAnalyticsInsights() async throws -> TransactionAnalyticsInsightsResponse
     func getChart(range: ChartRange, referenceDate: Date) async throws -> TransactionChartResponse
     func deleteTransaction(id: String) async throws
 }

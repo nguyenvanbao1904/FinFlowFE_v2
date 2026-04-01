@@ -4,7 +4,9 @@
 //
 
 import FinFlowCore
+import PhotosUI
 import SwiftUI
+import UIKit
 
 public struct AddTransactionView: View {
     private enum ActiveSheet: String, Identifiable {
@@ -12,6 +14,17 @@ public struct AddTransactionView: View {
         case accountPicker
 
         var id: String { rawValue }
+    }
+
+    private enum CameraSheet: String, Identifiable {
+        case camera
+
+        var id: String { rawValue }
+    }
+
+    private enum InputField: Hashable {
+        case amount
+        case note
     }
 
     // Removed unused router property
@@ -22,12 +35,22 @@ public struct AddTransactionView: View {
     // AI / Smart State - Keeping locally for UI effect
     @State private var aiInputText: String = ""
     @State private var isAnalyzing: Bool = false
+    @State private var speechManager = SpeechToTextManager()
+    @State private var speechErrorMessage: String?
+    @State private var cameraSheet: CameraSheet?
+    @State private var showCameraOptions: Bool = false
+    @State private var showPhotoPicker: Bool = false
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var selectedImage: UIImage?
+    @State private var isOCRing: Bool = false
+    @State private var ocrErrorMessage: String?
 
     // Animation trigger for "Magical" auto-fill effect
     @State private var showMagicEffect: Bool = false
 
     // Category Selection State
     @State private var activeSheet: ActiveSheet?
+    @FocusState private var focusedField: InputField?
 
     public init(viewModel: AddTransactionViewModel) {
         self._viewModel = State(initialValue: viewModel)
@@ -38,16 +61,23 @@ public struct AddTransactionView: View {
             // 1. The "Brain" - Smart Input Bar (Pinned at top)
             AISmartInputBar(
                 text: $aiInputText,
-                isAnalyzing: $isAnalyzing,
+                isAnalyzing: Binding(
+                    get: { isAnalyzing || isOCRing || speechManager.isListening },
+                    set: { _ in }
+                ),
                 placeholder: "Ví dụ: Đổ xăng 50 cành...",
                 onSubmit: { text in
-                    triggerAIAnalysis(text: text)
+                    submitTextForAnalysis(text, mirrorToInput: true)
                 },
                 onVoice: {
-                    // TODO: Implement real voice input (Speech framework)
+                    toggleVoiceInput()
                 },
                 onCamera: {
-                    // Trigger Camera UI
+                    // Stop voice capture to avoid AVAudioSession conflicts.
+                    if speechManager.isListening {
+                        speechManager.stopListening()
+                    }
+                    showCameraOptions = true
                 }
             )
             .padding(.horizontal)
@@ -136,6 +166,77 @@ public struct AddTransactionView: View {
                 set: { viewModel.alert = $0 }
             )
         )
+        .alert("Lỗi ghi âm", isPresented: Binding(
+            get: { speechErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented { speechErrorMessage = nil }
+            }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(speechErrorMessage ?? "")
+        }
+        .alert("Lỗi OCR", isPresented: Binding(
+            get: { ocrErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented { ocrErrorMessage = nil }
+            }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(ocrErrorMessage ?? "")
+        }
+        .confirmationDialog(
+            "Chọn nguồn hoá đơn",
+            isPresented: $showCameraOptions,
+            titleVisibility: .visible
+        ) {
+            Button("Chụp ảnh") {
+                cameraSheet = .camera
+            }
+            Button("Ảnh đã có") {
+                selectedPhotoItem = nil
+                showPhotoPicker = true
+            }
+            Button("Hủy", role: .cancel) {}
+        }
+        .photosPicker(
+            isPresented: $showPhotoPicker,
+            selection: $selectedPhotoItem,
+            matching: .images
+        )
+        .sheet(item: $cameraSheet) { _ in
+            CameraImagePicker(
+                onImagePicked: { image in
+                selectedImage = image
+                cameraSheet = nil
+                Task { await runOCRAndAnalyzeIfPossible() }
+            }
+            ) {
+                cameraSheet = nil
+            }
+            .ignoresSafeArea()
+        }
+        .onChange(of: selectedPhotoItem) { _, newItem in
+            guard let newItem else { return }
+            Task {
+                do {
+                    if let data = try await newItem.loadTransferable(type: Data.self),
+                        let image = UIImage(data: data) {
+                        selectedImage = image
+                        showPhotoPicker = false
+                        await runOCRAndAnalyzeIfPossible()
+                    } else {
+                        ocrErrorMessage = "Không thể đọc ảnh đã chọn."
+                    }
+                } catch {
+                    ocrErrorMessage = "Không thể đọc ảnh đã chọn: \(error.localizedDescription)"
+                }
+            }
+        }
+        .onDisappear {
+            speechManager.stopListening()
+        }
     }
 
     // MARK: - Core UI Sections
@@ -153,6 +254,7 @@ public struct AddTransactionView: View {
 
                 TextField("0", text: $viewModel.amount)
                     .keyboardType(.numberPad)
+                    .focused($focusedField, equals: .amount)
                     .font(AppTypography.displayXL)
                     .foregroundStyle(viewModel.isIncome ? AppColors.success : AppColors.google)
                     .multilineTextAlignment(.center)
@@ -283,6 +385,7 @@ public struct AddTransactionView: View {
                     .frame(width: Spacing.touchTarget)
 
                 TextField("Ví dụ: Ăn sáng tại phở Hùng...", text: $viewModel.note)
+                    .focused($focusedField, equals: .note)
                     .font(AppTypography.body)
                     .foregroundStyle(.primary)
             }
@@ -302,8 +405,7 @@ public struct AddTransactionView: View {
     // MARK: - Helpers
 
     private func triggerAIAnalysis(text: String) {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        focusedField = nil
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             isAnalyzing = true
         }
@@ -329,6 +431,58 @@ public struct AddTransactionView: View {
                 }
             }
         }
+    }
+
+    private func toggleVoiceInput() {
+        if speechManager.isListening {
+            let finalText = speechManager.latestTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+            speechManager.stopListening()
+            if !finalText.isEmpty {
+                submitTextForAnalysis(finalText, mirrorToInput: true)
+            }
+            return
+        }
+
+        speechManager.startListening(
+            onPartialText: { partialText in
+                aiInputText = partialText
+            },
+            onError: { message in
+                speechErrorMessage = message
+            },
+            onAutoSubmit: { finalText in
+                // User stopped speaking — stop mic and send to AI automatically.
+                speechManager.stopListening()
+                submitTextForAnalysis(finalText, mirrorToInput: true)
+            }
+        )
+    }
+
+    private func runOCRAndAnalyzeIfPossible() async {
+        guard let image = selectedImage else { return }
+        guard !isOCRing else { return }
+        isOCRing = true
+        defer {
+            isOCRing = false
+            selectedImage = nil
+            selectedPhotoItem = nil
+        }
+
+        do {
+            let text = try await ReceiptOCRService().recognizeText(from: image)
+            submitTextForAnalysis(text, mirrorToInput: false)
+        } catch {
+            ocrErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func submitTextForAnalysis(_ text: String, mirrorToInput: Bool) {
+        let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return }
+        if mirrorToInput {
+            aiInputText = normalized
+        }
+        triggerAIAnalysis(text: normalized)
     }
 
     private func formatCurrency(_ input: String) -> String {

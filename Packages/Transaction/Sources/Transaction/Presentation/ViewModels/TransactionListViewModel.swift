@@ -9,6 +9,7 @@ public class TransactionListViewModel {
     public var transactions: [TransactionResponse] = []
     public var summary: TransactionSummaryResponse?
     public var chartData: TransactionChartResponse?
+    public var aiInsights: [AnalyticsInsightResponse] = []
     public var chartRange: ChartRange = .month
     public var chartReferenceDate: Date = Date()
     public var isLoading: Bool = true
@@ -16,6 +17,7 @@ public class TransactionListViewModel {
     public var isChartLoading: Bool = true
     public var hasHistoryLoadError: Bool = false
     public var hasChartLoadError: Bool = false
+    public var isAnalyticsInsightsLoading: Bool = false
     public var alert: AppErrorAlert?
     public var currentPage: Int = 0
     public var hasMorePages: Bool = true
@@ -37,7 +39,7 @@ public class TransactionListViewModel {
                 try? await Task.sleep(for: .milliseconds(500))
                 guard !Task.isCancelled else { return }
                 isSearching = true
-                await fetchData(isInitial: true, triggeredBySearch: true, refreshAnalytics: false)
+                await fetchData(isInitial: true, triggeredBySearch: true, refreshSummaryAndChart: false)
                 isSearching = false
             }
         }
@@ -48,18 +50,23 @@ public class TransactionListViewModel {
     private let getTransactionsUseCase: GetTransactionsUseCase
     private let getSummaryUseCase: GetTransactionSummaryUseCase
     private let getChartUseCase: GetTransactionChartUseCase
+    private let getAnalyticsInsightsUseCase: GetTransactionAnalyticsInsightsUseCase
     private let deleteTransactionUseCase: DeleteTransactionUseCase
     private let router: any AppRouterProtocol
     private let sessionManager: any SessionManagerProtocol
     @ObservationIgnored
     private var hasRequestedInitialLoad = false
     @ObservationIgnored
+    private var analyticsInsightsUpToDate = false
+    @ObservationIgnored
+    private var analyticsSummaryAndChartUpToDate = false
+    @ObservationIgnored
     private var latestChartRequestID = UUID()
-
     public init(
         getTransactionsUseCase: GetTransactionsUseCase,
         getSummaryUseCase: GetTransactionSummaryUseCase,
         getChartUseCase: GetTransactionChartUseCase,
+        getAnalyticsInsightsUseCase: GetTransactionAnalyticsInsightsUseCase,
         deleteTransactionUseCase: DeleteTransactionUseCase,
         router: any AppRouterProtocol,
         sessionManager: any SessionManagerProtocol
@@ -67,6 +74,7 @@ public class TransactionListViewModel {
         self.getTransactionsUseCase = getTransactionsUseCase
         self.getSummaryUseCase = getSummaryUseCase
         self.getChartUseCase = getChartUseCase
+        self.getAnalyticsInsightsUseCase = getAnalyticsInsightsUseCase
         self.deleteTransactionUseCase = deleteTransactionUseCase
         self.router = router
         self.sessionManager = sessionManager
@@ -75,13 +83,56 @@ public class TransactionListViewModel {
     public func fetchInitialDataIfNeeded() async {
         guard !hasRequestedInitialLoad else { return }
         hasRequestedInitialLoad = true
-        await fetchData(isInitial: true, refreshAnalytics: true)
+        await fetchData(isInitial: true, refreshSummaryAndChart: true)
+    }
+
+    public func markAnalyticsInsightsStale() {
+        analyticsInsightsUpToDate = false
+        analyticsSummaryAndChartUpToDate = false
+    }
+
+    public func refreshAfterTransactionMutation() async {
+        markAnalyticsInsightsStale()
+        await fetchData(isInitial: true, refreshSummaryAndChart: true)
+    }
+
+    public func loadAnalyticsSummaryAndChartIfNeeded() async {
+        guard !analyticsSummaryAndChartUpToDate else { return }
+        do {
+            summary = try await getSummaryUseCase.execute()
+        } catch {
+            // Summary is optional for analytics view; keep existing value.
+        }
+        await fetchChartData()
+        // Only mark up-to-date when chart actually loaded.
+        analyticsSummaryAndChartUpToDate = (hasChartLoadError == false)
+    }
+
+    public func loadAnalyticsTabDataIfNeeded() async {
+        await loadAnalyticsSummaryAndChartIfNeeded()
+        await loadAnalyticsInsightsIfNeeded()
+    }
+
+    /// Call when user switches to the "Thống kê" segment.
+    public func loadAnalyticsInsightsIfNeeded() async {
+        guard !isAnalyticsInsightsLoading else { return }
+        guard !analyticsInsightsUpToDate else { return }
+        isAnalyticsInsightsLoading = true
+        defer { isAnalyticsInsightsLoading = false }
+        do {
+            let insightsResponse = try await getAnalyticsInsightsUseCase.execute()
+            aiInsights = insightsResponse.insights
+            analyticsInsightsUpToDate = true
+        } catch {
+            aiInsights = Self.localFallbackInsights
+            analyticsInsightsUpToDate = true
+        }
     }
 
     public func fetchData(
         isInitial: Bool = true,
         triggeredBySearch: Bool = false,
-        refreshAnalytics: Bool = false
+        refreshSummaryAndChart: Bool = false
     ) async {
         if isInitial {
             // Only show loading skeleton if not triggered by search (avoid jitter)
@@ -99,9 +150,8 @@ public class TransactionListViewModel {
         }
 
         do {
-            if isInitial && refreshAnalytics {
+            if isInitial && refreshSummaryAndChart {
                 summary = try await getSummaryUseCase.execute()
-                await fetchChartData()
             }
 
             // Fetch paginated transactions with date range filter and search keyword
@@ -129,7 +179,7 @@ public class TransactionListViewModel {
 
     public func applyFilter() {
         Task {
-            await fetchData(isInitial: true, refreshAnalytics: false)
+            await fetchData(isInitial: true, refreshSummaryAndChart: false)
         }
     }
 
@@ -137,7 +187,7 @@ public class TransactionListViewModel {
         filterStartDate = nil
         filterEndDate = nil
         Task {
-            await fetchData(isInitial: true, refreshAnalytics: false)
+            await fetchData(isInitial: true, refreshSummaryAndChart: false)
         }
     }
 
@@ -239,9 +289,9 @@ public class TransactionListViewModel {
             // Remove from local array
             transactions.removeAll { $0.id == id }
 
-            // Refresh summary and chart
-            summary = try await getSummaryUseCase.execute()
-            await fetchChartData()
+            // Refresh history & summary; mark analytics stale.
+            // Chart/AI will refresh when user opens the Thống kê segment.
+            await refreshAfterTransactionMutation()
             // Giống lưu/sửa giao dịch: các tab khác (ví dụ Kế hoạch) lắng nghe để refetch ngân sách / spent.
             NotificationCenter.default.post(name: .transactionDidSave, object: nil)
         } catch {
@@ -367,4 +417,21 @@ public class TransactionListViewModel {
             }
         }
     }
+
+    private static let localFallbackInsights: [AnalyticsInsightResponse] = [
+        AnalyticsInsightResponse(
+            id: "local-fallback-warning",
+            type: .warning,
+            title: "Theo dõi chi tiêu",
+            message: "Không thể tải phân tích AI lúc này. Hãy theo dõi các khoản chi lớn trong kỳ.",
+            confidence: 0.5
+        ),
+        AnalyticsInsightResponse(
+            id: "local-fallback-tip",
+            type: .tip,
+            title: "Mẹo tài chính",
+            message: "Duy trì ghi nhận giao dịch đều đặn để hệ thống đưa ra gợi ý chính xác hơn.",
+            confidence: 0.5
+        ),
+    ]
 }

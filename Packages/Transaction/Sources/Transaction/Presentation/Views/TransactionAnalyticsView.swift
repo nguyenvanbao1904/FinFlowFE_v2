@@ -7,26 +7,8 @@ import FinFlowCore
 import SwiftUI
 
 public struct TransactionAnalyticsView: View {
-    private let insights: [TransactionAIInsight] = [
-        TransactionAIInsight(
-            id: "spending-warning",
-            title: "Cảnh báo chi tiêu",
-            message:
-                "Bạn đã chi tiêu nhiều hơn 35% cho mục Ăn uống so với tháng trước. Hãy cân nhắc nấu ăn tại nhà để tiết kiệm khoảng 2.000.000 ₫ tháng tới.",
-            icon: "exclamationmark.triangle.fill",
-            color: AppColors.primary
-        ),
-        TransactionAIInsight(
-            id: "financial-tip",
-            title: "Mẹo Tài Chính",
-            message:
-                "Thu nhập tháng này của bạn rất tốt. Nếu bạn trích 15% (khoảng 3.750.000 ₫) vào quỹ dự phòng khẩn cấp, bạn sẽ đạt mục tiêu an toàn tài chính sớm hơn 2 tháng.",
-            icon: "leaf.fill",
-            color: AppColors.success
-        ),
-    ]
-
     public var summary: TransactionSummaryResponse?
+    let insights: [TransactionAIInsight]
     let chartData: TransactionChartResponse?
     let currentRange: ChartRange
     let onRangeChange: (ChartRange) -> Void
@@ -123,6 +105,7 @@ public struct TransactionAnalyticsView: View {
 
     public init(
         summary: TransactionSummaryResponse? = nil,
+        insights: [TransactionAIInsight] = [],
         chartData: TransactionChartResponse? = nil,
         currentRange: ChartRange = .month,
         onRangeChange: @escaping (ChartRange) -> Void,
@@ -133,6 +116,7 @@ public struct TransactionAnalyticsView: View {
         onRetry: (() -> Void)? = nil
     ) {
         self.summary = summary
+        self.insights = insights
         self.chartData = chartData
         self.currentRange = currentRange
         self.onRangeChange = onRangeChange

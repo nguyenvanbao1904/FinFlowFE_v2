@@ -22,5 +22,13 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>FinFlow cần sử dụng Face ID để xác thực đăng nhập nhanh và bảo mật</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FinFlow cần quyền microphone để chuyển giọng nói thành nội dung giao dịch.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>FinFlow cần quyền nhận diện giọng nói để tự động điền giao dịch từ lời nói.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FinFlow cần quyền camera để chụp ảnh hoá đơn và tự động điền giao dịch.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FinFlow cần quyền truy cập ảnh để chọn hoá đơn có sẵn và tự động điền giao dịch.</string>
 </dict>
 </plist>
