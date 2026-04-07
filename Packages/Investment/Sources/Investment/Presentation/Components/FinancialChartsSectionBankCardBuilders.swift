@@ -71,7 +71,11 @@ extension FinancialChartsSection {
            let assets = last.totalAssets,
            assets > 0
         {
-            subtitle = String(format: "NIM (Ước tính TTM): %.2f%%", (nii * 4.0 / assets) * 100)
+            // Khớp InteractiveBankNimChart: BCTC năm (quarter==0) đã là cả năm — không ×4.
+            let annualized = last.quarter == 0 ? nii : nii * 4.0
+            let pct = (annualized / assets) * 100
+            let label = last.quarter == 0 ? "NIM (ước tính)" : "NIM (Ước tính TTM)"
+            subtitle = String(format: "%@: %.2f%%", label, pct)
         }
         return chartCard(title: "Bức tranh biên lãi", subtitle: subtitle, expandKind: .nimBank) {
             bankNimChart(items, height: 200, fullScreen: false)

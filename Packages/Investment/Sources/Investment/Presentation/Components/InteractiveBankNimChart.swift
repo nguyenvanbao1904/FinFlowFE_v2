@@ -48,8 +48,9 @@ struct InteractiveBankNimChart: View {
     private func nim(for item: BankFinancialDataPoint) -> Double? {
         guard let ta = item.totalAssets, ta > 0 else { return nil }
         let net = item.netInterestIncome ?? 0
-        // Dữ liệu lợi nhuận đang là 1 Quý, cần Annualized (X4) để tính NIM TTM tương đương
-        return ((net * 4.0) / ta) * 100
+        // Backend: `quarter == 0` = BCTC năm → Lãi thuần đã là cả năm. `quarter > 0` = một quý → annualize ×4 so sánh với tổng tài sản.
+        let annualizedNet = item.quarter == 0 ? net : net * 4.0
+        return (annualizedNet / ta) * 100
     }
 
     private var barDomain: ClosedRange<Double> {
@@ -197,7 +198,7 @@ struct InteractiveBankNimChart: View {
                 let nimMetric = nim(for: item).map { n in
                     ChartPopoverMetric(
                         id: "nim",
-                        label: "NIM (Ước tính TTM)",
+                        label: item.quarter == 0 ? "NIM (ước tính)" : "NIM (ước tính TTM)",
                         value: String(format: "%.2f%%", n),
                         color: lineLineColor
                     )

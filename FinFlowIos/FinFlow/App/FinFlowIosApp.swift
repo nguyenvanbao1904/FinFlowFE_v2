@@ -43,6 +43,7 @@ struct AppRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var lastBackgroundDate: Date?
     @State private var isPrivacyBlurVisible = false
+    @State private var hasUnreadBotSuggestion = true
 
     // Constants
     private let backgroundTimeout: TimeInterval = 60  // 1 minute
@@ -83,6 +84,28 @@ struct AppRootView: View {
                 }
                 .presentationDetents(route == .finFlowBotChat ? [.medium, .large] : [.large])
                 .presentationDragIndicator(route == .finFlowBotChat ? .visible : .hidden)
+            }
+
+            if shouldShowGlobalBotOrb(root: observableRouter.root, presentedSheet: observableRouter.presentedSheet) {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        FinFlowBotGlassOrb(
+                            mascotAssetName: "FinFlowBotMascot",
+                            mascotBundle: .main,
+                            showsNotificationDot: hasUnreadBotSuggestion
+                        ) {
+                            hasUnreadBotSuggestion = false
+                            router.presentSheet(.finFlowBotChat)
+                        }
+                    }
+                    .padding(.trailing, Spacing.sm)
+                    .padding(.bottom, orbBottomPadding(for: observableRouter.root))
+                }
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .transition(.opacity)
+                .zIndex(500)
             }
 
             // Privacy Blur Overlay
@@ -185,8 +208,16 @@ struct AppRootView: View {
         case .editBudget(let budget):
             container.makeAddBudgetView(router: router, budgetToEdit: budget)
         case .finFlowBotChat:
-            FinFlowBotChatPlaceholderView()
+            FinFlowBotChatView()
         }
+    }
+
+    private func shouldShowGlobalBotOrb(root: AppRoot, presentedSheet: AppRoute?) -> Bool {
+        root == .dashboard && !isPrivacyBlurVisible && presentedSheet == nil
+    }
+
+    private func orbBottomPadding(for root: AppRoot) -> CGFloat {
+        root == .dashboard ? Spacing.lg + Spacing.md + Spacing.xs : Spacing.sm
     }
 }
 

@@ -3,7 +3,6 @@ import SwiftUI
 
 struct HomeDashboardContentView: View {
     let snapshot: HomeDashboardSnapshot
-    let onOpenBot: () -> Void
     let onSelectTab: (AppTab) -> Void
 
     var body: some View {
@@ -64,20 +63,6 @@ struct HomeDashboardContentView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, Spacing.xl)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            HStack {
-                Spacer()
-                FinFlowBotGlassOrb(
-                    mascotAssetName: "FinFlowBotMascot",
-                    mascotBundle: .main,
-                    showsNotificationDot: true
-                ) {
-                    onOpenBot()
-                }
-            }
-            .padding(.horizontal, Spacing.sm)
-            .padding(.bottom, Spacing.xs)
         }
     }
 

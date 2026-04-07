@@ -26,7 +26,6 @@ public struct HomeView: View {
             } else if let snapshot = viewModel.snapshot {
                 HomeDashboardContentView(
                     snapshot: snapshot,
-                    onOpenBot: { router.presentSheet(.finFlowBotChat) },
                     onSelectTab: { router.selectTab($0) }
                 )
             } else {
