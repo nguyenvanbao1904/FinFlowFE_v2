@@ -1,5 +1,6 @@
 import FinFlowCore
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -26,6 +27,9 @@ public class AddTransactionViewModel {
     private let analyzeUseCase: any AnalyzeTextUseCaseProtocol
     private let router: any AppRouterProtocol
     private let sessionManager: any SessionManagerProtocol
+
+    /// Coalesces concurrent loads (e.g. `.task` + AI analyze) so callers await one fetch instead of bailing via `isLoading`.
+    private var categoriesFetchTask: Task<Void, Never>?
 
     public init(
         addUseCase: AddTransactionUseCase,
@@ -60,38 +64,48 @@ public class AddTransactionViewModel {
     public func fetchCategories() async {
         if !categories.isEmpty && !accounts.isEmpty { return }
 
-        // Avoid duplicate loads if the sheet is presented multiple times quickly
-        if isLoading { return }
-
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            async let categoriesTask = getCategoriesUseCase.execute()
-            async let accountsTask = getWealthAccountsUseCase.execute()
-
-            let (fetchedCategories, allAccounts) = try await (categoriesTask, accountsTask)
-
-            self.categories = fetchedCategories
-            self.accounts = allAccounts
-
-            if let transaction = transactionToEdit {
-                self.selectedCategory = categories.first { $0.id == transaction.category.id }
-                self.selectedAccount = accounts.first { $0.id == transaction.accountId }
-
-                if let parsedDate = TransactionDateParser.parseBackendLocalDateTime(
-                    transaction.transactionDate) {
-                    self.date = parsedDate
-                }
-            } else if !transactionEligibleAccounts.isEmpty {
-                self.selectedAccount = transactionEligibleAccounts.first
-            }
-        } catch {
-            if error is CancellationError {
-                return
-            }
-            handleError(error, defaultTitle: "Lỗi Tải Dữ Liệu")
+        if let existing = categoriesFetchTask {
+            await existing.value
+            return
         }
+
+        let task = Task { @MainActor in
+            defer { self.categoriesFetchTask = nil }
+
+            if !self.categories.isEmpty && !self.accounts.isEmpty { return }
+
+            self.isLoading = true
+            defer { self.isLoading = false }
+
+            do {
+                async let categoriesTask = self.getCategoriesUseCase.execute()
+                async let accountsTask = self.getWealthAccountsUseCase.execute()
+
+                let (fetchedCategories, allAccounts) = try await (categoriesTask, accountsTask)
+
+                self.categories = fetchedCategories
+                self.accounts = allAccounts
+
+                if let transaction = self.transactionToEdit {
+                    self.selectedCategory = self.categories.first { $0.id == transaction.category.id }
+                    self.selectedAccount = self.accounts.first { $0.id == transaction.accountId }
+
+                    if let parsedDate = TransactionDateParser.parseBackendLocalDateTime(
+                        transaction.transactionDate) {
+                        self.date = parsedDate
+                    }
+                } else if !self.transactionEligibleAccounts.isEmpty {
+                    self.selectedAccount = self.transactionEligibleAccounts.first
+                }
+            } catch {
+                if error is CancellationError {
+                    return
+                }
+                self.handleError(error, defaultTitle: "Lỗi Tải Dữ Liệu")
+            }
+        }
+        categoriesFetchTask = task
+        await task.value
     }
 
     public func cancel() {
@@ -164,6 +178,9 @@ public class AddTransactionViewModel {
     public func analyzeText(input: String) async {
         guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
+        // Must have local category/account rows before matching AI UUIDs (avoids race with `.task` fetch).
+        await fetchCategories()
+
         do {
             let response = try await analyzeUseCase.execute(text: input)
 
@@ -197,17 +214,7 @@ public class AddTransactionViewModel {
     }
 
     private func handleError(_ error: Error, defaultTitle: String) {
-        if let appError = error as? AppError, case .unauthorized = appError {
-            alert = .authWithAction(
-                message: AppErrorAlert.sessionExpiredMessage
-            ) { [sessionManager] in
-                Task { @MainActor in
-                    await sessionManager.clearExpiredSession()
-                }
-            }
-            return
-        }
-        alert = error.toAppAlert(defaultTitle: defaultTitle)
+        alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: defaultTitle)
     }
 
 }

@@ -15,12 +15,12 @@ public struct AddBudgetView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: AddBudgetViewModel
+    @Bindable var viewModel: AddBudgetViewModel
     @State private var activeSheet: ActiveSheet?
     @FocusState private var isAmountFocused: Bool
 
     public init(viewModel: AddBudgetViewModel) {
-        _viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
@@ -177,4 +177,3 @@ public struct AddBudgetView: View {
     }
 }
 
-// AddBudgetViewModel moved to Presentation/ViewModels/AddBudgetViewModel.swift

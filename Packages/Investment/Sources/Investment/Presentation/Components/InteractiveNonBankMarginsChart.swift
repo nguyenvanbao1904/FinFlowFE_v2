@@ -9,27 +9,19 @@ struct InteractiveNonBankMarginsChart: View {
     let fullScreen: Bool
 
     private struct Row: Identifiable {
-        let id: Int
-        let year: Int
+        let id: String
+        let periodLabel: String
         let grossMargin: Double?
         let netMargin: Double?
     }
 
     private var rows: [Row] {
-        items.sorted { $0.year < $1.year }.map {
-            Row(id: $0.year, year: $0.year, grossMargin: $0.grossMargin, netMargin: $0.netMargin)
+        items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }.map {
+            Row(id: $0.id.uuidString, periodLabel: $0.periodLabel, grossMargin: $0.grossMargin, netMargin: $0.netMargin)
         }
     }
 
-    private var labels: [String] {
-        rows.indices.map { idx in
-            let item = items.sorted { $0.year < $1.year }[idx]
-            if showQuarterly && item.quarter != 0 {
-                return "Q\(item.quarter) \(item.year % 100)"
-            }
-            return "\(item.year)"
-        }
-    }
+    private var labels: [String] { rows.map(\.periodLabel) }
     private var visibleLength: Int { fullScreen ? min(8, max(1, rows.count)) : min(4, max(1, rows.count)) }
     private let legendReserved: CGFloat = 52
     private var chartHeight: CGFloat {
@@ -50,17 +42,17 @@ struct InteractiveNonBankMarginsChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
-                ForEach(Array(rows.enumerated()), id: \.offset) { idx, row in
+                ForEach(rows) { row in
                     if let g = row.grossMargin {
-                        LineMark(x: .value("Kỳ", labels[idx]), y: .value("Biên gộp", g))
+                        LineMark(x: .value("Kỳ", row.periodLabel), y: .value("Biên gộp", g))
                             .foregroundStyle(by: .value("Chỉ số", "Biên gộp %"))
-                        PointMark(x: .value("Kỳ", labels[idx]), y: .value("Biên gộp", g))
+                        PointMark(x: .value("Kỳ", row.periodLabel), y: .value("Biên gộp", g))
                             .foregroundStyle(by: .value("Chỉ số", "Biên gộp %"))
                     }
                     if let n = row.netMargin {
-                        LineMark(x: .value("Kỳ", labels[idx]), y: .value("Biên ròng", n))
+                        LineMark(x: .value("Kỳ", row.periodLabel), y: .value("Biên ròng", n))
                             .foregroundStyle(by: .value("Chỉ số", "Biên ròng %"))
-                        PointMark(x: .value("Kỳ", labels[idx]), y: .value("Biên ròng", n))
+                        PointMark(x: .value("Kỳ", row.periodLabel), y: .value("Biên ròng", n))
                             .foregroundStyle(by: .value("Chỉ số", "Biên ròng %"))
                     }
                 }

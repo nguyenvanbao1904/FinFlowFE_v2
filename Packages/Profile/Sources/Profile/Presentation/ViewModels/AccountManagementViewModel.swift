@@ -4,6 +4,7 @@
 //
 
 import FinFlowCore
+import Observation
 
 /// ViewModel cho Account Management section
 /// Responsibility: Quản lý password change và account deletion
@@ -201,6 +202,15 @@ public class AccountManagementViewModel {
     /// Logout (keep refresh token)
     public func logout() async {
         Logger.info("Người dùng đăng xuất (Soft Logout)", category: "AccountVM")
+        // Close any active account-related UI before session transition.
+        showDeleteAccountConfirmation = false
+        showDeletePasswordConfirmation = false
+        showOTPInput = false
+        otpCode = ""
+        deletePasswordInput = ""
+        otpAlert = nil
+        alert = nil
+        router.dismissSheet()
         // We only clear access token locally.
         await sessionManager.logout()
         Logger.info("Soft Logout completed", category: "AccountVM")

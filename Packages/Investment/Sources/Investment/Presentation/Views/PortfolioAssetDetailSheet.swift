@@ -29,7 +29,7 @@ public struct PortfolioAssetDetailSheet: View {
                     VStack(spacing: .zero) {
                         detailRow(label: "Tỷ trọng danh mục", value: formatWeight(asset: asset, total: portfolioStockValue))
                         Divider().padding(.vertical, Spacing.sm)
-                        detailRow(label: "Khối lượng", value: formatQuantity(asset.totalQuantity))
+                        detailRow(label: "Khối lượng", value: asset.totalQuantity.formattedQuantity)
                         Divider().padding(.vertical, Spacing.sm)
                         detailRow(label: "Giá vốn", value: CurrencyFormatter.format(asset.averagePrice))
                         Divider().padding(.vertical, Spacing.sm)
@@ -84,15 +84,6 @@ public struct PortfolioAssetDetailSheet: View {
                 .font(AppTypography.headline)
                 .foregroundStyle(valueColor)
         }
-    }
-
-    private func formatQuantity(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.groupingSeparator = "."
-        formatter.maximumFractionDigits = 0
-        formatter.minimumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? String(Int(value))
     }
 
     private func formatWeight(asset: PortfolioAssetResponse, total: Double) -> String {

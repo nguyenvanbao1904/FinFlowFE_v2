@@ -10,11 +10,11 @@ import GoogleSignIn
 import SwiftUI
 
 public struct LoginView: View {
-    @State private var viewModel: LoginViewModel
+    @Bindable var viewModel: LoginViewModel
     @Environment(\.colorScheme) var colorScheme
 
     public init(viewModel: LoginViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

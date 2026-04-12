@@ -49,7 +49,6 @@ extension FinancialChartsSection {
     func nonBankAssetChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         InteractiveNonBankAssetQualityChart(
             items: items,
-            showQuarterly: showQuarterly,
             height: height,
             fullScreen: fullScreen
         )
@@ -59,7 +58,6 @@ extension FinancialChartsSection {
     func nonBankCapitalChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         InteractiveNonBankCapitalStructureChart(
             items: items,
-            showQuarterly: showQuarterly,
             height: height,
             fullScreen: fullScreen
         )
@@ -78,24 +76,6 @@ extension FinancialChartsSection {
     func bankNimChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         InteractiveBankNimChart(
             items: items,
-            showQuarterly: showQuarterly,
-            height: height,
-            fullScreen: fullScreen
-        )
-    }
-
-    // --- Bank Profit (stacked: interest + fee + other) ---
-    func bankRevenueChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        let series: [(String, Color, (BankFinancialDataPoint) -> Double?)] = [
-            ("Lãi thuần", AppColors.chartIncomeInterest, \.netInterestIncome),
-            ("Phí dịch vụ", AppColors.chartIncomeFee, \.feeAndCommissionIncome),
-            ("Thu nhập khác", AppColors.chartIncomeOther, \.otherIncome),
-        ]
-        return InteractiveStackedBarChart(
-            items: items,
-            series: series,
-            yearKey: \.year,
-            quarterKey: \.quarter,
             showQuarterly: showQuarterly,
             height: height,
             fullScreen: fullScreen

@@ -76,10 +76,13 @@ public enum AppColors {
     /// Subtle grid line for chart axes.
     public static let chartGridLine = Color(UIColor.separator).opacity(0.28)
 
-    public static let chartRevenue = Color.cyan
-    public static let chartProfit = Color.green
+    /// Cột doanh thu / series doanh thu — RGB ổn định để đọc được trên dark mode (cyan hệ thống quá tối).
+    public static let chartRevenue = Color(red: 0.35, green: 0.92, blue: 1.0)
+    /// Cột LNST — xanh lá sáng, tách khỏi nền grouped dark.
+    public static let chartProfit = Color(red: 0.28, green: 0.9, blue: 0.52)
 
-    public static let chartIncomeInterest = Color.indigo
+    /// Thu nhập lãi thuần & series tương tự — thay indigo hệ thống (gần như biến mất trên nền đen).
+    public static let chartIncomeInterest = Color(red: 0.52, green: 0.62, blue: 1.0)
     public static let chartIncomeFee = Color.teal
     public static let chartIncomeOther = Color.purple
 

@@ -12,14 +12,7 @@ struct InteractiveRoeRoaChart: View {
     @State private var hidePopoverTask: Task<Void, Never>?
     @State private var scrollLabel: String = ""
 
-    private var labels: [String] {
-        data.map { d in
-            if showQuarterly && d.quarter != 0 {
-                return "Q\(d.quarter) \(d.year % 100)"
-            }
-            return "\(d.year)"
-        }
-    }
+    private var labels: [String] { data.map(\.periodLabel) }
     private var visibleLength: Int { fullScreen ? min(8, max(1, data.count)) : min(4, max(1, data.count)) }
     private let legendReserved: CGFloat = 26
     private var chartHeight: CGFloat {
@@ -51,8 +44,8 @@ struct InteractiveRoeRoaChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
-                ForEach(Array(data.enumerated()), id: \.offset) { idx, d in
-                    let label = labels[idx]
+                ForEach(data) { d in
+                    let label = d.periodLabel
                     if let roe = d.roe {
                         LineMark(x: .value("Kỳ", label), y: .value("ROE", roe))
                             .foregroundStyle(by: .value("Chỉ số", "ROE"))

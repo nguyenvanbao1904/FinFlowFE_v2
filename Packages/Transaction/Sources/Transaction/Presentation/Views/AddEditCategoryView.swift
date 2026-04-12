@@ -12,7 +12,18 @@ public struct AddEditCategoryView: View {
     @State private var selectedColor: Color = AppColors.primary
     @State private var isSaving = false
 
+    /// Hydrate from `categoryToEdit` only when this identity changes — not on every `onAppear` / `.task` re-run
+    /// (e.g. after popping the icon `Picker` navigation). `add` must stay stable across nil `id`, unlike `.task(id: nil)`.
+    @State private var lastHydratedFormIdentity: String?
+
     private var isEditMode: Bool { categoryToEdit != nil }
+
+    private var formIdentityKey: String {
+        if let id = categoryToEdit?.id {
+            return "edit:\(id)"
+        }
+        return "add"
+    }
 
     /// Curated SF Symbols for category icon (native Picker, no custom UI).
     private static let iconSymbolNames: [String] = [
@@ -28,6 +39,37 @@ public struct AddEditCategoryView: View {
         "tv", "tv.fill", "gamecontroller", "gamecontroller.fill",
         "ellipsis.circle", "ellipsis.circle.fill"
     ]
+
+    private static let iconSymbolNamesSet: Set<String> = Set(iconSymbolNames)
+
+    /// Icons not in the picker list cannot be represented as a selection; map to default row.
+    private static func sanitizedIconForPicker(_ raw: String?) -> String {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !trimmed.isEmpty else { return "" }
+        return iconSymbolNamesSet.contains(trimmed) ? trimmed : ""
+    }
+
+    private func applyModelToForm() {
+        if let cat = categoryToEdit {
+            name = cat.name
+            icon = Self.sanitizedIconForPicker(cat.icon)
+            if !cat.color.isEmpty {
+                selectedColor = Color(hex: cat.color)
+            }
+        } else {
+            name = ""
+            type = .expense
+            icon = ""
+            selectedColor = AppColors.primary
+        }
+    }
+
+    private func hydrateFromModelIfIdentityChanged() {
+        let key = formIdentityKey
+        if lastHydratedFormIdentity == key { return }
+        lastHydratedFormIdentity = key
+        applyModelToForm()
+    }
 
     public init(
         viewModel: CategoryListViewModel,
@@ -69,7 +111,9 @@ public struct AddEditCategoryView: View {
                         Label(name, systemImage: name).tag(name)
                     }
                 }
-                .pickerStyle(.navigationLink)
+                // `.navigationLink` pushes a child; popping back often re-triggers `onAppear` and breaks selection.
+                // Menu keeps selection on-screen without a separate navigation destination.
+                .pickerStyle(.menu)
                 ColorPicker("Màu", selection: $selectedColor, supportsOpacity: false)
             } header: {
                 Text("Tùy chọn")
@@ -93,13 +137,10 @@ public struct AddEditCategoryView: View {
             }
         }
         .onAppear {
-            if let cat = categoryToEdit {
-                name = cat.name
-                icon = cat.icon ?? ""
-                if !cat.color.isEmpty {
-                    selectedColor = Color(hex: cat.color)
-                }
-            }
+            hydrateFromModelIfIdentityChanged()
+        }
+        .onChange(of: categoryToEdit?.id) { _, _ in
+            hydrateFromModelIfIdentityChanged()
         }
         .alertHandler($viewModel.alert)
     }

@@ -20,7 +20,11 @@ public struct ValuationChartGroup: View {
     @State private var pendingRangeReloadTask: Task<Void, Never>?
     @State private var lastRequestedRangeKey: String?
 
-    private let calendar = Calendar(identifier: .gregorian)
+    private let calendar: Calendar = {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
+        return c
+    }()
     private var utcCalendar: Calendar {
         var c = calendar
         c.timeZone = TimeZone(secondsFromGMT: 0)!
@@ -28,8 +32,8 @@ public struct ValuationChartGroup: View {
     }
 
     /// Backend parse `yyyy-MM-dd` as `LocalDate` (timezone agnostic), nhưng FE format date in UTC (`GMT+0`).
-    /// Nếu dùng Date ở local midnight thì có thể bị lệch ngày 1.
-    /// Hàm này giữ nguyên Y/M/D theo local, nhưng tạo Date tại UTC midnight để format ra đúng `yyyy-MM-dd`.
+    /// Hàm này giữ nguyên Y/M/D theo lịch thị trường VN đã chọn trên UI, rồi tạo Date tại UTC midnight
+    /// để format ra đúng `yyyy-MM-dd`.
     private func backendUTCMidnightDate(fromLocal date: Date) -> Date {
         let ymd = calendar.dateComponents([.year, .month, .day], from: date)
         var dc = DateComponents()
@@ -104,6 +108,14 @@ public struct ValuationChartGroup: View {
             let day = calendar.startOfDay(for: d)
             return day >= lo && day <= hi
         }
+    }
+
+    private var rangeStats: ValuationRangeStats {
+        valuationRangeStats(filteredValuations)
+    }
+
+    private var dailyRangeStats: ValuationRangeStats {
+        valuationDailyRangeStats(filteredDailyValuations)
     }
 
     private var liveValuationFootnote: String {
@@ -196,8 +208,8 @@ public struct ValuationChartGroup: View {
                 ValuationSingleChart(
                     title: "Định giá P/E",
                     current: overview.displayPE,
-                    rangeMedian: medianInRange(filteredValuations, keyPath: \.pe),
-                    rangeMean: meanInRange(filteredValuations, keyPath: \.pe),
+                    rangeMedian: rangeStats.peMedian,
+                    rangeMean: rangeStats.peMean,
                     data: filteredValuations,
                     valueKeyPath: \.pe,
                     lineColor: .teal,
@@ -208,8 +220,8 @@ public struct ValuationChartGroup: View {
                 ValuationSingleChart(
                     title: "Định giá P/B",
                     current: overview.displayPB,
-                    rangeMedian: medianInRange(filteredValuations, keyPath: \.pb),
-                    rangeMean: meanInRange(filteredValuations, keyPath: \.pb),
+                    rangeMedian: rangeStats.pbMedian,
+                    rangeMean: rangeStats.pbMean,
                     data: filteredValuations,
                     valueKeyPath: \.pb,
                     lineColor: .blue,
@@ -220,8 +232,8 @@ public struct ValuationChartGroup: View {
                 ValuationSingleChart(
                     title: "Định giá P/S",
                     current: overview.displayPS,
-                    rangeMedian: medianInRange(filteredValuations, keyPath: \.ps),
-                    rangeMean: meanInRange(filteredValuations, keyPath: \.ps),
+                    rangeMedian: rangeStats.psMedian,
+                    rangeMean: rangeStats.psMean,
                     data: filteredValuations,
                     valueKeyPath: \.ps,
                     lineColor: .pink,
@@ -232,8 +244,8 @@ public struct ValuationChartGroup: View {
                 ValuationDailySingleChart(
                     title: "Định giá P/E",
                     current: overview.displayPE,
-                    rangeMedian: medianInRangeDaily(filteredDailyValuations, metric: \.pe),
-                    rangeMean: meanInRangeDaily(filteredDailyValuations, metric: \.pe),
+                    rangeMedian: dailyRangeStats.peMedian,
+                    rangeMean: dailyRangeStats.peMean,
                     data: filteredDailyValuations,
                     metric: \.pe,
                     lineColor: .teal,
@@ -245,8 +257,8 @@ public struct ValuationChartGroup: View {
                 ValuationDailySingleChart(
                     title: "Định giá P/B",
                     current: overview.displayPB,
-                    rangeMedian: medianInRangeDaily(filteredDailyValuations, metric: \.pb),
-                    rangeMean: meanInRangeDaily(filteredDailyValuations, metric: \.pb),
+                    rangeMedian: dailyRangeStats.pbMedian,
+                    rangeMean: dailyRangeStats.pbMean,
                     data: filteredDailyValuations,
                     metric: \.pb,
                     lineColor: .blue,
@@ -258,8 +270,8 @@ public struct ValuationChartGroup: View {
                 ValuationDailySingleChart(
                     title: "Định giá P/S",
                     current: overview.displayPS,
-                    rangeMedian: medianInRangeDaily(filteredDailyValuations, metric: \.ps),
-                    rangeMean: meanInRangeDaily(filteredDailyValuations, metric: \.ps),
+                    rangeMedian: dailyRangeStats.psMedian,
+                    rangeMean: dailyRangeStats.psMean,
                     data: filteredDailyValuations,
                     metric: \.ps,
                     lineColor: .pink,
@@ -496,4 +508,3 @@ private func parseDailyChartDate(_ isoDay: String) -> Date? {
     guard parts.count == 3 else { return nil }
     return cal.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
 }
-

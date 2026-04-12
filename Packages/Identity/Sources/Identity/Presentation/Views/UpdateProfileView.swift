@@ -2,7 +2,7 @@ import FinFlowCore
 import SwiftUI
 
 public struct UpdateProfileView: View {
-    @State private var viewModel: UpdateProfileViewModel
+    @Bindable var viewModel: UpdateProfileViewModel
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -10,7 +10,7 @@ public struct UpdateProfileView: View {
     }
 
     public init(viewModel: UpdateProfileViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

@@ -1,5 +1,6 @@
 import FinFlowCore
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor

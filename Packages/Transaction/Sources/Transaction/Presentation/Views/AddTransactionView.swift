@@ -27,10 +27,7 @@ public struct AddTransactionView: View {
         case note
     }
 
-    // Removed unused router property
-
-    // ViewModel
-    @State private var viewModel: AddTransactionViewModel
+    @Bindable var viewModel: AddTransactionViewModel
 
     // AI / Smart State - Keeping locally for UI effect
     @State private var aiInputText: String = ""
@@ -53,7 +50,7 @@ public struct AddTransactionView: View {
     @FocusState private var focusedField: InputField?
 
     public init(viewModel: AddTransactionViewModel) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

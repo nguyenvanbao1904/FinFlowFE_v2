@@ -15,7 +15,6 @@ public struct WealthListView: View {
         var id: String { rawValue }
     }
 
-    private let router: any AppRouterProtocol
     private let getWealthAccountsUseCase: GetWealthAccountsUseCase
     private let getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase
     private let createWealthAccountUseCase: CreateWealthAccountUseCase
@@ -34,7 +33,6 @@ public struct WealthListView: View {
     @State private var hasRequestedInitialLoad = false
 
     public init(
-        router: any AppRouterProtocol,
         getWealthAccountsUseCase: GetWealthAccountsUseCase,
         getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase,
         createWealthAccountUseCase: CreateWealthAccountUseCase,
@@ -42,7 +40,6 @@ public struct WealthListView: View {
         deleteWealthAccountUseCase: DeleteWealthAccountUseCase,
         sessionManager: any SessionManagerProtocol
     ) {
-        self.router = router
         self.getWealthAccountsUseCase = getWealthAccountsUseCase
         self.getWealthAccountTypesUseCase = getWealthAccountTypesUseCase
         self.createWealthAccountUseCase = createWealthAccountUseCase
@@ -69,22 +66,7 @@ public struct WealthListView: View {
         do {
             accounts = try await getWealthAccountsUseCase.execute()
         } catch {
-            // Khi user chuyển tab nhanh, Task .task / .refreshable có thể bị hủy.
-            // Bỏ qua CancellationError để tránh show alert vô lý.
-            if error is CancellationError {
-                return
-            }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(
-                    message: AppErrorAlert.sessionExpiredMessage
-                ) {
-                    Task { @MainActor in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                loadError = error.toAppAlert()
-            }
+            loadError = error.toHandledAlert(sessionManager: sessionManager)
         }
     }
 
@@ -240,20 +222,7 @@ public struct WealthListView: View {
             try await deleteWealthAccountUseCase.execute(id: account.id)
             await loadData(force: true)
         } catch {
-            if error is CancellationError {
-                return
-            }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(
-                    message: AppErrorAlert.sessionExpiredMessage
-                ) {
-                    Task { @MainActor in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
-            loadError = error.toAppAlert()
+            loadError = error.toHandledAlert(sessionManager: sessionManager)
         }
     }
 

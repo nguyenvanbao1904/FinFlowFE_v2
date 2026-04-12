@@ -80,10 +80,30 @@ public enum AppRoute: Hashable, Sendable {
     case addBudget
     case editBudget(BudgetResponse)
 
-    /// Chat với FinFlow Bot (placeholder — sẽ thay bằng màn chat AI).
-    case finFlowBotChat
+    /// Chat với FinFlow Bot.
+    case finFlowBotChat(initialPrompt: String? = nil)
 }
 
 extension AppRoute: Identifiable {
-    public var id: Int { hashValue }
+    /// Stable, human-readable identity — safe for SwiftUI `sheet(item:)` and `List` diffing.
+    public var id: String {
+        switch self {
+        case .login:                          return "login"
+        case .register:                       return "register"
+        case .forgotPassword:                 return "forgotPassword"
+        case .dashboard:                      return "dashboard"
+        case .profile:                        return "profile"
+        case .settings:                       return "settings"
+        case .transactionDetail(let tid):     return "transactionDetail-\(tid)"
+        case .updateProfile(let p):           return "updateProfile-\(p.id)"
+        case .changePassword(let has):        return "changePassword-\(has)"
+        case .createPIN(let email):           return "createPIN-\(email)"
+        case .addTransaction:                 return "addTransaction"
+        case .editTransaction(let t):         return "editTransaction-\(t.id)"
+        case .categoryList:                   return "categoryList"
+        case .addBudget:                      return "addBudget"
+        case .editBudget(let b):              return "editBudget-\(b.id)"
+        case .finFlowBotChat(let prompt):     return "finFlowBotChat-\(prompt ?? "")"
+        }
+    }
 }

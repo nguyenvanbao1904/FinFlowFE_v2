@@ -66,6 +66,13 @@ public enum Layout {
     public static let inputRowHeight: CGFloat = 70
 }
 
+// MARK: - Animation & Timing
+
+public enum AnimationTiming {
+    /// Standard short delay for navigation/dismissal animations (0.3 s).
+    public static let navigationDelay: UInt64 = 300_000_000
+}
+
 // MARK: - Shadow
 
 public enum ShadowStyle {

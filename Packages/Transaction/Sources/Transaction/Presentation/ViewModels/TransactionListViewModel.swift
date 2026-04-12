@@ -13,7 +13,6 @@ public class TransactionListViewModel {
     public var chartRange: ChartRange = .month
     public var chartReferenceDate: Date = Date()
     public var isLoading: Bool = true
-    public var isSearching: Bool = false  // Separate state for search to avoid UI jitter
     public var isChartLoading: Bool = true
     public var hasHistoryLoadError: Bool = false
     public var hasChartLoadError: Bool = false
@@ -30,17 +29,11 @@ public class TransactionListViewModel {
     // Search
     public var searchText: String = "" {
         didSet {
-            // Cancel previous search task
             searchTask?.cancel()
-            isSearching = false  // Reset immediately when cancelling
-
-            // Debounce search by 500ms
             searchTask = Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(500))
                 guard !Task.isCancelled else { return }
-                isSearching = true
                 await fetchData(isInitial: true, triggeredBySearch: true, refreshSummaryAndChart: false)
-                isSearching = false
             }
         }
     }
@@ -239,29 +232,20 @@ public class TransactionListViewModel {
     }
 
     private func handleError(_ error: Error, isChartError: Bool = false) {
-        // 401 Unauthorized — token hết hạn, yêu cầu đăng nhập lại
-        if let appError = error as? AppError, case .unauthorized = appError {
+        let handled = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu")
+        if handled?.isUnauthorized == true {
             isLoading = false
             isChartLoading = false
             hasHistoryLoadError = false
             hasChartLoadError = false
-            alert = .authWithAction(
-                message: AppErrorAlert.sessionExpiredMessage
-            ) { [sessionManager] in
-                Task { @MainActor in
-                    await sessionManager.clearExpiredSession()
-                }
-            }
-            return
-        }
-
-        if isChartError {
+        } else if isChartError {
             hasChartLoadError = true
         } else {
             hasHistoryLoadError = true
         }
-
-        self.alert = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu")
+        if let handled {
+            self.alert = handled
+        }
     }
 
     public func loadMoreIfNeeded(currentItem: TransactionResponse) async {
@@ -301,6 +285,14 @@ public class TransactionListViewModel {
 
     public func presentEditTransaction(_ transaction: TransactionResponse) {
         router.presentSheet(.editTransaction(transaction))
+    }
+
+    public func generateDetailedReport() {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM/yyyy"
+        let currentMonth = dateFormatter.string(from: Date())
+        let prompt = "Hãy tạo cho tôi một báo cáo phân tích chi tiết về tình hình thu chi, biến động các danh mục và gợi ý ngân sách cho tháng \(currentMonth)."
+        router.presentSheet(.finFlowBotChat(initialPrompt: prompt))
     }
 
     // MARK: - Computed Summary

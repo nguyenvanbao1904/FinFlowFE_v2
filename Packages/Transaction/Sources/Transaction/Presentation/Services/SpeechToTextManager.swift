@@ -32,20 +32,23 @@ final class SpeechToTextManager {
             do {
                 try await audio.beginRecognition(
                     onTranscript: { transcript in
-                        Task { @MainActor in
+                        Task { @MainActor [weak self] in
+                            guard let self else { return }
                             self.latestTranscript = transcript
                             onPartialText(transcript)
                         }
                     },
                     onStop: { errorMessage in
-                        Task { @MainActor in
+                        Task { @MainActor [weak self] in
+                            guard let self else { return }
                             self.isListening = false
                             // Chỉ gọi onError nếu thực sự có thông báo lỗi
                             if let msg = errorMessage { onError(msg) }
                         }
                     },
                     onAutoSubmit: { finalText in
-                        Task { @MainActor in
+                        Task { @MainActor [weak self] in
+                            guard let self else { return }
                             self.isListening = false
                             self.latestTranscript = finalText
                             if !finalText.isEmpty {

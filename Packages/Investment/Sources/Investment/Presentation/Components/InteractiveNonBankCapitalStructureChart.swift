@@ -6,7 +6,6 @@ import SwiftUI
 /// Đường cam: (Nợ vay ròng / VCSH), trục trái -100% ... 100%.
 struct InteractiveNonBankCapitalStructureChart: View {
     let items: [NonBankFinancialDataPoint]
-    let showQuarterly: Bool
     let height: CGFloat
     let fullScreen: Bool
 
@@ -16,6 +15,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
     @State private var scrollLabel: String = ""
 
     private struct CapitalStructurePoint {
+        let periodLabel: String
         let year: Int
         let equityValue: Double
         let shortBorrowValue: Double
@@ -36,20 +36,30 @@ struct InteractiveNonBankCapitalStructureChart: View {
     }
 
     private var points: [CapitalStructurePoint] {
-        items.compactMap(makeCapitalPoint)
+        items
+            .sorted { a, b in
+                if a.year != b.year { return a.year < b.year }
+                return a.quarter < b.quarter
+            }
+            .compactMap(makeCapitalPoint)
     }
 
-    private var labels: [String] {
-        points.indices.map { idx in
-            let item = items.sorted { $0.year < $1.year }[idx]
-            if showQuarterly && item.quarter != 0 {
-                return "Q\(item.quarter) \(item.year % 100)"
-            }
-            return "\(item.year)"
-        }
-    }
+    private var labels: [String] { points.map(\.periodLabel) }
+
     private var visibleLength: Int { fullScreen ? min(8, max(1, points.count)) : min(4, max(1, points.count)) }
-    private let legendReserved: CGFloat = 176
+
+    /// Cùng bậc với `InteractiveStackedBarChart` / `InteractiveBankCapitalLeverageChart`, cộng thêm chú thích 1–2 dòng.
+    private var legendGridReserved: CGFloat {
+        let legendItemCount = 6
+        if legendItemCount <= 3 { return 26 }
+        if legendItemCount <= 6 { return 52 }
+        return 78
+    }
+
+    private var footnoteReserved: CGFloat { Spacing.xs + 36 }
+
+    private var legendReserved: CGFloat { legendGridReserved + footnoteReserved }
+
     private var chartHeight: CGFloat {
         if fullScreen {
             return max(110, height - legendReserved - 20)
@@ -108,9 +118,6 @@ struct InteractiveNonBankCapitalStructureChart: View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart(Array(points.enumerated()), id: \.offset) { idx, d in
                 let label = labels[idx]
-                RuleMark(y: .value("0%", scalePctToBarDomain(0)))
-                    .foregroundStyle(Color.primary.opacity(0.8))
-                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
 
                 BarMark(x: .value("Kỳ", label), y: .value("Vốn CSH", d.equityValue))
                     .foregroundStyle(AppColors.chartCapitalEquity)
@@ -128,13 +135,14 @@ struct InteractiveNonBankCapitalStructureChart: View {
                     y: .value("Nợ vay ròng/VCSH", lineYValue(for: d))
                 )
                 .foregroundStyle(Color.orange)
-                .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                .interpolationMethod(.monotone)
                 PointMark(
                     x: .value("Kỳ", label),
                     y: .value("Nợ vay ròng/VCSH", lineYValue(for: d))
                 )
                 .foregroundStyle(Color.orange)
-                .symbolSize(34)
+                .symbolSize(30)
             }
             .chartYAxis {
                 AxisMarks(position: .trailing, values: .automatic(desiredCount: 5)) { value in
@@ -197,11 +205,12 @@ struct InteractiveNonBankCapitalStructureChart: View {
                     chartLegendItem("Nguồn vốn khác", color: AppColors.chartAssetLoans)
                     chartLegendItem("Nợ vay ròng / VCSH", color: .orange)
                 }
-                Text("Đường cam thể hiện tỷ lệ Nợ vay ròng / VCSH. Trục trái (-100% ... 100%).")
+                .frame(height: legendGridReserved, alignment: .top)
+                Text("Đường cam: Nợ vay ròng / VCSH · Trục trái −100% … 100%.")
                     .font(AppTypography.caption2)
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, Spacing.xs)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
             }
             .frame(height: legendReserved, alignment: .top)
         }
@@ -224,6 +233,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
         let ratio: Double? = equity != 0 ? netDebt / equity : nil
 
         return CapitalStructurePoint(
+            periodLabel: item.periodLabel,
             year: item.year,
             equityValue: equity,
             shortBorrowValue: shortB,

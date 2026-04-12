@@ -9,14 +9,14 @@ struct InteractiveBankProfitYoYGrowthChart: View {
     let fullScreen: Bool
 
     private struct Row: Identifiable {
-        let id: Int
-        let year: Int
+        let id: String
+        let periodLabel: String
         let value: Double?
     }
 
     private struct YoYRow: Identifiable {
-        let id: Int
-        let year: Int
+        let id: String
+        let periodLabel: String
         let yoy: Double?
     }
 
@@ -30,7 +30,10 @@ struct InteractiveBankProfitYoYGrowthChart: View {
     private let legendReserved: CGFloat = 52
 
     private var rows: [Row] {
-        points.map { Row(id: $0.year, year: $0.year, value: $0.value) }
+        points.map { p in
+            let label = (showQuarterly && p.quarter != 0) ? "Q\(p.quarter) \(p.year % 100)" : "\(p.year)"
+            return Row(id: "\(p.year)-\(p.quarter)", periodLabel: label, value: p.value)
+        }
     }
 
     private var yoyRows: [YoYRow] {
@@ -41,19 +44,12 @@ struct InteractiveBankProfitYoYGrowthChart: View {
             if i > 0, let c = cur.value, let p = rows[i - 1].value, p != 0 {
                 yoy = (c - p) / p * 100
             }
-            out.append(YoYRow(id: cur.id, year: cur.year, yoy: yoy))
+            out.append(YoYRow(id: cur.id, periodLabel: cur.periodLabel, yoy: yoy))
         }
         return out
     }
 
-    private var labels: [String] {
-        points.enumerated().map { _, p in
-            if showQuarterly && p.quarter != 0 {
-                return "Q\(p.quarter) \(p.year % 100)"
-            }
-            return "\(p.year)"
-        }
-    }
+    private var labels: [String] { rows.map(\.periodLabel) }
     private var visibleLength: Int { fullScreen ? min(8, max(1, rows.count)) : min(4, max(1, rows.count)) }
     private var chartPlotHeight: CGFloat {
         if fullScreen {
@@ -95,10 +91,10 @@ struct InteractiveBankProfitYoYGrowthChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
-                ForEach(Array(rows.enumerated()), id: \.offset) { idx, row in
+                ForEach(rows) { row in
                     if let v = row.value {
                         BarMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", row.periodLabel),
                             y: .value("Giá trị", v)
                         )
                         .foregroundStyle(barColor)
@@ -109,11 +105,11 @@ struct InteractiveBankProfitYoYGrowthChart: View {
                     .foregroundStyle(Color.primary.opacity(0.8))
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
 
-                ForEach(Array(yoyRows.enumerated()), id: \.offset) { idx, y in
+                ForEach(yoyRows) { y in
                     if let rv = y.yoy {
                         let scaled = scaleYoYToBarDomain(rv)
                         LineMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", y.periodLabel),
                             y: .value("YoY", scaled)
                         )
                         .foregroundStyle(yoyLineColor)
@@ -121,7 +117,7 @@ struct InteractiveBankProfitYoYGrowthChart: View {
                         .interpolationMethod(.monotone)
 
                         PointMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", y.periodLabel),
                             y: .value("YoY", scaled)
                         )
                         .foregroundStyle(yoyLineColor)

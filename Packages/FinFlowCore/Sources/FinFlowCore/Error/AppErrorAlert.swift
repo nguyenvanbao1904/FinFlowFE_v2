@@ -80,6 +80,15 @@ public enum AppErrorAlert: AppAlert, Equatable, Sendable, Identifiable {
         }
     }
 
+    /// Returns `true` when this alert represents a session-expired / 401 condition,
+    /// allowing callers to reset loading/error state before displaying it.
+    public var isUnauthorized: Bool {
+        switch self {
+        case .auth, .authWithAction: return true
+        default: return false
+        }
+    }
+
     public var buttons: AnyView {
         switch self {
         case .network(let onRetry):

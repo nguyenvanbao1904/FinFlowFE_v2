@@ -65,32 +65,6 @@ public struct UserProfile: Codable, Sendable, Hashable {
     }
 }
 
-/// Authentication Token - Domain Value Object
-public struct AuthToken: Codable, Sendable {
-    public let accessToken: String
-    public let refreshToken: String?
-    public let type: String
-    public let expiresIn: Int?
-    public let refreshTokenExpiresIn: Int?
-    public let isReactivated: Bool?
-
-    public init(
-        accessToken: String,
-        refreshToken: String?,
-        type: String,
-        expiresIn: Int?,
-        refreshTokenExpiresIn: Int?,
-        isReactivated: Bool? = nil
-    ) {
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-        self.type = type
-        self.expiresIn = expiresIn
-        self.refreshTokenExpiresIn = refreshTokenExpiresIn
-        self.isReactivated = isReactivated
-    }
-}
-
 /// OTP Purpose - Domain Enum
 public enum OtpPurpose: String, Codable, Sendable {
     case register = "REGISTER"

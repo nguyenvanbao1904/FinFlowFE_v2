@@ -9,7 +9,8 @@ public protocol HTTPClientProtocol: Sendable {
         body: (any Encodable & Sendable)?,
         headers: [String: String]?,
         version: String?,
-        retryOn401: Bool
+        retryOn401: Bool,
+        extendedTimeout: Bool
     ) async throws -> T
 }
 
@@ -29,7 +30,27 @@ public extension HTTPClientProtocol {
             body: body,
             headers: headers,
             version: version,
-            retryOn401: true
+            retryOn401: true,
+            extendedTimeout: false
+        )
+    }
+
+    func request<T: Codable & Sendable>(
+        endpoint: String,
+        method: String,
+        body: (any Encodable & Sendable)?,
+        headers: [String: String]?,
+        version: String?,
+        retryOn401: Bool
+    ) async throws -> T {
+        try await request(
+            endpoint: endpoint,
+            method: method,
+            body: body,
+            headers: headers,
+            version: version,
+            retryOn401: retryOn401,
+            extendedTimeout: false
         )
     }
 
@@ -38,7 +59,15 @@ public extension HTTPClientProtocol {
         method: String,
         body: (any Encodable & Sendable)?
     ) async throws -> T {
-        try await request(endpoint: endpoint, method: method, body: body, headers: nil, version: nil, retryOn401: true)
+        try await request(
+            endpoint: endpoint,
+            method: method,
+            body: body,
+            headers: nil,
+            version: nil,
+            retryOn401: true,
+            extendedTimeout: false
+        )
     }
 
     func request<T: Codable & Sendable>(

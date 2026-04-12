@@ -1,5 +1,6 @@
-import Foundation
 import FinFlowCore
+import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -10,8 +11,7 @@ public final class InvestmentPortfolioViewModel {
     public var industryBySymbol: [String: String] = [:]
     public var portfolioHealth: PortfolioHealthResponse?
     public var portfolioBenchmark: PortfolioMarketBenchmarkResponse?
-    public var portfolioPerformance: PortfolioPerformanceResponse?
-    public var performanceRange = "1Y"
+
 
     /// True while the initial (or empty-list) portfolio fetch is in flight — avoids showing empty state before the first response.
     public var isLoadingPortfolios = true
@@ -27,7 +27,7 @@ public final class InvestmentPortfolioViewModel {
     private let importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase
     private let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
     private let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
-    private let getPortfolioPerformanceUseCase: GetPortfolioPerformanceUseCase
+
     private let sessionManager: any SessionManagerProtocol
     private var latestPortfolioLoadRequestID = UUID()
     private var loadedPortfolioDetailsID: String?
@@ -41,7 +41,6 @@ public final class InvestmentPortfolioViewModel {
         importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase,
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
-        getPortfolioPerformanceUseCase: GetPortfolioPerformanceUseCase,
         sessionManager: any SessionManagerProtocol
     ) {
         self.getCompanyIndustriesUseCase = getCompanyIndustriesUseCase
@@ -52,7 +51,7 @@ public final class InvestmentPortfolioViewModel {
         self.importPortfolioSnapshotUseCase = importPortfolioSnapshotUseCase
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
-        self.getPortfolioPerformanceUseCase = getPortfolioPerformanceUseCase
+
         self.sessionManager = sessionManager
     }
 
@@ -94,16 +93,8 @@ public final class InvestmentPortfolioViewModel {
                 Logger.debug("loadAll cancelled", category: "Investment")
                 return
             }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                errorAlert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
             Logger.error("loadAll failed | error=\(error.localizedDescription)", category: "Investment")
-            errorAlert = error.toAppAlert(defaultTitle: "Lỗi tải danh mục/tài sản")
+            errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tải danh mục/tài sản")
         }
     }
 
@@ -112,18 +103,7 @@ public final class InvestmentPortfolioViewModel {
             _ = try await createPortfolioUseCase.execute(request: CreatePortfolioRequest(name: name))
             await loadAll(force: true)
         } catch {
-            if error is CancellationError {
-                return
-            }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                errorAlert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
-            errorAlert = error.toAppAlert(defaultTitle: "Lỗi tạo danh mục")
+            errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tạo danh mục")
         }
     }
 
@@ -133,7 +113,6 @@ public final class InvestmentPortfolioViewModel {
             assets = []
             portfolioHealth = nil
             portfolioBenchmark = nil
-            portfolioPerformance = nil
             await recomputeAllPortfoliosTotalValue()
             return
         }
@@ -189,26 +168,9 @@ public final class InvestmentPortfolioViewModel {
                 category: "Investment"
             )
 
-            let fetchedPerformance = try? await getPortfolioPerformanceUseCase.execute(
-                portfolioId: selectedPortfolioID,
-                range: performanceRange
-            )
-            guard requestID == latestPortfolioLoadRequestID else {
-                Logger.debug(
-                    "loadAssetsForSelectedPortfolio ignored stale request after performance fetch | id=\(selectedPortfolioID)",
-                    category: "Investment"
-                )
-                return
-            }
-            Logger.info(
-                "performance fetched | points=\(fetchedPerformance?.portfolioPoints.count ?? 0) range=\(performanceRange)",
-                category: "Investment"
-            )
-
             assets = fetchedAssets
             portfolioHealth = fetchedHealth
             portfolioBenchmark = fetchedBenchmark
-            portfolioPerformance = fetchedPerformance
             loadedPortfolioDetailsID = selectedPortfolioID
 
             await prefetchIndustries(for: fetchedAssets)
@@ -233,19 +195,11 @@ public final class InvestmentPortfolioViewModel {
                 Logger.debug("loadAssetsForSelectedPortfolio cancelled", category: "Investment")
                 return
             }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                errorAlert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
             Logger.error(
                 "loadAssetsForSelectedPortfolio failed | selectedId=\(selectedPortfolio.id) error=\(error.localizedDescription)",
                 category: "Investment"
             )
-            errorAlert = error.toAppAlert(defaultTitle: "Lỗi tải tài sản")
+            errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tải tài sản")
         }
     }
 
@@ -256,20 +210,7 @@ public final class InvestmentPortfolioViewModel {
         }
     }
 
-    public func loadPortfolioPerformance() async {
-        guard let selectedPortfolio else {
-            portfolioPerformance = nil
-            return
-        }
-        do {
-            portfolioPerformance = try await getPortfolioPerformanceUseCase.execute(
-                portfolioId: selectedPortfolio.id,
-                range: performanceRange
-            )
-        } catch {
-            portfolioPerformance = nil
-        }
-    }
+
 
     public func createCashTransaction(tradeType: TradeType, amount: Double, transactionDate: Date) async throws {
         guard let selectedPortfolio else { return }
@@ -325,26 +266,7 @@ public final class InvestmentPortfolioViewModel {
         await loadAll(force: true)
     }
 
-    public func performanceChartDay(_ isoDay: String) -> Date {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
-        let parts = isoDay.split(separator: "-").compactMap { Int($0) }
-        if parts.count == 3,
-           let y = parts.first, let m = parts.dropFirst().first, let d = parts.dropFirst(2).first,
-           let date = cal.date(from: DateComponents(year: y, month: m, day: d)) {
-            return date
-        }
-        return Date()
-    }
 
-    public func formatQuantity(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.groupingSeparator = "."
-        formatter.maximumFractionDigits = 0
-        formatter.minimumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: value)) ?? String(Int(value))
-    }
 
     public var sortedAssets: [PortfolioAssetResponse] {
         guard loadedPortfolioDetailsID == selectedPortfolio?.id else { return [] }

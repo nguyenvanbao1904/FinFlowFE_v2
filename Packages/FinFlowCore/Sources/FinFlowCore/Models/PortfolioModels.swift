@@ -275,39 +275,4 @@ public struct PortfolioMetricComparison: Codable, Sendable {
     }
 }
 
-// MARK: - Portfolio performance (NAV vs VNINDEX snapshots)
 
-/// GET /api/investments/portfolios/{id}/performance
-public struct PortfolioPerformanceResponse: Codable, Sendable {
-    public let rangeStart: String
-    public let rangeEnd: String
-    public let benchmarkCode: String
-    public let portfolioPoints: [PerformanceSeriesPointResponse]
-    public let benchmarkPoints: [PerformanceSeriesPointResponse]
-
-    public init(
-        rangeStart: String,
-        rangeEnd: String,
-        benchmarkCode: String,
-        portfolioPoints: [PerformanceSeriesPointResponse],
-        benchmarkPoints: [PerformanceSeriesPointResponse]
-    ) {
-        self.rangeStart = rangeStart
-        self.rangeEnd = rangeEnd
-        self.benchmarkCode = benchmarkCode
-        self.portfolioPoints = portfolioPoints
-        self.benchmarkPoints = benchmarkPoints
-    }
-}
-
-public struct PerformanceSeriesPointResponse: Codable, Sendable {
-    public let date: String
-    public let value: Double
-    public let returnPct: Double?
-
-    public init(date: String, value: Double, returnPct: Double?) {
-        self.date = date
-        self.value = value
-        self.returnPct = returnPct
-    }
-}

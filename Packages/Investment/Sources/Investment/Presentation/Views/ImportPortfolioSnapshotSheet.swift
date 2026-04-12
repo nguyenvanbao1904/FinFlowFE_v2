@@ -232,7 +232,9 @@ public struct ImportPortfolioSnapshotSheet: View {
             try await onSubmit(cashBalance, parsedHoldings, transactionDate)
             dismiss()
         } catch {
-            errorMessage = "Không thể nhập danh mục. Vui lòng thử lại."
+            if error is CancellationError { return }
+            errorMessage = (error as? AppError)?.errorDescription
+                ?? error.localizedDescription
         }
     }
 
@@ -263,7 +265,7 @@ public struct ImportPortfolioSnapshotSheet: View {
 
         activeSuggestionRowId = rowId
         suggestTasksByRowId[rowId] = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
             if Task.isCancelled { return }
 
             do {

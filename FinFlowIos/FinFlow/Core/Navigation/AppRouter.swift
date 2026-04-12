@@ -17,7 +17,6 @@ public final class AppRouter: AppRouterProtocol {
     public var root: AppRoot = .splash
     public var presentedSheet: AppRoute?
     
-    // Legacy support (computed)
     public var isAuthenticated: Bool {
         root == .dashboard
     }
@@ -44,6 +43,14 @@ public final class AppRouter: AppRouterProtocol {
 
     private func handleStateChange(_ state: SessionState) {
         Logger.info("Session: \(state)", category: "Navigation")
+
+        // Ensure no orphan sheet remains when session/root transitions.
+        switch state {
+        case .authenticated:
+            break
+        default:
+            presentedSheet = nil
+        }
 
         switch state {
         case .authenticated:

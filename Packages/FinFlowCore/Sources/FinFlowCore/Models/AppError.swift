@@ -5,7 +5,7 @@
 //  Created by Nguyễn Văn Bảo on 26/12/25.
 //
 
-@_exported import Foundation
+import Foundation
 
 /// Application-wide error types
 /// Frontend CHỈ HIỂN THỊ message từ backend, KHÔNG tự format

@@ -93,6 +93,10 @@ public struct MainTabView<
             }
             .tag(AppTab.investment)
         }
+        // Align tab bar tone with grouped screens. Use `.automatic` — `.visible` can leave an
+        // extra slab below the tab items (home-indicator zone looks like “padding” too thick).
+        .toolbarBackground(AppColors.appBackground, for: .tabBar)
+        .toolbarBackground(.automatic, for: .tabBar)
     }
 
     private func tabRoot<Content: View>(

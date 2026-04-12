@@ -13,8 +13,8 @@ public protocol NetworkConfigProtocol: Sendable {
 
 public struct NetworkConfig: NetworkConfigProtocol {
     public let baseURL: String
-    
-    public init(baseURL: String = "http://192.168.1.8:8080/api") {
+
+    public init(baseURL: String) {
         self.baseURL = baseURL
     }
 }

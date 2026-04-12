@@ -4,11 +4,9 @@ import SwiftUI
 /// Mobile-first snapshot cards inspired by compact financial dashboards.
 public struct MobileInsightSnapshot: View {
     let overview: StockOverview
-    let financials: FinancialDataSeries?
 
-    public init(overview: StockOverview, financials: FinancialDataSeries?) {
+    public init(overview: StockOverview) {
         self.overview = overview
-        self.financials = financials
     }
 
     public var body: some View {

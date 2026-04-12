@@ -5,6 +5,8 @@ public actor APIClient: HTTPClientProtocol {
     private let tokenStore: (any TokenStoreProtocol)?
     private let apiVersion: String
     private let session: URLSession
+    /// Matches AI orchestration (multi-turn tools + LLM); default session caps at 60s resource and aborts early.
+    private let longRunningSession: URLSession
     private var refreshHandler: (@Sendable () async throws -> String)?
     private var onUnauthorized: (@Sendable () async -> Void)?
     private var refreshTask: Task<String, any Error>?
@@ -31,6 +33,13 @@ public actor APIClient: HTTPClientProtocol {
                 configuration.waitsForConnectivity = true
                 return URLSession(configuration: configuration)
             }()
+        self.longRunningSession = {
+            let configuration = URLSessionConfiguration.default
+            configuration.timeoutIntervalForRequest = 120
+            configuration.timeoutIntervalForResource = 300
+            configuration.waitsForConnectivity = true
+            return URLSession(configuration: configuration)
+        }()
     }
 
     public func request<T: Codable & Sendable>(
@@ -46,7 +55,8 @@ public actor APIClient: HTTPClientProtocol {
             body: body,
             headers: headers,
             version: version,
-            retryOn401: true
+            retryOn401: true,
+            extendedTimeout: false
         )
     }
 
@@ -58,9 +68,11 @@ public actor APIClient: HTTPClientProtocol {
         body: (any Encodable & Sendable)? = nil,
         headers: [String: String]? = nil,
         version: String? = nil,  // Override version cho request cụ thể
-        retryOn401: Bool = true  // Cho phép tắt retry khi gọi refresh token
+        retryOn401: Bool = true,  // Cho phép tắt retry khi gọi refresh token
+        extendedTimeout: Bool = false
     ) async throws -> T {
         var retryAttempted = false
+        let urlSession = extendedTimeout ? longRunningSession : session
 
         func makeRequest(with tokenOverride: String? = nil) async throws -> URLRequest {
             guard let url = URL(string: config.baseURL + endpoint) else {
@@ -99,7 +111,7 @@ public actor APIClient: HTTPClientProtocol {
             let data: Data
             let response: URLResponse
             do {
-                (data, response) = try await session.data(for: request)
+                (data, response) = try await urlSession.data(for: request)
             } catch {
                 if error is CancellationError {
                     throw error

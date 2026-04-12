@@ -119,7 +119,7 @@ struct InvestmentPortfolioTabContent: View {
                                         color: colorForSymbol(asset.symbol),
                                         title: asset.symbol,
                                         subtitle:
-                                            "KL \(viewModel.formatQuantity(asset.totalQuantity)) • Giá vốn \(CurrencyFormatter.format(asset.averagePrice)) • Giá hiện tại \(CurrencyFormatter.format(asset.closePrice ?? 0))"
+                                            "KL \(asset.totalQuantity.formattedQuantity) • Giá vốn \(CurrencyFormatter.format(asset.averagePrice)) • Giá hiện tại \(CurrencyFormatter.format(asset.closePrice ?? 0))"
                                     ) {
                                         VStack(alignment: .trailing, spacing: Spacing.xs) {
                                             Text(CurrencyFormatter.format(marketValue))
@@ -165,108 +165,14 @@ struct InvestmentPortfolioTabContent: View {
                     }
                 }
 
-                if viewModel.selectedPortfolio != nil {
-                    navVsIndexPerformanceCard(viewModel: viewModel)
-                        .padding(.top, Spacing.md)
-                }
+
             }
         }
         .padding(.horizontal, Spacing.md)
         .background(AppColors.appBackground)
     }
 
-    private func navVsIndexPerformanceCard(viewModel: InvestmentPortfolioViewModel) -> some View {
-        @Bindable var viewModel = viewModel
 
-        return VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Text("Hiệu suất vs \(viewModel.portfolioPerformance?.benchmarkCode ?? "VNINDEX")")
-                    .font(AppTypography.displayCaption)
-                    .foregroundStyle(.primary)
-                Spacer()
-                Picker(
-                    "Kỳ",
-                    selection: Binding(
-                        get: { viewModel.performanceRange },
-                        set: { viewModel.performanceRange = $0 }
-                    )
-                ) {
-                    Text("1T").tag("1M")
-                    Text("3T").tag("3M")
-                    Text("6T").tag("6M")
-                    Text("1N").tag("1Y")
-                    Text("YTD").tag("YTD")
-                    Text("Tối đa").tag("MAX")
-                }
-                .pickerStyle(.menu)
-                .tint(AppColors.primary)
-            }
-
-            if let perf = viewModel.portfolioPerformance {
-                let hasPortfolio = perf.portfolioPoints.contains { $0.returnPct != nil }
-                let hasBench = perf.benchmarkPoints.contains { $0.returnPct != nil }
-                if hasPortfolio || hasBench {
-                    Chart {
-                        ForEach(perf.portfolioPoints, id: \.date) { pt in
-                            if let rp = pt.returnPct {
-                                LineMark(
-                                    x: .value("Ngày", viewModel.performanceChartDay(pt.date)),
-                                    y: .value("%", rp)
-                                )
-                                .foregroundStyle(AppColors.primary)
-                                .interpolationMethod(.catmullRom)
-                            }
-                        }
-                        ForEach(perf.benchmarkPoints, id: \.date) { pt in
-                            if let rp = pt.returnPct {
-                                LineMark(
-                                    x: .value("Ngày", viewModel.performanceChartDay(pt.date)),
-                                    y: .value("%", rp)
-                                )
-                                .foregroundStyle(Color.orange)
-                                .interpolationMethod(.catmullRom)
-                            }
-                        }
-                    }
-                    .chartYAxisLabel("% so với điểm đầu kỳ")
-                    .frame(height: 200)
-                    .padding(.top, Spacing.xs)
-
-                    HStack(spacing: Spacing.md) {
-                        HStack(spacing: AppSpacing.xs) {
-                            Circle()
-                                .fill(AppColors.primary)
-                                .frame(width: AppSpacing.xs, height: AppSpacing.xs)
-                            Text("Danh mục")
-                                .font(AppTypography.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        HStack(spacing: AppSpacing.xs) {
-                            Circle()
-                                .fill(Color.orange)
-                                .frame(width: AppSpacing.xs, height: AppSpacing.xs)
-                            Text(perf.benchmarkCode)
-                                .font(AppTypography.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                } else {
-                    Text("Biểu đồ sẽ có dữ liệu sau các phiên chốt NAV cuối ngày (so với chỉ số).")
-                        .font(AppTypography.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, Spacing.xs)
-                }
-            } else {
-                Text("Biểu đồ sẽ có dữ liệu sau các phiên chốt NAV cuối ngày (so với chỉ số).")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, Spacing.xs)
-            }
-        }
-        .padding(Spacing.md)
-        .background(AppColors.cardBackground)
-        .clipShape(.rect(cornerRadius: CornerRadius.medium))
-    }
 
     @ViewBuilder
     private func portfolioSummaryStats(viewModel: InvestmentPortfolioViewModel) -> some View {

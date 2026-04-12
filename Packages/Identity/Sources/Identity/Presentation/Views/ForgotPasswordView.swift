@@ -2,18 +2,16 @@ import FinFlowCore
 import SwiftUI
 
 public struct ForgotPasswordView: View {
-    @State private var viewModel: ForgotPasswordViewModel
+    @Bindable var viewModel: ForgotPasswordViewModel
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var otpFocused: Bool
 
     public init(viewModel: ForgotPasswordViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
-        @Bindable var vm = viewModel
-
-        return ZStack {
+        ZStack {
             // Background Gradient
             AppColors.appBackground
                 .ignoresSafeArea()
@@ -43,7 +41,7 @@ public struct ForgotPasswordView: View {
                                     .foregroundStyle(AppColors.primary)
 
                                 PINCodeInput(
-                                    pin: $vm.otpCode,
+                                    pin: $viewModel.otpCode,
                                     isFocused: $otpFocused,
                                     displayMode: .numbers
                                 )
@@ -88,8 +86,7 @@ public struct ForgotPasswordView: View {
 
     // MARK: - Step 1: Input Email
     private var emailInputView: some View {
-        @Bindable var vm = viewModel
-        return VStack(spacing: Spacing.lg) {
+        VStack(spacing: Spacing.lg) {
             Text("Nhập email của bạn để nhận mã xác thực OTP")
                 .font(AppTypography.body)
                 .foregroundStyle(.secondary)
@@ -97,7 +94,7 @@ public struct ForgotPasswordView: View {
 
             // Dùng EmailFieldWithOTP component (giống RegisterView)
             EmailFieldWithOTP(
-                email: $vm.email,
+                email: $viewModel.email,
                 otpCode: .constant(""),  // Không dùng inline OTP ở đây
                 isEmailVerified: false,  // Forgot password không cần verify inline
                 isEmailValid: viewModel.isEmailValid,
@@ -123,16 +120,15 @@ public struct ForgotPasswordView: View {
 
     // MARK: - Step 3: Reset Password
     private var resetPasswordView: some View {
-        @Bindable var vm = viewModel
-        return VStack(spacing: Spacing.lg) {
+        VStack(spacing: Spacing.lg) {
             Text("Thiết lập mật khẩu mới")
                 .font(AppTypography.headline)
-                .foregroundStyle(AppColors.primary)  // Used AppColors.primary for emphasis
+                .foregroundStyle(AppColors.primary)
 
             GlassField(
-                text: $vm.password, placeholder: "Mật khẩu mới", icon: "lock.fill", isSecure: true)
+                text: $viewModel.password, placeholder: "Mật khẩu mới", icon: "lock.fill", isSecure: true)
             GlassField(
-                text: $vm.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation",
+                text: $viewModel.confirmPassword, placeholder: "Xác nhận mật khẩu", icon: "lock.rotation",
                 isSecure: true)
 
             Button("Đổi Mật Khẩu") {

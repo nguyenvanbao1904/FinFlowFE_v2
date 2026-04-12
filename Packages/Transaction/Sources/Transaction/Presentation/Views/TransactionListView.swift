@@ -6,10 +6,7 @@
 import FinFlowCore
 import SwiftUI
 
-/// UI for the new Transaction List View
-/// Designed with Apple's Liquid Glass style leveraging FinFlowCore DesignSystem
 public struct TransactionListView: View {
-    // For prototype purposes, we use simple state
     @State private var selectedTab: TransactionTab = .history
     @State private var transactionToDelete: TransactionResponse?
     @State private var showDeleteConfirmation: Bool = false
@@ -20,11 +17,10 @@ public struct TransactionListView: View {
         var id: String { self.rawValue }
     }
 
-    // ViewModel
-    @State private var viewModel: TransactionListViewModel
+    @Bindable var viewModel: TransactionListViewModel
 
     public init(viewModel: TransactionListViewModel) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
@@ -296,6 +292,9 @@ public struct TransactionListView: View {
             hasLoadError: viewModel.hasChartLoadError,
             onRetry: {
                 Task { await viewModel.fetchChartData() }
+            },
+            onGenerateReport: {
+                viewModel.generateDetailedReport()
             }
         )
     }

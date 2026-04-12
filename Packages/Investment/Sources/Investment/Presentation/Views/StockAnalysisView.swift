@@ -120,7 +120,7 @@ public struct StockAnalysisView: View {
         }
         .padding(.horizontal, Spacing.lg)
 
-        MobileInsightSnapshot(overview: overview, financials: viewModel.financials)
+        MobileInsightSnapshot(overview: overview)
             .padding(.horizontal, Spacing.lg)
 
         FinancialChartsSection(
@@ -182,13 +182,6 @@ public struct StockAnalysisView: View {
             }
         )
         .padding(.horizontal, Spacing.lg)
-    }
-
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title)
-            .font(AppTypography.headline)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, Spacing.lg)
     }
 
     // MARK: - States

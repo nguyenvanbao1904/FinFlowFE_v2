@@ -5,6 +5,7 @@
 
 import FinFlowCore
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -37,16 +38,7 @@ public final class HomeViewModel {
             snapshot = try await loadSnapshotWithTimeout()
             hasCompletedInitialLoad = true
         } catch {
-            if error is CancellationError { return }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor [sessionManager = self.sessionManager] in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
-            loadError = error.toAppAlert(defaultTitle: "Không tải được Tổng quan")
+            loadError = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Không tải được Tổng quan")
         }
     }
 

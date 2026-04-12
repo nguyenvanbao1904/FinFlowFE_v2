@@ -18,14 +18,7 @@ struct InteractiveBankNimChart: View {
     /// Thứ tự khớp backend: (year, quarter) tăng dần.
     private var sortedItems: [BankFinancialDataPoint] { items }
 
-    private var labels: [String] {
-        sortedItems.map { item in
-            if showQuarterly && item.quarter != 0 {
-                return "Q\(item.quarter) \(item.year % 100)"
-            }
-            return "\(item.year)"
-        }
-    }
+    private var labels: [String] { sortedItems.map(\.periodLabel) }
     private var visibleLength: Int { fullScreen ? min(8, max(1, items.count)) : min(4, max(1, items.count)) }
     private let legendReserved: CGFloat = 52
     private var chartPlotHeight: CGFloat {
@@ -91,8 +84,8 @@ struct InteractiveBankNimChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
-                ForEach(Array(sortedItems.enumerated()), id: \.offset) { idx, item in
-                    let label = labels[idx]
+                ForEach(sortedItems) { item in
+                    let label = item.periodLabel
                     let gross = grossInterest(for: item)
                     let exp = abs(item.interestExpense ?? 0)
 

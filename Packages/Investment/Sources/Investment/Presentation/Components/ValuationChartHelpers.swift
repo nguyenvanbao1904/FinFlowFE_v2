@@ -4,6 +4,15 @@ import SwiftUI
 
 // MARK: - Period dates & range stats
 
+struct ValuationRangeStats {
+    let peMedian: Double?
+    let peMean: Double?
+    let pbMedian: Double?
+    let pbMean: Double?
+    let psMedian: Double?
+    let psMean: Double?
+}
+
 func endOfReportingPeriod(
     for point: ValuationDataPoint,
     showQuarterly: Bool,
@@ -82,10 +91,33 @@ func meanInRangeDaily(
     meanOfFiniteValues(points.compactMap { $0[keyPath: metric] })
 }
 
+func valuationRangeStats(_ points: [ValuationDataPoint]) -> ValuationRangeStats {
+    ValuationRangeStats(
+        peMedian: medianInRange(points, keyPath: \.pe),
+        peMean: meanInRange(points, keyPath: \.pe),
+        pbMedian: medianInRange(points, keyPath: \.pb),
+        pbMean: meanInRange(points, keyPath: \.pb),
+        psMedian: medianInRange(points, keyPath: \.ps),
+        psMean: meanInRange(points, keyPath: \.ps)
+    )
+}
+
+func valuationDailyRangeStats(_ points: [DailyValuationDataPoint]) -> ValuationRangeStats {
+    ValuationRangeStats(
+        peMedian: medianInRangeDaily(points, metric: \.pe),
+        peMean: meanInRangeDaily(points, metric: \.pe),
+        pbMedian: medianInRangeDaily(points, metric: \.pb),
+        pbMean: meanInRangeDaily(points, metric: \.pb),
+        psMedian: medianInRangeDaily(points, metric: \.ps),
+        psMean: meanInRangeDaily(points, metric: \.ps)
+    )
+}
+
 // MARK: - Pinch and axis zoom helpers
 
 enum ValuationChartAxisZoom {
-    static let minZoom: CGFloat = 0.5
+    /// Cho phép zoom **ra** đủ để thấy gần toàn bộ chuỗi dài (10 năm); 0,5 chỉ ~×2 so với mặc định.
+    static let minZoom: CGFloat = 0.11
     static let maxZoom: CGFloat = 5.0
 
     static func clamp(_ z: CGFloat) -> CGFloat {
@@ -93,32 +125,51 @@ enum ValuationChartAxisZoom {
     }
 }
 
+/// Chỉ vẽ RuleMark TB/TV khi giá trị nằm gần dải chuỗi — tránh kéo trục Y (P/E ~8 nhưng TV 40) và đường nằm ngoài vùng nhìn.
+func valuationReferenceLineFitsSeries(value: Double?, seriesValues: [Double]) -> Bool {
+    guard let v = value, v.isFinite else { return false }
+    let finite = seriesValues.filter(\.isFinite)
+    guard let dLo = finite.min(), let dHi = finite.max() else { return false }
+    let span = max(dHi - dLo, 1e-9)
+    let expand = max(span * 2.0, 3.0)
+    return v >= dLo - expand && v <= dHi + expand
+}
+
 /// Domain trục Y dùng chung cho chart quý/năm và chart theo ngày.
+/// Bám chuỗi giống ROE/ROA: chỉ mở rộng cho TB/TV/`current` khi chúng **gần** dải dữ liệu (tránh P/E hàng ngày ~8 bị nén vì số «hiện tại»/TV tính khác mẫu số).
+/// `yAxisZoom`: >1 thu hẹp thang (phóng chi tiết), <1 mở rộng; có **clamp** để tránh trục Y phình vô hạn khi zoom ra.
 func valuationChartYDomain(
     seriesValues: [Double],
     rangeMedian: Double?,
     rangeMean: Double?,
     current: Double,
-    liveYZoom: CGFloat
+    yAxisZoom: CGFloat
 ) -> ClosedRange<Double> {
     let finite = seriesValues.filter(\.isFinite)
     guard !finite.isEmpty else { return 0...1 }
 
     let dataLo = finite.min()!
     let dataHi = finite.max()!
-    let dataMid = (dataLo + dataHi) / 2
+    let seriesSpan = max(dataHi - dataLo, 1e-9)
 
     var lo = dataLo
     var hi = dataHi
-    if let m = rangeMedian, m.isFinite {
-        lo = min(lo, m)
-        hi = max(hi, m)
+
+    let refExpand = max(seriesSpan * 2.0, 3.0)
+    func mergeIfNearSeries(_ v: Double?) {
+        guard let v, v.isFinite else { return }
+        guard v >= dataLo - refExpand && v <= dataHi + refExpand else { return }
+        lo = min(lo, v)
+        hi = max(hi, v)
     }
-    if let a = rangeMean, a.isFinite {
-        lo = min(lo, a)
-        hi = max(hi, a)
-    }
-    if current.isFinite {
+    mergeIfNearSeries(rangeMedian)
+    mergeIfNearSeries(rangeMean)
+
+    let currentExpand = max(seriesSpan * 2.8, 5.0)
+    if current.isFinite,
+        current >= dataLo - currentExpand,
+        current <= dataHi + currentExpand
+    {
         lo = min(lo, current)
         hi = max(hi, current)
     }
@@ -143,54 +194,57 @@ func valuationChartYDomain(
     }
 
     guard lo < hi else { return (hi - 0.5)...(hi + 0.5) }
-    let z = Double(liveYZoom)
-    var half = (hi - lo) / 2
-    half = max(half / z, 1e-9)
 
-    // Keep Y zoom anchored around the true data center.
-    var nLo = dataMid - half
-    var nHi = dataMid + half
-    if nHi < dataLo || nLo > dataHi {
-        let minHalf = max((dataHi - dataLo) / 2 * 1.05, 1e-6)
-        half = max(half, minHalf)
-        nLo = dataMid - half
-        nHi = dataMid + half
-    }
+    let span0 = hi - lo
+    let mid = (lo + hi) / 2
+    let z = max(Double(ValuationChartAxisZoom.clamp(yAxisZoom)), 0.05)
+    var half = (span0 / 2) / z
+    let minHalf = max((span0 / 2) / 25, 1e-9)
+    let maxHalf = (span0 / 2) * 4
+    half = min(max(half, minHalf), maxHalf)
+    var nLo = mid - half
+    var nHi = mid + half
     if !allowNegative {
         nLo = max(0, nLo)
         if nLo >= nHi {
             nHi = nLo + 1e-6
         }
     }
-    guard nLo < nHi else { return (dataMid - 0.25)...(dataMid + 0.25) }
+    guard nLo < nHi else { return lo...hi }
     return nLo...nHi
 }
 
-/// Chụm: zoom cửa sổ thời gian (X) và thang giá trị (Y) cùng hệ số.
+/// Chụm hai ngón: cùng hệ số cho **trục X** (cửa sổ thời gian) và **trục Y** (thang giá trị).
+/// Gắn `simultaneousGesture` — theo quy ước HIG: một ngón cuộn, hai ngón chụm; không dùng `highPriorityGesture`
+/// để tránh lệch hành vi so với scroll nội bộ của Charts.
 @MainActor
 func valuationPinchGesture(
     pinch: GestureState<CGFloat>,
     xAxisZoom: Binding<CGFloat>,
     yAxisZoom: Binding<CGFloat>,
-    onXZoomCommitted: @escaping () -> Void
+    onXZoomCommitted: @escaping (_ previousX: CGFloat, _ newX: CGFloat) -> Void
 ) -> some Gesture {
     MagnifyGesture()
         .updating(pinch) { value, state, _ in
             state = value.magnification
         }
         .onEnded { value in
-            xAxisZoom.wrappedValue = ValuationChartAxisZoom.clamp(
-                xAxisZoom.wrappedValue * value.magnification
-            )
-            yAxisZoom.wrappedValue = ValuationChartAxisZoom.clamp(
-                yAxisZoom.wrappedValue * value.magnification
-            )
-            onXZoomCommitted()
+            let mag = value.magnification
+            let prevX = xAxisZoom.wrappedValue
+            let prevY = yAxisZoom.wrappedValue
+            let nextX = ValuationChartAxisZoom.clamp(prevX * mag)
+            let nextY = ValuationChartAxisZoom.clamp(prevY * mag)
+            guard nextX != prevX || nextY != prevY else { return }
+            xAxisZoom.wrappedValue = nextX
+            yAxisZoom.wrappedValue = nextY
+            if nextX != prevX {
+                onXZoomCommitted(prevX, nextX)
+            }
         }
 }
 
 extension View {
-    /// Tắt animation ngầm khi đổi zoom (giảm giật).
+    /// Tắt animation ngầm khi đổi zoom / gesture (SwiftUI Charts hay implicit animate → giật).
     func valuationChartZoomAnimations(
         xAxisZoom: CGFloat,
         yAxisZoom: CGFloat,

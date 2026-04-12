@@ -7,16 +7,13 @@
 
 import SwiftUI
 
-private struct FinFlowBotChatMessage: Identifiable, Equatable {
-    enum Sender {
-        case bot
-        case user
-    }
-
-    let id = UUID()
-    let sender: Sender
-    let text: String
-    let sentAt: Date
+private enum FinFlowBotChatDefaults {
+    static let greeting =
+        "Chào bạn, mình là FinFlow Bot. Hãy hỏi về chi tiêu, ngân sách hoặc danh mục đầu tư để mình phân tích nhanh cho bạn."
+    static let resetGreeting =
+        "Phiên chat mới đã sẵn sàng. Bạn muốn bắt đầu từ thu chi, ngân sách hay đầu tư?"
+    static let fallbackError =
+        "Mình đang gặp lỗi tạm thời khi truy cập dữ liệu. Bạn thử gửi lại giúp mình sau vài giây nhé."
 }
 
 /// Sheet chat FinFlow Bot theo phong cách native iOS.
@@ -24,51 +21,73 @@ public struct FinFlowBotChatView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft = ""
     @State private var isBotTyping = false
+    @State private var isLoadingHistory = false
+    @State private var hasLoadedHistory = false
     @State private var showsResetDialog = false
+    @State private var errorMessage: String?
     @State private var messages: [FinFlowBotChatMessage]
+    @FocusState private var isComposerFocused: Bool
 
     private let quickPrompts: [String]
+    private let initialPrompt: String?
+    private let loadMessagesHandler: (@Sendable () async throws -> [FinFlowBotChatMessage])?
+    private let sendMessageHandler: (@Sendable (String) async throws -> FinFlowBotSendResult)?
+    private let resetConversationHandler: (@Sendable () async throws -> [FinFlowBotChatMessage])?
 
     public init(
         quickPrompts: [String] = [
             "Tóm tắt chi tiêu tuần này",
             "Kiểm tra ngân sách tháng này",
             "Gợi ý tối ưu danh mục đầu tư"
-        ]
+        ],
+        initialPrompt: String? = nil,
+        loadMessagesHandler: (@Sendable () async throws -> [FinFlowBotChatMessage])? = nil,
+        sendMessageHandler: (@Sendable (String) async throws -> FinFlowBotSendResult)? = nil,
+        resetConversationHandler: (@Sendable () async throws -> [FinFlowBotChatMessage])? = nil
     ) {
         self.quickPrompts = quickPrompts
-        self._messages = State(
-            initialValue: [
-                FinFlowBotChatMessage(
-                    sender: .bot,
-                    text: "Chào bạn, mình là FinFlow Bot. Hãy hỏi về chi tiêu, ngân sách hoặc danh mục đầu tư để mình phân tích nhanh cho bạn.",
-                    sentAt: Date()
-                )
-            ]
-        )
+        self.initialPrompt = initialPrompt
+        self.loadMessagesHandler = loadMessagesHandler
+        self.sendMessageHandler = sendMessageHandler
+        self.resetConversationHandler = resetConversationHandler
+        self._messages = State(initialValue: Self.defaultMessages())
     }
 
     public var body: some View {
-        List {
+        VStack(spacing: .zero) {
+            List {
             Section {
-                botIntroCard
-                    .listRowBackground(AppColors.settingsCardBackground)
-                    .listRowInsets(
-                        EdgeInsets(top: Spacing.xs, leading: Spacing.sm, bottom: Spacing.xs, trailing: Spacing.sm)
-                    )
+                if shouldShowQuickPrompts {
+                    botIntroCard
+                        .listRowBackground(AppColors.settingsCardBackground)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(
+                            EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md)
+                        )
 
-                quickPromptSection
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(
-                        EdgeInsets(top: .zero, leading: Spacing.sm, bottom: Spacing.xs, trailing: Spacing.sm)
-                    )
+                    quickPromptSection
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(
+                            EdgeInsets(top: .zero, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md)
+                        )
+                }
+
+                if isLoadingHistory {
+                    historyLoadingRow
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(
+                            EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: .zero, trailing: Spacing.md)
+                        )
+                }
 
                 ForEach(messages) { message in
                     FinFlowBotChatMessageRow(message: message)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                         .listRowInsets(
-                            EdgeInsets(top: Spacing.xs, leading: Spacing.sm, bottom: .zero, trailing: Spacing.sm)
+                            EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: .zero, trailing: Spacing.md)
                         )
                 }
 
@@ -77,16 +96,21 @@ public struct FinFlowBotChatView: View {
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                         .listRowInsets(
-                            EdgeInsets(top: Spacing.xs, leading: Spacing.sm, bottom: .zero, trailing: Spacing.sm)
+                            EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: .zero, trailing: Spacing.md)
                         )
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
         .background(AppColors.appBackground)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            composer
+        .onTapGesture {
+            isComposerFocused = false
+        }
+
+        composer
+            .background(AppColors.appBackground)
         }
         .navigationTitle("FinFlow Bot")
         .navigationBarTitleDisplayMode(.inline)
@@ -96,13 +120,40 @@ public struct FinFlowBotChatView: View {
                     showsResetDialog = true
                 }
                 .font(AppTypography.buttonTitle)
+                .disabled(isBotTyping || isLoadingHistory)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Đóng") {
+                    isComposerFocused = false
                     dismiss()
                 }
                 .font(AppTypography.buttonTitle)
             }
+        }
+        .task {
+            if let prompt = initialPrompt {
+                // Report mode: reset conversation for a clean slate, then auto-send.
+                await resetConversationForReport()
+                applyPrompt(prompt)
+            } else {
+                // Normal mode: load existing chat history.
+                await loadConversationIfNeeded()
+            }
+        }
+        .alert(
+            "Không thể xử lý yêu cầu",
+            isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        errorMessage = nil
+                    }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Đã có lỗi xảy ra.")
         }
         .confirmationDialog("Làm mới hội thoại?", isPresented: $showsResetDialog, titleVisibility: .visible) {
             Button("Làm mới", role: .destructive) {
@@ -148,11 +199,22 @@ public struct FinFlowBotChatView: View {
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                     .font(AppTypography.caption)
+                    .disabled(isLoadingHistory || isBotTyping)
                 }
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Gợi ý câu hỏi nhanh")
+    }
+
+    private var historyLoadingRow: some View {
+        HStack(spacing: Spacing.xs) {
+            ProgressView()
+                .controlSize(.small)
+            Text("Đang tải lịch sử hội thoại...")
+                .font(AppTypography.caption)
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var botTypingRow: some View {
@@ -178,6 +240,8 @@ public struct FinFlowBotChatView: View {
                     .lineLimit(1...4)
                     .submitLabel(.send)
                     .onSubmit(sendMessage)
+                    .focused($isComposerFocused)
+                    .disabled(isLoadingHistory || isBotTyping)
 
                 Button {
                     sendMessage()
@@ -202,33 +266,90 @@ public struct FinFlowBotChatView: View {
         .padding(.horizontal, Spacing.sm)
         .padding(.top, Spacing.xs)
         .padding(.bottom, Spacing.xs)
-        .background(.ultraThinMaterial)
+        .background(AppColors.appBackground)
     }
 
     private var canSend: Bool {
-        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isBotTyping
+        !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !isBotTyping
+            && !isLoadingHistory
     }
 
+    private var shouldShowQuickPrompts: Bool {
+        let hasUserMessage = messages.contains { $0.sender == .user }
+        return !hasUserMessage
+    }
+
+    @MainActor
     private func applyPrompt(_ prompt: String) {
         draft = prompt
+        isComposerFocused = false
         sendMessage()
     }
 
+    @MainActor
     private func sendMessage() {
         let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         guard !isBotTyping else { return }
 
+        isComposerFocused = false
         draft = ""
         messages.append(FinFlowBotChatMessage(sender: .user, text: trimmed, sentAt: Date()))
         isBotTyping = true
 
-        let response = botReply(for: trimmed)
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 650_000_000)
-            messages.append(FinFlowBotChatMessage(sender: .bot, text: response, sentAt: Date()))
-            isBotTyping = false
+            defer { isBotTyping = false }
+
+            do {
+                if let sendMessageHandler {
+                    let result = try await sendMessageHandler(trimmed)
+                    let assistantText = resolvedAssistantText(from: result)
+                    messages.append(
+                        FinFlowBotChatMessage(
+                            sender: .bot,
+                            text: assistantText,
+                            sentAt: Date(),
+                            citations: result.citations
+                        )
+                    )
+                } else {
+                    try await Task.sleep(nanoseconds: 650_000_000)
+                    messages.append(
+                        FinFlowBotChatMessage(
+                            sender: .bot,
+                            text: botReply(for: trimmed),
+                            sentAt: Date()
+                        )
+                    )
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+                messages.append(
+                    FinFlowBotChatMessage(
+                        sender: .bot,
+                        text: FinFlowBotChatDefaults.fallbackError,
+                        sentAt: Date()
+                    )
+                )
+            }
         }
+    }
+
+    private func resolvedAssistantText(from result: FinFlowBotSendResult) -> String {
+        let clarified = result.clarificationQuestion?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let content = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if result.needsClarification, !clarified.isEmpty {
+            return clarified
+        }
+        if !content.isEmpty {
+            return content
+        }
+        if !clarified.isEmpty {
+            return clarified
+        }
+        return FinFlowBotChatDefaults.fallbackError
     }
 
     private func botReply(for prompt: String) -> String {
@@ -245,16 +366,82 @@ public struct FinFlowBotChatView: View {
         return "Mình đã nhận câu hỏi. Bạn có thể hỏi cụ thể theo mốc thời gian như “7 ngày gần đây” hoặc “tháng này” để mình trả lời sát hơn."
     }
 
+    @MainActor
     private func resetConversation() {
-        messages = [
+        Task { @MainActor in
+            do {
+                if let resetConversationHandler {
+                    let reloaded = try await resetConversationHandler()
+                    messages = reloaded.isEmpty ? Self.resetMessages() : reloaded
+                } else {
+                    messages = Self.resetMessages()
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+                messages = Self.resetMessages()
+            }
+            draft = ""
+            isBotTyping = false
+            isComposerFocused = false
+        }
+    }
+
+    /// Async version of reset — awaits the backend call so callers can
+    /// sequence actions (e.g. reset → auto-send) within a `.task` block.
+    @MainActor
+    private func resetConversationForReport() async {
+        do {
+            if let resetConversationHandler {
+                let reloaded = try await resetConversationHandler()
+                messages = reloaded.isEmpty ? Self.resetMessages() : reloaded
+            } else {
+                messages = Self.resetMessages()
+            }
+        } catch {
+            messages = Self.resetMessages()
+        }
+        draft = ""
+        isBotTyping = false
+        hasLoadedHistory = true
+    }
+
+    @MainActor
+    private func loadConversationIfNeeded() async {
+        guard !hasLoadedHistory else { return }
+        hasLoadedHistory = true
+        guard let loadMessagesHandler else { return }
+
+        isLoadingHistory = true
+        defer { isLoadingHistory = false }
+
+        do {
+            let history = try await loadMessagesHandler()
+            if !history.isEmpty {
+                messages = history
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private static func defaultMessages() -> [FinFlowBotChatMessage] {
+        [
             FinFlowBotChatMessage(
                 sender: .bot,
-                text: "Phiên chat mới đã sẵn sàng. Bạn muốn bắt đầu từ thu chi, ngân sách hay đầu tư?",
+                text: FinFlowBotChatDefaults.greeting,
                 sentAt: Date()
             )
         ]
-        draft = ""
-        isBotTyping = false
+    }
+
+    private static func resetMessages() -> [FinFlowBotChatMessage] {
+        [
+            FinFlowBotChatMessage(
+                sender: .bot,
+                text: FinFlowBotChatDefaults.resetGreeting,
+                sentAt: Date()
+            )
+        ]
     }
 }
 
@@ -266,6 +453,24 @@ private struct FinFlowBotChatMessageRow: View {
 
     private var isBot: Bool {
         message.sender == .bot
+    }
+
+    private var citationSummary: String? {
+        let normalized = message.citations
+            .compactMap { citation -> String? in
+                let title = citation.sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !title.isEmpty else { return nil }
+                if let page = citation.pageNumber {
+                    return "\(title) · tr.\(page)"
+                }
+                return title
+            }
+
+        guard !normalized.isEmpty else { return nil }
+        let head = normalized.prefix(2).joined(separator: " • ")
+        let tailCount = max(0, normalized.count - 2)
+        let suffix = tailCount > 0 ? " +\(tailCount)" : ""
+        return "Nguồn: \(head)\(suffix)"
     }
 
     var body: some View {
@@ -291,6 +496,13 @@ private struct FinFlowBotChatMessageRow: View {
                 Text(message.sentAt.formatted(date: .omitted, time: .shortened))
                     .font(AppTypography.caption2)
                     .foregroundStyle(.secondary)
+
+                if let citationSummary {
+                    Text(citationSummary)
+                        .font(AppTypography.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
             .padding(.horizontal, Spacing.sm)
             .padding(.vertical, Spacing.xs)

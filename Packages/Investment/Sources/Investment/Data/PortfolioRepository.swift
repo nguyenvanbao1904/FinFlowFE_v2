@@ -98,15 +98,6 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         )
     }
 
-    public func getPortfolioPerformance(portfolioId: String, range: String) async throws -> PortfolioPerformanceResponse {
-        let encoded = range.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? range
-        return try await client.request(
-            endpoint: "/investments/portfolios/\(portfolioId)/performance?range=\(encoded)",
-            method: "GET",
-            body: nil as String?,
-            headers: nil,
-            version: nil
-        )
-    }
+
 }
 

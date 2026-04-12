@@ -12,7 +12,7 @@ import FinFlowCore
 public struct PlanningView: View {
     private let budgetListViewModel: BudgetListViewModel
 
-    public init(router: any AppRouterProtocol, budgetListViewModel: BudgetListViewModel) {
+    public init(budgetListViewModel: BudgetListViewModel) {
         self.budgetListViewModel = budgetListViewModel
     }
 

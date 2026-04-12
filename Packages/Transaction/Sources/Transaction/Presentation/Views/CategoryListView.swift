@@ -7,14 +7,14 @@ public struct CategoryListView: View {
         var id: String { rawValue }
     }
 
-    @State private var viewModel: CategoryListViewModel
+    @Bindable var viewModel: CategoryListViewModel
     @State private var activeSheet: ActiveSheet?
     @State private var categoryToEdit: CategoryResponse?
     @State private var categoryToDelete: CategoryResponse?
     @State private var showDeleteConfirmation = false
 
     public init(viewModel: CategoryListViewModel) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     private var incomeCategories: [CategoryResponse] {

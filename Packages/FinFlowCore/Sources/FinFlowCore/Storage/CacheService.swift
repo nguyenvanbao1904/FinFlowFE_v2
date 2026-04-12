@@ -86,15 +86,9 @@ public actor FileCacheService: CacheServiceProtocol {
 /// Cache keys constants
 public enum CacheKey {
     public static let userProfile = "user_profile"
-    public static let transactions = "transactions"
-    // Thêm keys khác khi cần
-    
+
     /// User-scoped profile cache key to avoid cross-account leakage
     public static func userProfile(for userId: String) -> String {
         return "user_profile_\(userId)"
-    }
-    
-    public static func transaction(id: String) -> String {
-        return "transaction_\(id)"
     }
 }

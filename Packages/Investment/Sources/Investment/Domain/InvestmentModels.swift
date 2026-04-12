@@ -165,6 +165,11 @@ public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
     public let quarter: Int
+
+    /// Human-readable period label used as the X-axis value in charts.
+    public var periodLabel: String {
+        quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
+    }
     
     // Cơ cấu tài sản
     public let cashAndEquivalents: Double?
@@ -272,6 +277,11 @@ public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
 public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
+
+    /// Human-readable period label used as the X-axis value in charts.
+    public var periodLabel: String {
+        quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
+    }
     public let quarter: Int
     
     // Cơ cấu tài sản

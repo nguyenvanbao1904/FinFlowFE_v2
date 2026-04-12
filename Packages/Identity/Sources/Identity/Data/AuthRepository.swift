@@ -95,68 +95,41 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     }
 
     public func refreshToken() async throws -> RefreshTokenResponse {
-        guard let refreshToken = await tokenStore?.getRefreshToken() else {
-            Logger.error("Không có refresh token", category: "Auth")
-            throw AppError.unauthorized("Không tìm thấy refresh token")
-        }
-
-        do {
-            Logger.info("Đang refresh token...", category: "Auth")
-            let request = RefreshTokenRequest(refreshToken: refreshToken)
-            let response: RefreshTokenResponse = try await client.request(
-                endpoint: "/auth/refresh",
-                method: "POST",
-                body: request,
-                headers: nil,
-                version: nil,
-                retryOn401: false  // ⛔️ Prevent infinite loop
-            )
-
-            // 🔐 CRITICAL FIX: Save new tokens immediately to prevent race condition
-            // Without this, concurrent 401s will reuse old token (already blacklisted)
-            await tokenStore?.setToken(response.token)
-            if let newRefreshToken = response.refreshToken {
-                await tokenStore?.setRefreshToken(newRefreshToken)
-            }
-
-            Logger.info("Refresh token thành công", category: "Auth")
-            return response
-        } catch {
-            Logger.error("Refresh token thất bại: \(error)", category: "Auth")
-            throw AppError.unauthorized("Lỗi làm mới phiên đăng nhập")
-        }
+        try await performTokenRefresh(label: "")
     }
 
-    /// Refresh token nhưng không logout/clear token khi lỗi (dùng cho silent flows)
+    /// Refresh token without clearing session on failure — caller handles UI/alert.
     public func refreshTokenSilent() async throws -> RefreshTokenResponse {
-        guard let refreshToken = await tokenStore?.getRefreshToken() else {
+        try await performTokenRefresh(label: " (silent)")
+    }
+
+    private func performTokenRefresh(label: String) async throws -> RefreshTokenResponse {
+        guard let storedRefreshToken = await tokenStore?.getRefreshToken() else {
             Logger.error("Không có refresh token", category: "Auth")
             throw AppError.unauthorized("Không tìm thấy refresh token")
         }
 
         do {
-            Logger.info("Đang refresh token (silent)...", category: "Auth")
-            let request = RefreshTokenRequest(refreshToken: refreshToken)
+            Logger.info("Đang refresh token\(label)...", category: "Auth")
             let response: RefreshTokenResponse = try await client.request(
                 endpoint: "/auth/refresh",
                 method: "POST",
-                body: request,
+                body: RefreshTokenRequest(refreshToken: storedRefreshToken),
                 headers: nil,
                 version: nil,
-                retryOn401: false  // ⛔️ Prevent infinite loop
+                retryOn401: false
             )
 
-            // 🔐 CRITICAL FIX: Save new tokens immediately to prevent race condition
+            // Save new tokens immediately to prevent race conditions on concurrent 401s.
             await tokenStore?.setToken(response.token)
             if let newRefreshToken = response.refreshToken {
                 await tokenStore?.setRefreshToken(newRefreshToken)
             }
 
-            Logger.info("Refresh token (silent) thành công", category: "Auth")
+            Logger.info("Refresh token\(label) thành công", category: "Auth")
             return response
         } catch {
-            Logger.error("Refresh token (silent) thất bại: \(error)", category: "Auth")
-            // KHÔNG logout/clear token ở đây, để caller xử lý UI/alert
+            Logger.error("Refresh token\(label) thất bại: \(error)", category: "Auth")
             throw AppError.unauthorized("Lỗi làm mới phiên đăng nhập")
         }
     }

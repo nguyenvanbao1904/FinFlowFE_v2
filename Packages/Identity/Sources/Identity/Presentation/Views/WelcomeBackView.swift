@@ -8,54 +8,49 @@ import SwiftUI
 import LocalAuthentication
 
 public struct WelcomeBackView: View {
-    @State private var viewModel: WelcomeBackViewModel
+    @Bindable var viewModel: WelcomeBackViewModel
 
     public init(viewModel: WelcomeBackViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
-        @Bindable var vm = viewModel
-
-        return ZStack {
+        ZStack {
             AppColors.appBackground
                 .ignoresSafeArea()
 
-            VStack(spacing: Spacing.xl) {
-                // Logo
-                AppLogoHeader()
-                    .padding(.top, Spacing.xl * 2)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: Spacing.xl) {
+                    AppLogoHeader()
+                        .padding(.top, Spacing.xl)
 
-                Spacer()
-
-                // Welcome Screen (always show)
-                WelcomeHeaderView(
-                    displayName: viewModel.displayName,
-                    email: viewModel.email,
-                    isLoading: viewModel.isLoading,
-                    biometryType: viewModel.biometricType,
-                    onLogin: { 
-                        viewModel.showPINInputScreen() 
-                    },
-                    onBiometricLogin: { 
-                        Task { await viewModel.loginWithBiometric() } 
-                    }
-                )
-
-                Spacer()
-
-                // Switch Account Button
-                Button(action: viewModel.switchAccount) {
-                    Text("Đăng nhập tài khoản khác")
-                        .font(AppTypography.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
+                    WelcomeHeaderView(
+                        displayName: viewModel.displayName,
+                        email: viewModel.email,
+                        isLoading: viewModel.isLoading,
+                        biometryType: viewModel.biometricType,
+                        onLogin: {
+                            viewModel.showPINInputScreen()
+                        },
+                        onBiometricLogin: {
+                            Task { await viewModel.loginWithBiometric() }
+                        }
+                    )
                 }
-                .padding(.bottom, Spacing.lg)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, Spacing.xl)
             }
             .padding(.horizontal, Spacing.lg)
         }
-        .ignoresSafeArea()
+        .safeAreaInset(edge: .bottom) {
+            Button(action: viewModel.switchAccount) {
+                Text("Đăng nhập tài khoản khác")
+                    .font(AppTypography.body)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, Spacing.sm)
+        }
         .pinInputSheet(
             isPresented: $viewModel.showPINInput,
             pin: $viewModel.pin,
@@ -70,12 +65,12 @@ public struct WelcomeBackView: View {
                 viewModel.pin = ""
             },
             onForgotPIN: viewModel.forgotPIN,
-            alert: $vm.alert
+            alert: $viewModel.alert
         )
         // OTP Input Sheet for PIN Reset
         .pinInputSheet(
-            isPresented: $vm.showOtpInput,
-            pin: $vm.otpCode,
+            isPresented: $viewModel.showOtpInput,
+            pin: $viewModel.otpCode,
             title: "Đặt lại mã PIN",
             subtitle: "Mã OTP đã gửi đến\n\(viewModel.email)",
             showConfirmButton: true,
@@ -88,12 +83,12 @@ public struct WelcomeBackView: View {
                 viewModel.showOtpInput = false
             },
             onDismiss: { viewModel.otpCode = "" },
-            alert: $vm.alert
+            alert: $viewModel.alert
         )
         // Password Input Sheet for Reset PIN (dùng chung với Dashboard xóa tài khoản)
         .passwordConfirmationSheet(
-            isPresented: $vm.showPasswordForReset,
-            password: $vm.resetPasswordInput,
+            isPresented: $viewModel.showPasswordForReset,
+            password: $viewModel.resetPasswordInput,
             title: "Xác nhận mật khẩu",
             subtitle: "Vui lòng nhập mật khẩu đăng nhập để xác thực và tạo mã PIN mới.",
             placeholder: "Mật khẩu",
@@ -106,7 +101,7 @@ public struct WelcomeBackView: View {
                 viewModel.showPasswordForReset = false
             },
             onDismiss: { viewModel.resetPasswordInput = "" },
-            alert: $vm.alert
+            alert: $viewModel.alert
         )
         // Overlay Alert Handler (khi không có sheet nào đang mở)
         .overlay {

@@ -54,7 +54,15 @@ extension DependencyContainer {
     func makeRegisterView(router: any AppRouterProtocol) -> some View {
         RegisterView(
             viewModel: makeRegisterViewModel(
-                onSuccess: { router.popToRoot() },
+                onSuccess: { username in 
+                    router.popToRoot()
+                    Task {
+                        try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                        await MainActor.run {
+                            router.presentSheet(.createPIN(email: username))
+                        }
+                    }
+                },
                 onNavigateToLogin: { router.popToRoot() }
             )
         )
@@ -122,24 +130,13 @@ extension DependencyContainer {
         return vm
     }
 
-    // Factory cho Main Tab View
+    /// Builds the main tab view. Accepts the concrete `AppRouter` so that `@Bindable`
+    /// bindings for tab selection and navigation paths can be derived without a runtime cast.
     func makeMainTabView<Destination: View>(
-        router: any AppRouterProtocol,
+        router: AppRouter,
         @ViewBuilder destinationFactory: @escaping (AppRoute) -> Destination
     ) -> some View {
-        guard let appRouter = router as? AppRouter else {
-            fatalError("Router must be AppRouter")
-        }
-        @Bindable var observableRouter = appRouter
-
-        let homeViewModel = homeViewModelForDashboard()
-        let homeView = HomeView(router: router, viewModel: homeViewModel)
-
-        let transactionView = makeTransactionListView(router: router)
-
-        let planningView = makePlanningView(router: router)
-        let wealthView = makeWealthView(router: router)
-        let investmentView = makeInvestmentView(router: router)
+        @Bindable var observableRouter = router
 
         return MainTabView(
             router: router,
@@ -149,82 +146,71 @@ extension DependencyContainer {
             planningPath: $observableRouter.planningPath,
             wealthPath: $observableRouter.wealthPath,
             investmentPath: $observableRouter.investmentPath,
-            homeView: homeView,
-            transactionView: transactionView,
-            planningView: planningView,
-            wealthView: wealthView,
-            investmentView: investmentView,
+            homeView: HomeView(router: router, viewModel: homeViewModelForDashboard()),
+            transactionView: makeTransactionListView(router: router),
+            planningView: makePlanningView(router: router),
+            wealthView: makeWealthView(router: router),
+            investmentView: makeInvestmentView(router: router),
             destinationFactory: destinationFactory
         )
     }
 
     @MainActor
     func makePlanningView(router: any AppRouterProtocol) -> some View {
-        let getBudgetsUseCase = GetBudgetsUseCase(repository: budgetRepository)
-        let deleteBudgetUseCase = DeleteBudgetUseCase(repository: budgetRepository)
-        let createBudgetUseCase = CreateBudgetUseCase(repository: budgetRepository)
-        let updateBudgetUseCase = UpdateBudgetUseCase(repository: budgetRepository)
-        let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
         let budgetListViewModel = BudgetListViewModel(
             router: router,
-            getBudgetsUseCase: getBudgetsUseCase,
-            deleteBudgetUseCase: deleteBudgetUseCase,
-            createBudgetUseCase: createBudgetUseCase,
-            updateBudgetUseCase: updateBudgetUseCase,
-            getCategoriesUseCase: getCategoriesUseCase,
+            getBudgetsUseCase: GetBudgetsUseCase(repository: budgetRepository),
+            deleteBudgetUseCase: DeleteBudgetUseCase(repository: budgetRepository),
             sessionManager: sessionManager
         )
-        return PlanningView(router: router, budgetListViewModel: budgetListViewModel)
+        return PlanningView(budgetListViewModel: budgetListViewModel)
+    }
+
+    @MainActor
+    func makeFinFlowBotChatView(initialPrompt: String? = nil) -> some View {
+        let gateway = botChatGateway
+        return FinFlowBotChatView(
+            initialPrompt: initialPrompt,
+            loadMessagesHandler: {
+                try await gateway.loadMessages()
+            },
+            sendMessageHandler: { content in
+                try await gateway.sendMessage(content)
+            },
+            resetConversationHandler: {
+                try await gateway.startNewThread()
+            }
+        )
     }
 
     @MainActor
     func makeWealthView(router: any AppRouterProtocol) -> some View {
-        let getWealthAccountsUseCase = GetWealthAccountsUseCase(repository: wealthAccountRepository)
-        let getWealthAccountTypesUseCase = GetWealthAccountTypesUseCase(
-            repository: wealthAccountRepository)
-        let createWealthAccountUseCase = CreateWealthAccountUseCase(
-            repository: wealthAccountRepository)
-        let updateWealthAccountUseCase = UpdateWealthAccountUseCase(
-            repository: wealthAccountRepository)
-        let deleteWealthAccountUseCase = DeleteWealthAccountUseCase(
-            repository: wealthAccountRepository)
         return WealthListView(
-            router: router,
-            getWealthAccountsUseCase: getWealthAccountsUseCase,
-            getWealthAccountTypesUseCase: getWealthAccountTypesUseCase,
-            createWealthAccountUseCase: createWealthAccountUseCase,
-            updateWealthAccountUseCase: updateWealthAccountUseCase,
-            deleteWealthAccountUseCase: deleteWealthAccountUseCase,
+            getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
+            getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase(repository: wealthAccountRepository),
+            createWealthAccountUseCase: CreateWealthAccountUseCase(repository: wealthAccountRepository),
+            updateWealthAccountUseCase: UpdateWealthAccountUseCase(repository: wealthAccountRepository),
+            deleteWealthAccountUseCase: DeleteWealthAccountUseCase(repository: wealthAccountRepository),
             sessionManager: sessionManager
         )
     }
 
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
-        let getStockAnalysisUseCase = GetStockAnalysisUseCase(repository: investmentRepository)
-        let getCompanyIndustriesUseCase = GetCompanyIndustriesUseCase(repository: investmentRepository)
-        let suggestCompaniesUseCase = SuggestCompaniesUseCase(repository: investmentRepository)
-        let getPortfoliosUseCase = GetPortfoliosUseCase(repository: portfolioRepository)
-        let getPortfolioAssetsUseCase = GetPortfolioAssetsUseCase(repository: portfolioRepository)
-        let createPortfolioUseCase = CreatePortfolioUseCase(repository: portfolioRepository)
-        let createTradeTransactionUseCase = CreateTradeTransactionUseCase(repository: portfolioRepository)
-        let importPortfolioSnapshotUseCase = ImportPortfolioSnapshotUseCase(repository: portfolioRepository)
-        let getPortfolioHealthUseCase = GetPortfolioHealthUseCase(repository: portfolioRepository)
-        let getPortfolioVsMarketUseCase = GetPortfolioVsMarketUseCase(repository: portfolioRepository)
-        let getPortfolioPerformanceUseCase = GetPortfolioPerformanceUseCase(repository: portfolioRepository)
-        return InvestmentView(
-            getStockAnalysisUseCase: getStockAnalysisUseCase,
-            getCompanyIndustriesUseCase: getCompanyIndustriesUseCase,
-            suggestCompaniesUseCase: suggestCompaniesUseCase,
-            getPortfoliosUseCase: getPortfoliosUseCase,
-            getPortfolioAssetsUseCase: getPortfolioAssetsUseCase,
-            createPortfolioUseCase: createPortfolioUseCase,
-            createTradeTransactionUseCase: createTradeTransactionUseCase,
-            importPortfolioSnapshotUseCase: importPortfolioSnapshotUseCase,
-            getPortfolioHealthUseCase: getPortfolioHealthUseCase,
-            getPortfolioVsMarketUseCase: getPortfolioVsMarketUseCase,
-            getPortfolioPerformanceUseCase: getPortfolioPerformanceUseCase,
-            sessionManager: sessionManager
+        InvestmentView(
+            dependencies: InvestmentViewDependencies(
+                getStockAnalysisUseCase: GetStockAnalysisUseCase(repository: investmentRepository),
+                getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase(repository: investmentRepository),
+                suggestCompaniesUseCase: SuggestCompaniesUseCase(repository: investmentRepository),
+                getPortfoliosUseCase: GetPortfoliosUseCase(repository: portfolioRepository),
+                getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase(repository: portfolioRepository),
+                createPortfolioUseCase: CreatePortfolioUseCase(repository: portfolioRepository),
+                createTradeTransactionUseCase: CreateTradeTransactionUseCase(repository: portfolioRepository),
+                importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase(repository: portfolioRepository),
+                getPortfolioHealthUseCase: GetPortfolioHealthUseCase(repository: portfolioRepository),
+                getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase(repository: portfolioRepository),
+                sessionManager: sessionManager
+            )
         )
     }
 
@@ -299,7 +285,11 @@ extension DependencyContainer {
                 email: email,
                 pinManager: pinManager,
                 onCompletion: {
-                    router.pop()
+                    if router.presentedSheet != nil {
+                        router.dismissSheet()
+                    } else {
+                        router.pop()
+                    }
                 }
             )
         )
@@ -328,15 +318,20 @@ extension DependencyContainer {
         return AddTransactionView(viewModel: viewModel)
     }
 
+    /// Một `TransactionListViewModel` cho cả phiên dashboard (cache trên `DependencyContainer`).
+    /// Tránh tạo VM mới mỗi lần `AppRootView` rebuild khi mở/đóng sheet — nếu không, `.task { fetchInitialDataIfNeeded }` chạy lại và xóa + tải lại cả danh sách.
     @MainActor
-    func makeTransactionListView(router: any AppRouterProtocol) -> some View {
+    func transactionListViewModelForDashboard(router: any AppRouterProtocol) -> TransactionListViewModel {
+        if let cached = cachedTransactionListViewModel {
+            return cached
+        }
         let getTransactionsUseCase = GetTransactionsUseCase(repository: transactionRepository)
         let getSummaryUseCase = GetTransactionSummaryUseCase(repository: transactionRepository)
         let getChartUseCase = GetTransactionChartUseCase(repository: transactionRepository)
         let getAnalyticsInsightsUseCase = GetTransactionAnalyticsInsightsUseCase(
             repository: transactionRepository)
         let deleteTransactionUseCase = DeleteTransactionUseCase(repository: transactionRepository)
-        let viewModel = TransactionListViewModel(
+        let vm = TransactionListViewModel(
             getTransactionsUseCase: getTransactionsUseCase,
             getSummaryUseCase: getSummaryUseCase,
             getChartUseCase: getChartUseCase,
@@ -345,7 +340,13 @@ extension DependencyContainer {
             router: router,
             sessionManager: sessionManager
         )
-        return TransactionListView(viewModel: viewModel)
+        cachedTransactionListViewModel = vm
+        return vm
+    }
+
+    @MainActor
+    func makeTransactionListView(router: any AppRouterProtocol) -> some View {
+        TransactionListView(viewModel: transactionListViewModelForDashboard(router: router))
     }
 
     @MainActor
@@ -367,7 +368,6 @@ extension DependencyContainer {
         let updateBudgetUseCase = UpdateBudgetUseCase(repository: budgetRepository)
         let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
         let viewModel = AddBudgetViewModel(
-            router: router,
             createBudgetUseCase: createBudgetUseCase,
             updateBudgetUseCase: updateBudgetUseCase,
             getCategoriesUseCase: getCategoriesUseCase,

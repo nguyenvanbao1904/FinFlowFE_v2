@@ -38,6 +38,8 @@ public class DependencyContainer {
     let budgetRepository: BudgetRepositoryProtocol
     let investmentRepository: InvestmentRepositoryProtocol
     let portfolioRepository: PortfolioRepositoryProtocol
+    let chatRepository: any ChatRepositoryProtocol
+    let botChatGateway: BotChatGateway
 
     // 4. Use Cases - Created on demand (Transient) to avoid Container bloat
 
@@ -84,6 +86,9 @@ public class DependencyContainer {
         self.budgetRepository = BudgetRepository(client: apiClient)
         self.investmentRepository = InvestmentRepository(client: apiClient)
         self.portfolioRepository = PortfolioRepository(client: apiClient)
+        let chatRepository = ChatRepository(client: apiClient)
+        self.chatRepository = chatRepository
+        self.botChatGateway = BotChatGateway(chatRepository: chatRepository)
 
         // 🔗 Config Auth Hooks (Break Circular Dependency)
         Task { [weak concreteAuthRepository, tokenStore] in
@@ -116,8 +121,15 @@ public class DependencyContainer {
     /// Một `HomeViewModel` cho phiên dashboard. `AppRootView` render lại khi mở sheet / đổi router — nếu tạo VM mới mỗi lần sẽ mất `snapshot` (task load có thể bị cancel).
     var cachedHomeViewModel: HomeViewModel?
 
+    /// Cùng lý do: mở sheet "Thêm giao dịch" đổi `presentedSheet` → body `AppRootView` rebuild → `makeMainTabView` gọi lại. Không cache thì `TransactionListViewModel` mới + `.task` fetch lại toàn bộ danh sách (spinner 5–10 phút nếu API chậm).
+    var cachedTransactionListViewModel: TransactionListViewModel?
+
     func resetCachedHomeViewModel() {
         cachedHomeViewModel = nil
+    }
+
+    func resetCachedTransactionListViewModel() {
+        cachedTransactionListViewModel = nil
     }
 
     // MARK: - Auth State
@@ -126,3 +138,4 @@ public class DependencyContainer {
         return sessionManager.state.isAuthenticated
     }
 }
+

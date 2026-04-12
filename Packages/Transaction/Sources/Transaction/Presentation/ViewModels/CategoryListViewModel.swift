@@ -43,18 +43,7 @@ public final class CategoryListViewModel {
         do {
             categories = try await repository.getCategories()
         } catch {
-            if error is CancellationError {
-                return
-            }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                loadError = error.toAppAlert()
-            }
+            loadError = error.toHandledAlert(sessionManager: sessionManager)
         }
     }
 
@@ -71,15 +60,7 @@ public final class CategoryListViewModel {
             await loadCategories(force: true)
             return true
         } catch {
-            if let appError = error as? AppError, case .unauthorized = appError {
-                alert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                alert = error.toAppAlert()
-            }
+            alert = error.toHandledAlert(sessionManager: sessionManager)
             return false
         }
     }
@@ -96,15 +77,7 @@ public final class CategoryListViewModel {
             await loadCategories(force: true)
             return true
         } catch {
-            if let appError = error as? AppError, case .unauthorized = appError {
-                alert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                alert = error.toAppAlert()
-            }
+            alert = error.toHandledAlert(sessionManager: sessionManager)
             return false
         }
     }
@@ -114,15 +87,7 @@ public final class CategoryListViewModel {
             try await repository.deleteCategory(id: id)
             await loadCategories(force: true)
         } catch {
-            if let appError = error as? AppError, case .unauthorized = appError {
-                alert = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    Task { @MainActor in
-                        await self.sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                alert = error.toAppAlert()
-            }
+            alert = error.toHandledAlert(sessionManager: sessionManager)
         }
     }
 }

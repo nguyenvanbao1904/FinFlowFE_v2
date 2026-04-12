@@ -2,29 +2,7 @@ import Charts
 import FinFlowCore
 import SwiftUI
 
-// swiftlint:disable file_length
-
-public struct FinancialPerformanceGrid: View {
-    let financials: FinancialDataSeries?
-    let showQuarterly: Bool
-
-    public init(financials: FinancialDataSeries?, showQuarterly: Bool = false) {
-        self.financials = financials
-        self.showQuarterly = showQuarterly
-    }
-
-    public var body: some View {
-        VStack {
-            if let data = financials {
-                RevenueGrowthChart(financials: data, showQuarterly: showQuarterly)
-                ProfitGrowthChart(financials: data, showQuarterly: showQuarterly)
-                IncomeStructureChart(financials: data, showQuarterly: showQuarterly)
-            }
-        }
-    }
-}
-
-// MARK: - Helpers
+// MARK: - Shared Chart Helpers
 
 func latestUniqueByYear<T>(_ items: [T], year: KeyPath<T, Int>) -> [T] {
     var latestByYear: [Int: T] = [:]
@@ -135,22 +113,6 @@ func chartPlottableStringPeriodDomain(orderPreserving periods: [String]) -> [Str
 
 func nativeSelectionChange(to newValue: String?, displayedValue: inout String?) {
     displayedValue = newValue
-}
-
-// MARK: - Income Structure Chart (TOI Breakdown)
-
-private struct IncomeStructureChart: View {
-    let financials: FinancialDataSeries
-    let showQuarterly: Bool
-
-    var body: some View {
-        switch financials {
-        case .bank(let items):
-            BankIncomeStructure(items: items, showQuarterly: showQuarterly)
-        case .nonBank:
-            EmptyView()
-        }
-    }
 }
 
 // MARK: - Shared Components

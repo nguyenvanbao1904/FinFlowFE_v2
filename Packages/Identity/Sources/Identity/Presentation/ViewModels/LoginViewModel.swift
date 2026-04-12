@@ -5,6 +5,7 @@
 
 import FinFlowCore
 import LocalAuthentication
+import Observation
 import SwiftUI
 
 @MainActor
@@ -98,8 +99,18 @@ public class LoginViewModel {
 
         do {
             let response = try await loginUseCase.execute(username: username, password: password)
+            let hasPIN = await pinManager.hasPIN(for: username)
+            
             await sessionManager.login(response: response)
             Logger.info("🎯 Login success", category: "Auth")
+            
+            if !hasPIN {
+                // Wait briefly for app state to transition to .dashboard
+                try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                await MainActor.run {
+                    router.presentSheet(.createPIN(email: username))
+                }
+            }
         } catch {
             Logger.error("Đăng nhập thất bại: \(error)", category: "Auth")
             self.alert = error.toAppAlert(defaultTitle: "Lỗi")
@@ -114,8 +125,17 @@ public class LoginViewModel {
 
         do {
             let response = try await loginUseCase.executeGoogle(idToken: idToken)
+            let hasPIN = await pinManager.hasPIN(for: response.username)
+            
             await sessionManager.login(response: response)
             Logger.info("Google Login success", category: "Auth")
+            
+            if !hasPIN {
+                try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                await MainActor.run {
+                    router.presentSheet(.createPIN(email: response.username))
+                }
+            }
         } catch {
             Logger.error("Google Login failed: \(error)", category: "Auth")
             self.alert = error.toAppAlert(defaultTitle: "Lỗi Google Login")

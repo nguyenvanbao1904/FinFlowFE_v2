@@ -1,5 +1,6 @@
-import Foundation
 import FinFlowCore
+import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -13,7 +14,14 @@ public final class StockAnalysisViewModel {
 
     public var isLoading = false
     public var error: AppErrorAlert?
-    public var isLoadingFullHistory = false
+    public var isLoadingFinancials = false
+    public var isLoadingValuations = false
+    public var isLoadingDividends = false
+
+    /// Derived: any background history load is in progress (used by the UI loading indicator).
+    public var isLoadingFullHistory: Bool {
+        isLoadingFinancials || isLoadingValuations || isLoadingDividends
+    }
 
     private let getStockAnalysisUseCase: GetStockAnalysisUseCase
     private let sessionManager: any SessionManagerProtocol
@@ -33,10 +41,13 @@ public final class StockAnalysisViewModel {
     }
 
     public func load(symbol: String = "ACB") async {
-        currentSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        let requestedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        currentSymbol = requestedSymbol
         didLoadFullFinancials = false
         didLoadFullValuations = false
         didLoadFullDividends = false
+        valuationsRangeRequestId += 1
+        dailyValuationsRangeRequestId += 1
         dailyValuations = []
         isLoading = true
         defer { isLoading = false }
@@ -44,10 +55,11 @@ public final class StockAnalysisViewModel {
         do {
             // Snapshot tab: giới hạn để payload nhẹ; backend dùng LIMIT ở SQL. Full history: loadFull*IfNeeded.
             let result = try await getStockAnalysisUseCase.execute(
-                symbol: currentSymbol,
+                symbol: requestedSymbol,
                 annualLimit: 4,
                 quarterlyLimit: 4
             )
+            guard requestedSymbol == currentSymbol else { return }
             overview = result.overview
             shareholders = result.shareholders
             valuations = result.valuations
@@ -59,56 +71,42 @@ public final class StockAnalysisViewModel {
                 await loadFullDividendsIfNeeded()
             }
         } catch {
-            // Giống các tab khác: bỏ qua khi Task bị huỷ (chuyển tab nhanh).
-            if error is CancellationError {
-                return
-            }
-            // Refresh thất bại hoặc API trả 401 có thể là `.unauthorized` hoặc `serverError(1010, …)` — dùng httpStatusCode.
-            if let appError = error as? AppError, appError.httpStatusCode == 401 {
-                self.error = .authWithAction(
-                    message: AppErrorAlert.sessionExpiredMessage
-                ) { [sessionManager] in
-                    Task { @MainActor in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu")
         }
     }
 
     public func loadFullFinancialsIfNeeded() async {
-        guard !didLoadFullFinancials, !isLoadingFullHistory, !currentSymbol.isEmpty else { return }
-        isLoadingFullHistory = true
-        defer { isLoadingFullHistory = false }
+        guard !didLoadFullFinancials, !isLoadingFinancials, !currentSymbol.isEmpty else { return }
+        let symbol = currentSymbol
+        isLoadingFinancials = true
+        defer { isLoadingFinancials = false }
 
         do {
-            let fullFinancials = try await getStockAnalysisUseCase.executeFinancialSeries(symbol: currentSymbol)
+            let fullFinancials = try await getStockAnalysisUseCase.executeFinancialSeries(symbol: symbol)
+            guard symbol == currentSymbol else { return }
             financials = fullFinancials
             didLoadFullFinancials = true
             error = nil
         } catch {
-            if error is CancellationError {
-                return
-            }
+            if error is CancellationError { return }
             self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Tài Chính")
         }
     }
 
     public func loadFullValuationsIfNeeded() async {
-        guard !didLoadFullValuations, !isLoadingFullHistory, !currentSymbol.isEmpty else { return }
-        isLoadingFullHistory = true
-        defer { isLoadingFullHistory = false }
+        guard !didLoadFullValuations, !isLoadingValuations, !currentSymbol.isEmpty else { return }
+        let symbol = currentSymbol
+        isLoadingValuations = true
+        defer { isLoadingValuations = false }
 
         do {
-            valuations = try await getStockAnalysisUseCase.executeValuations(symbol: currentSymbol)
+            let points = try await getStockAnalysisUseCase.executeValuations(symbol: symbol)
+            guard symbol == currentSymbol else { return }
+            valuations = points
             didLoadFullValuations = true
             error = nil
         } catch {
-            if error is CancellationError {
-                return
-            }
+            if error is CancellationError { return }
             self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Định Giá")
         }
     }
@@ -119,65 +117,63 @@ public final class StockAnalysisViewModel {
         showQuarterly: Bool
     ) async {
         guard !currentSymbol.isEmpty else { return }
+        let symbol = currentSymbol
 
         valuationsRangeRequestId += 1
         let requestId = valuationsRangeRequestId
 
-        isLoadingFullHistory = true
-        defer { isLoadingFullHistory = false }
+        isLoadingValuations = true
+        defer { isLoadingValuations = false }
 
         do {
             let points = try await getStockAnalysisUseCase.executeValuations(
-                symbol: currentSymbol,
+                symbol: symbol,
                 annualLimit: nil,
                 startDate: startDate,
                 endDate: endDate,
                 showQuarterly: showQuarterly
             )
-            guard requestId == valuationsRangeRequestId else { return }
+            guard symbol == currentSymbol, requestId == valuationsRangeRequestId else { return }
             valuations = points
             error = nil
         } catch {
-            if error is CancellationError {
-                return
-            }
-            guard requestId == valuationsRangeRequestId else { return }
+            if error is CancellationError { return }
+            guard symbol == currentSymbol, requestId == valuationsRangeRequestId else { return }
             self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Định Giá Theo Khoảng")
         }
     }
 
     public func loadDailyValuationsForRange(startDate: Date, endDate: Date) async {
         guard !currentSymbol.isEmpty else { return }
+        let symbol = currentSymbol
 
         dailyValuationsRangeRequestId += 1
         let requestId = dailyValuationsRangeRequestId
 
-        isLoadingFullHistory = true
-        defer { isLoadingFullHistory = false }
+        isLoadingValuations = true
+        defer { isLoadingValuations = false }
 
         do {
             let points = try await getStockAnalysisUseCase.executeDailyValuations(
-                symbol: currentSymbol,
+                symbol: symbol,
                 startDate: startDate,
                 endDate: endDate
             )
-            guard requestId == dailyValuationsRangeRequestId else { return }
+            guard symbol == currentSymbol, requestId == dailyValuationsRangeRequestId else { return }
             dailyValuations = points
             error = nil
         } catch {
-            if error is CancellationError {
-                return
-            }
-            guard requestId == dailyValuationsRangeRequestId else { return }
+            if error is CancellationError { return }
+            guard symbol == currentSymbol, requestId == dailyValuationsRangeRequestId else { return }
             self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Định Giá Theo Ngày")
         }
     }
 
     public func loadFullDividendsIfNeeded() async {
-        guard !didLoadFullDividends, !isLoadingFullHistory, !currentSymbol.isEmpty else { return }
+        guard !didLoadFullDividends, !isLoadingDividends, !currentSymbol.isEmpty else { return }
         let symbol = currentSymbol
-        isLoadingFullHistory = true
-        defer { isLoadingFullHistory = false }
+        isLoadingDividends = true
+        defer { isLoadingDividends = false }
 
         do {
             let full = try await getStockAnalysisUseCase.executeDividends(symbol: symbol)
@@ -186,9 +182,7 @@ public final class StockAnalysisViewModel {
             didLoadFullDividends = true
             error = nil
         } catch {
-            if error is CancellationError {
-                return
-            }
+            if error is CancellationError { return }
             self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Cổ Tức")
         }
     }

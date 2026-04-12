@@ -5,6 +5,7 @@
 
 import FinFlowCore
 import Foundation
+import Observation
 
 @MainActor
 @Observable
@@ -17,7 +18,7 @@ public class CreatePINViewModel {
 
     // Sheet state
     public var showCreatePINSheet = false
-    public var showConfirmPINSheet = false
+    public var isConfirmStep = false
 
     private let email: String
     private let pinManager: any PINManagerProtocol
@@ -84,6 +85,6 @@ public class CreatePINViewModel {
         confirmPIN = ""
         alert = nil
         showCreatePINSheet = false
-        showConfirmPINSheet = false
+        isConfirmStep = false
     }
 }

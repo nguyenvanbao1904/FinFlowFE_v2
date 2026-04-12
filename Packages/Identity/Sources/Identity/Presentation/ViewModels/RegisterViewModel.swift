@@ -1,5 +1,6 @@
 import FinFlowCore
 import Foundation
+import Observation
 import SwiftUI
 
 @MainActor
@@ -111,7 +112,7 @@ public class RegisterViewModel {
     private let loginUseCase: LoginUseCaseProtocol
     private let sessionManager: any SessionManagerProtocol
     private let otpHandler: OTPInputHandler
-    private let onRegistrationSuccess: () -> Void
+    private let onRegistrationSuccess: (String) -> Void
     private let onNavigateToLogin: () -> Void
 
     // Field validation messages
@@ -130,7 +131,7 @@ public class RegisterViewModel {
         loginUseCase: LoginUseCaseProtocol,
         sessionManager: any SessionManagerProtocol,
         otpHandler: OTPInputHandler,
-        onRegistrationSuccess: @escaping () -> Void = {},
+        onRegistrationSuccess: @escaping (String) -> Void = { _ in },
         onNavigateToLogin: @escaping () -> Void = {}
     ) {
         self.registerUseCase = registerUseCase
@@ -367,7 +368,7 @@ public class RegisterViewModel {
 
             // Success! Trigger dismiss callback
             isRegistrationSuccess = true
-            onRegistrationSuccess()
+            onRegistrationSuccess(username)
         } catch {
             Logger.error("Register/Login failed: \(error)", category: "Auth")
             if let appError = error as? AppError {

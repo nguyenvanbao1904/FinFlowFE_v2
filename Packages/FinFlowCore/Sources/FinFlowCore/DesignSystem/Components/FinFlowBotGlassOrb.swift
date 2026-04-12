@@ -87,6 +87,7 @@ public struct FinFlowBotGlassOrb: View {
             }
         }
         .buttonStyle(.plain)
+        .contentShape(Circle())
         .accessibilityLabel("FinFlow Bot, trợ lý gợi ý")
         .accessibilityHint(showsNotificationDot ? "Có gợi ý mới. Mở để xem chi tiết." : "Mở gợi ý trong ngày.")
     }

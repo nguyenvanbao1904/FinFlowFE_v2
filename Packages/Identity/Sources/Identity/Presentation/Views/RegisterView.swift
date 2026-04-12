@@ -2,12 +2,12 @@ import FinFlowCore
 import SwiftUI  // BẮT BUỘC - Để dùng View, State, Environment...
 
 public struct RegisterView: View {
-    @State private var viewModel: RegisterViewModel
+    @Bindable var viewModel: RegisterViewModel
     @Environment(\.colorScheme) var colorScheme
     @FocusState private var focusedField: RegisterField?
 
     public init(viewModel: RegisterViewModel) {
-        _viewModel = State(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

@@ -6,6 +6,7 @@
 
 import FinFlowCore
 import LocalAuthentication
+import Observation
 
 /// ViewModel cho Security Settings section
 /// Responsibility: Quản lý PIN và Biometric authentication
@@ -130,7 +131,12 @@ public class SecuritySettingsViewModel {
     
     /// Handle forgot PIN for settings changes
     public func forgotPINForSettings() {
-        showForgotPINAlert = true
+        // Close PIN input first to avoid stacked/hovering modal transitions on small screens.
+        showPINVerification = false
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            self.showForgotPINAlert = true
+        }
     }
     
     /// Send OTP to reset PIN
@@ -141,9 +147,11 @@ public class SecuritySettingsViewModel {
         
         do {
             try await otpHandler.sendOTP(to: userEmail, purpose: .resetPin)
-            showForgotPINAlert = false // Close the alert
-            showPINVerification = false // Close the PIN sheet
-            showResetPinOtpInput = true // Show OTP Sheet
+            showForgotPINAlert = false
+            showPINVerification = false
+            // Keep transition stable between alert -> sheet on iPhone small heights.
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            showResetPinOtpInput = true
         } catch {
             pinAlert = error.toAppAlert(defaultTitle: "Lỗi gửi mã OTP")
         }

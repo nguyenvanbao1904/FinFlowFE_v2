@@ -15,25 +15,25 @@ struct InteractiveNonBankMetricYoYChart: View {
     let fullScreen: Bool
 
     private struct Row: Identifiable {
-        let id: Int
-        let year: Int
+        let id: String
+        let periodLabel: String
         let value: Double?
     }
 
     private struct YoYRow: Identifiable {
-        let id: Int
-        let year: Int
+        let id: String
+        let periodLabel: String
         let yoy: Double?
     }
 
     private var rows: [Row] {
-        items.sorted { $0.year < $1.year }.map { item in
+        items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }.map { item in
             let v: Double?
             switch kind {
             case .revenue: v = item.netRevenue
             case .profit: v = item.profitAfterTax
             }
-            return Row(id: item.year, year: item.year, value: v)
+            return Row(id: item.id.uuidString, periodLabel: item.periodLabel, value: v)
         }
     }
 
@@ -53,7 +53,7 @@ struct InteractiveNonBankMetricYoYChart: View {
                     }
                 }
             }
-            out.append(YoYRow(id: cur.year, year: cur.year, yoy: yoy))
+            out.append(YoYRow(id: cur.id, periodLabel: cur.periodLabel, yoy: yoy))
         }
         return out
     }
@@ -82,7 +82,10 @@ struct InteractiveNonBankMetricYoYChart: View {
     }
 
     private var barColor: Color {
-        Color.primary.opacity(0.15)
+        switch kind {
+        case .revenue: AppColors.chartRevenue
+        case .profit: AppColors.chartProfit
+        }
     }
 
     private var barLegendLabel: String {
@@ -92,11 +95,9 @@ struct InteractiveNonBankMetricYoYChart: View {
         }
     }
 
+    /// Cam nổi bật trên nền tối; tách biệt rõ với cột cyan (DT) hoặc xanh (LNST).
     private var yoyLineColor: Color {
-        switch kind {
-        case .revenue: AppColors.chartIncomeInterest
-        case .profit: AppColors.chartGrowthStable
-        }
+        AppColors.chartGrowthStable
     }
 
     private var yoyLegendLabel: String {
@@ -113,15 +114,7 @@ struct InteractiveNonBankMetricYoYChart: View {
         }
     }
 
-    private var labels: [String] {
-        rows.indices.map { idx in
-            let item = items.sorted { $0.year < $1.year }[idx]
-            if showQuarterly && item.quarter != 0 {
-                return "Q\(item.quarter) \(item.year % 100)"
-            }
-            return "\(item.year)"
-        }
-    }
+    private var labels: [String] { rows.map(\.periodLabel) }
     private var visibleLength: Int { fullScreen ? min(8, max(1, rows.count)) : min(4, max(1, rows.count)) }
     private let legendReserved: CGFloat = 52
     private var chartPlotHeight: CGFloat {
@@ -139,10 +132,10 @@ struct InteractiveNonBankMetricYoYChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart {
-                ForEach(Array(rows.enumerated()), id: \.offset) { idx, row in
+                ForEach(rows) { row in
                     if let v = row.value {
                         BarMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", row.periodLabel),
                             y: .value("Giá trị", v)
                         )
                         .foregroundStyle(barColor)
@@ -153,17 +146,17 @@ struct InteractiveNonBankMetricYoYChart: View {
                     .foregroundStyle(Color.primary.opacity(0.8))
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
 
-                ForEach(Array(yoyRows.enumerated()), id: \.offset) { idx, y in
+                ForEach(yoyRows) { y in
                     if let rv = y.yoy {
                         LineMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", y.periodLabel),
                             y: .value("YoY", scaleYoYToBarDomain(rv))
                         )
                         .foregroundStyle(yoyLineColor)
                         .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
 
                         PointMark(
-                            x: .value("Kỳ", labels[idx]),
+                            x: .value("Kỳ", y.periodLabel),
                             y: .value("YoY", scaleYoYToBarDomain(rv))
                         )
                         .foregroundStyle(yoyLineColor)

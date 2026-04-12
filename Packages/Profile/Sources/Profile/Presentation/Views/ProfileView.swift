@@ -17,9 +17,9 @@ public struct ProfileView: View {
         var id: String { rawValue }
     }
 
-    @State private var profileVM: ProfileViewModel
-    @State private var securityVM: SecuritySettingsViewModel
-    @State private var accountVM: AccountManagementViewModel
+    @Bindable var profileVM: ProfileViewModel
+    @Bindable var securityVM: SecuritySettingsViewModel
+    @Bindable var accountVM: AccountManagementViewModel
     @State private var verificationPIN: String = ""
     @State private var activeSheet: ActiveSheet?
     @Environment(\.dismiss) private var dismiss
@@ -29,9 +29,9 @@ public struct ProfileView: View {
         securityVM: SecuritySettingsViewModel,
         accountVM: AccountManagementViewModel
     ) {
-        _profileVM = State(wrappedValue: profileVM)
-        _securityVM = State(wrappedValue: securityVM)
-        _accountVM = State(wrappedValue: accountVM)
+        self.profileVM = profileVM
+        self.securityVM = securityVM
+        self.accountVM = accountVM
     }
 
     public var body: some View {

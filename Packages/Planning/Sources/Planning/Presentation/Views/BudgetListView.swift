@@ -10,12 +10,12 @@ import FinFlowCore
 import SwiftUI
 
 public struct BudgetListView: View {
-    @State private var viewModel: BudgetListViewModel
+    @Bindable var viewModel: BudgetListViewModel
     @State private var budgetToDelete: BudgetResponse?
     @State private var showDeleteConfirmation = false
 
     public init(viewModel: BudgetListViewModel) {
-        _viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

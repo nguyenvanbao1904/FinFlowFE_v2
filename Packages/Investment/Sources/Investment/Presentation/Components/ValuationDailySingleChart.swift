@@ -10,7 +10,23 @@ private func parseDailyChartDate(_ isoDay: String) -> Date? {
     return cal.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
 }
 
+private struct ValuationDailyRenderedPoint: Identifiable {
+    let id: Int
+    let label: String
+    let value: Double
+}
+
 struct ValuationDailySingleChart: View {
+    private static let lineSeriesLabel = "Lịch sử"
+
+    private static let dayLabelFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "vi_VN")
+        formatter.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
+        formatter.dateFormat = "dd/MM/yy"
+        return formatter
+    }()
+
     let title: String
     let current: Double
     let rangeMedian: Double?
@@ -19,99 +35,63 @@ struct ValuationDailySingleChart: View {
     let metric: KeyPath<DailyValuationDataPoint, Double?>
     let lineColor: Color
     let onRequestFullHistory: (() -> Void)?
-    /// Gợi ý dưới tiêu đề (ví dụ giải thích P/S ngân hàng).
     let headlineNote: String?
-    /// Thay thế copy mặc định khi không có điểm trên chart.
     let emptyChartMessage: String?
 
-    @State private var scrollPositionDate: Date = .distantPast
+    @State private var scrollPosition: Int = 0
+    @State private var points: [ValuationDailyRenderedPoint] = []
+    @State private var seriesValues: [Double] = []
     @State private var showFullscreen = false
-    @State private var selectedChartDate: Date?
-    @State private var displayedChartDate: Date?
-    @State private var xAxisZoom: CGFloat = 1
-    @State private var yAxisZoom: CGFloat = 1
-    @GestureState private var pinchMagnification: CGFloat = 1
 
-    private var liveXAxisZoom: CGFloat {
-        ValuationChartAxisZoom.clamp(xAxisZoom * pinchMagnification)
+    private var plotPointCount: Int {
+        points.count
     }
 
-    private var liveYAxisZoom: CGFloat {
-        ValuationChartAxisZoom.clamp(yAxisZoom * pinchMagnification)
+    private var renderedPoints: [ValuationDailyRenderedPoint] {
+        strideSample(points, maxPoints: 220)
     }
 
-    private static let dayLabelFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "vi_VN")
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
-        f.calendar = cal
-        f.timeZone = cal.timeZone
-        f.dateFormat = "dd/MM/yy"
-        return f
-    }()
-
-    private static var vnCalendar: Calendar {
-        var c = Calendar(identifier: .gregorian)
-        c.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
-        return c
+    private var visibleLength: Int {
+        visibleLength(fullScreen: false)
     }
 
-    private static let secondsPerDay: TimeInterval = 86_400
-
-    /// Điểm vẽ: trục X dùng `Date` để Swift Charts gom nhãn thời gian (tránh hàng trăm nhãn chuỗi).
-    private var plotPoints: [(date: Date, value: Double)] {
-        data.compactMap { p -> (Date, Double)? in
-            guard let v = p[keyPath: metric], v.isFinite,
-                let d = parseDailyChartDate(p.date)
-            else { return nil }
-            return (d, v)
-        }
-        .sorted { $0.0 < $1.0 }
-        .map { (date: $0.0, value: $0.1) }
-    }
-
-    private var plotSpanDays: Int {
-        guard let f = plotPoints.first?.date, let l = plotPoints.last?.date else { return 1 }
-        return max(1, Int(ceil(l.timeIntervalSince(f) / Self.secondsPerDay)) + 1)
-    }
-
-    /// Số ngày hiển thị cùng lúc (cửa sổ cuộn ngang).
-    private func visibleDaySpan(fullScreen: Bool) -> Int {
-        let n = plotPoints.count
-        guard n > 0 else { return 30 }
+    private func visibleLength(fullScreen: Bool) -> Int {
         if fullScreen {
-            return min(n, max(60, min(240, n * 2 / 5)))
+            return min(max(90, plotPointCount / 3), max(plotPointCount, 1))
         }
-        return min(n, max(30, min(120, n / 4)))
+        return min(max(45, plotPointCount / 4), max(plotPointCount, 1))
     }
 
-    private func effectiveVisibleDays(fullScreen: Bool) -> Int {
-        let n = plotPoints.count
-        guard n > 0 else { return 1 }
-        let base = visibleDaySpan(fullScreen: fullScreen)
-        let z = max(Double(liveXAxisZoom), 0.01)
-        let scaled = Int(round(Double(base) / z))
-        return max(1, min(plotSpanDays, max(1, scaled)))
+    private var xAxisValues: [Int] {
+        xAxisValues(fullScreen: false)
     }
 
-    private func scrollLeadingDate(visibleDays: Int) -> Date {
-        guard let first = plotPoints.first?.date, let last = plotPoints.last?.date else {
-            return Date()
+    private func xAxisValues(fullScreen: Bool) -> [Int] {
+        guard !points.isEmpty else { return [] }
+        let targetLabelCount = fullScreen ? 8 : 5
+        if points.count <= targetLabelCount {
+            return points.map(\.id)
         }
-        let window = TimeInterval(visibleDays) * Self.secondsPerDay
-        let start = last.addingTimeInterval(-window)
-        return start < first ? first : start
+        let stride = max(1, Int(ceil(Double(points.count - 1) / Double(max(targetLabelCount - 1, 1)))))
+        var values = Array(Swift.stride(from: 0, to: points.count, by: stride))
+        if values.last != points.count - 1 {
+            values.append(points.count - 1)
+        }
+        return values
     }
 
     private var yDomain: ClosedRange<Double> {
         valuationChartYDomain(
-            seriesValues: plotPoints.map(\.value),
+            seriesValues: seriesValues,
             rangeMedian: rangeMedian,
             rangeMean: rangeMean,
             current: current,
-            liveYZoom: liveYAxisZoom
+            yAxisZoom: 1
         )
+    }
+
+    private var showPointMarks: Bool {
+        renderedPoints.count <= 45
     }
 
     var body: some View {
@@ -131,16 +111,9 @@ struct ValuationDailySingleChart: View {
                     }
                 }
                 Spacer()
-
                 ValuationChartZoomToolbar(
-                    isZoomed: abs(xAxisZoom - 1) > 0.04 || abs(yAxisZoom - 1) > 0.04,
-                    onReset: {
-                        xAxisZoom = 1
-                        yAxisZoom = 1
-                        scrollPositionDate = scrollLeadingDate(
-                            visibleDays: effectiveVisibleDays(fullScreen: false)
-                        )
-                    },
+                    isZoomed: false,
+                    onReset: {},
                     onFullscreen: {
                         onRequestFullHistory?()
                         showFullscreen = true
@@ -157,7 +130,7 @@ struct ValuationDailySingleChart: View {
                 Spacer(minLength: 0)
             }
 
-            if plotPoints.isEmpty {
+            if renderedPoints.isEmpty {
                 Text(emptyChartMessage ?? "Không có điểm dữ liệu trong khoảng thời gian đã chọn.")
                     .font(AppTypography.caption)
                     .foregroundStyle(.secondary)
@@ -166,17 +139,12 @@ struct ValuationDailySingleChart: View {
                     .background(AppColors.cardBackground.opacity(0.5))
                     .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
             } else {
-                chart(fullScreen: false)
+                chart
                     .frame(height: Layout.chartHeight)
-                    .valuationChartZoomAnimations(
-                        xAxisZoom: xAxisZoom,
-                        yAxisZoom: yAxisZoom,
-                        pinchMagnification: pinchMagnification
-                    )
             }
 
             Text(
-                "Theo ngày giao dịch; ngày thiếu chỉ số bỏ qua; vuốt ngang để xem thêm. Chụm hai ngón: phóng/thu thời gian và giá trị. ↺ đặt lại."
+                "Bản rút gọn để ưu tiên độ mượt: chỉ giữ kéo ngang và line chart. Muốn \"zoom\" thì đổi khoảng ở bộ chọn phía trên."
             )
             .font(.caption2)
             .foregroundStyle(.secondary)
@@ -184,20 +152,23 @@ struct ValuationDailySingleChart: View {
         .padding(Spacing.lg)
         .background(AppColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
-        .onChange(of: selectedChartDate) { _, newValue in
-            displayedChartDate = newValue
+        .onAppear {
+            rebuildPoints()
+            resetScrollPosition()
+        }
+        .onChange(of: data) { _, _ in
+            rebuildPoints()
+            resetScrollPosition()
         }
         .onChange(of: data.count) { _, _ in
-            xAxisZoom = 1
-            yAxisZoom = 1
-            scrollPositionDate = .distantPast
+            resetScrollPosition()
         }
         .fullScreenCover(isPresented: $showFullscreen) {
             ChartFullscreenContainer(title: title) {
                 ValuationFullscreenChartHost(
-                    xAxisZoom: xAxisZoom,
-                    yAxisZoom: yAxisZoom,
-                    pinchMagnification: pinchMagnification
+                    xAxisZoom: 1,
+                    yAxisZoom: 1,
+                    pinchMagnification: 1
                 ) {
                     chart(fullScreen: true)
                 }
@@ -205,279 +176,109 @@ struct ValuationDailySingleChart: View {
         }
     }
 
+    private var chart: some View {
+        chart(fullScreen: false)
+    }
+
     private func chart(fullScreen: Bool) -> some View {
-        let visibleDays = effectiveVisibleDays(fullScreen: fullScreen)
-        let domainLength = TimeInterval(visibleDays) * Self.secondsPerDay
-        let densePoints = plotPoints.count > 100
-        let pointSize: CGFloat = densePoints ? 6 : 18
-        // Nhiều nhãn hơn một chút nhưng vẫn an toàn (trục Date + stride).
-        let autoLabelCount = fullScreen ? 14 : 10
+        Chart {
+            if let mean = rangeMean, mean.isFinite,
+                valuationReferenceLineFitsSeries(value: mean, seriesValues: seriesValues)
+            {
+                RuleMark(y: .value("TB", mean))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 4]))
+                    .foregroundStyle(Color.purple)
+            }
 
-        return ZStack(alignment: .top) {
-            let baseChart = Chart {
-                if let mean = rangeMean, mean.isFinite {
-                    RuleMark(y: .value("TB", mean))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 4]))
-                        .foregroundStyle(Color.purple)
-                        .annotation(position: .leading, alignment: .trailing) {
-                            Text("TB")
-                                .font(.caption2)
-                                .foregroundStyle(Color.purple)
-                        }
-                }
-                if let median = rangeMedian {
-                    RuleMark(y: .value("Trung vị", median))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
-                        .foregroundStyle(.orange)
-                        .annotation(position: .trailing, alignment: .leading) {
-                            Text("Trung vị")
-                                .font(.caption2)
-                                .foregroundStyle(.orange)
-                        }
-                }
+            if let median = rangeMedian,
+                valuationReferenceLineFitsSeries(value: median, seriesValues: seriesValues)
+            {
+                RuleMark(y: .value("Trung vị", median))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
+                    .foregroundStyle(.orange)
+            }
 
-                ForEach(Array(plotPoints.enumerated()), id: \.offset) { _, point in
-                    LineMark(
-                        x: .value("Ngày", point.date),
-                        y: .value("Chỉ số", point.value)
-                    )
-                    .foregroundStyle(lineColor)
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-                    .interpolationMethod(.monotone)
+            ForEach(renderedPoints) { point in
+                LineMark(
+                    x: .value("Index", point.id),
+                    y: .value("Chỉ số", point.value),
+                    series: .value("Chuỗi", Self.lineSeriesLabel)
+                )
+                .foregroundStyle(lineColor)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.linear)
 
+                if showPointMarks {
                     PointMark(
-                        x: .value("Ngày", point.date),
+                        x: .value("Index", point.id),
                         y: .value("Chỉ số", point.value)
                     )
                     .foregroundStyle(lineColor)
-                    .symbolSize(pointSize)
+                    .symbolSize(14)
                 }
-            }
-            .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: domainLength)
-            .chartScrollPosition(x: $scrollPositionDate)
-            .onAppear {
-                if scrollPositionDate == .distantPast {
-                    scrollPositionDate = scrollLeadingDate(visibleDays: visibleDays)
-                }
-            }
-            .chartXAxis {
-                if plotSpanDays <= 126 {
-                    // ~≤4 tháng: để Charts tự chia, nhiều mốc hơn (có chỗ dưới chart).
-                    AxisMarks(
-                        values: .automatic(
-                            desiredCount: autoLabelCount,
-                            roundLowerBound: true,
-                            roundUpperBound: true
-                        )
-                    ) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(Self.dayLabelFormatter.string(from: d))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-                            }
-                        }
-                    }
-                } else if plotSpanDays <= 400 {
-                    AxisMarks(values: .stride(by: .month, count: 1, calendar: Self.vnCalendar)) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(d, format: .dateTime.day().month(.abbreviated))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-                            }
-                        }
-                    }
-                } else if plotSpanDays <= 720 {
-                    AxisMarks(values: .stride(by: .month, count: 2, calendar: Self.vnCalendar)) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(d, format: .dateTime.month(.abbreviated).year(.twoDigits))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
-                            }
-                        }
-                    }
-                } else if plotSpanDays <= 1080 {
-                    AxisMarks(values: .stride(by: .month, count: 3, calendar: Self.vnCalendar)) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(d, format: .dateTime.month(.abbreviated).year(.twoDigits))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
-                            }
-                        }
-                    }
-                } else if plotSpanDays <= 1500 {
-                    AxisMarks(values: .stride(by: .month, count: 6, calendar: Self.vnCalendar)) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(d, format: .dateTime.month(.abbreviated).year(.twoDigits))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
-                            }
-                        }
-                    }
-                } else {
-                    AxisMarks(values: .stride(by: .month, count: 12, calendar: Self.vnCalendar)) { value in
-                        AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                        AxisValueLabel(centered: false) {
-                            if let d = value.as(Date.self) {
-                                Text(d, format: .dateTime.month(.abbreviated).year(.twoDigits))
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.75)
-                            }
-                        }
-                    }
-                }
-            }
-            .chartYAxis {
-                AxisMarks(position: .leading) { _ in
-                    AxisGridLine().foregroundStyle(.gray.opacity(0.1))
-                    AxisValueLabel()
-                }
-            }
-            .chartYScale(domain: yDomain)
-            .chartLegend(position: .top) {
-                HStack(spacing: Spacing.sm) {
-                    HStack(spacing: Spacing.xs) {
-                        RoundedRectangle(cornerRadius: 1)
-                            .fill(lineColor)
-                            .frame(width: 12, height: 3)
-                        Text(title.replacingOccurrences(of: "Định giá ", with: ""))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    if rangeMedian != nil {
-                        HStack(spacing: Spacing.xs) {
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(.orange)
-                                .frame(width: 12, height: 1)
-                            Text("Trung vị (khoảng)")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    if rangeMean != nil {
-                        HStack(spacing: Spacing.xs) {
-                            RoundedRectangle(cornerRadius: 1)
-                                .fill(Color.purple)
-                                .frame(width: 12, height: 1)
-                            Text("TB (khoảng)")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
-
-            if fullScreen {
-                baseChart.chartXSelection(value: $selectedChartDate)
-            } else {
-                baseChart
-            }
-
-            if fullScreen, let picked = displayedChartDate {
-                dailySelectionPopover(for: picked)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.top, Spacing.xs)
             }
         }
-        .simultaneousGesture(
-            valuationPinchGesture(
-                pinch: $pinchMagnification,
-                xAxisZoom: $xAxisZoom,
-                yAxisZoom: $yAxisZoom,
-                onXZoomCommitted: {
-                    scrollPositionDate = scrollLeadingDate(
-                        visibleDays: effectiveVisibleDays(fullScreen: showFullscreen)
-                    )
+        .transaction { $0.animation = nil }
+        .chartScrollableAxes(.horizontal)
+        .chartXVisibleDomain(length: visibleLength(fullScreen: fullScreen))
+        .chartScrollPosition(x: $scrollPosition)
+        .chartYScale(domain: yDomain)
+        .chartLegend(.hidden)
+        .chartXAxis {
+            AxisMarks(values: xAxisValues(fullScreen: fullScreen)) { value in
+                AxisGridLine().foregroundStyle(.gray.opacity(0.1))
+                AxisValueLabel {
+                    if let index = value.as(Int.self), points.indices.contains(index) {
+                        Text(points[index].label)
+                            .font(fullScreen ? .caption : .caption2)
+                    }
                 }
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { _ in
+                AxisGridLine().foregroundStyle(.gray.opacity(0.1))
+                AxisValueLabel()
+            }
+        }
+    }
+
+    private func rebuildPoints() {
+        let rebuilt = data.enumerated().compactMap { offset, point -> ValuationDailyRenderedPoint? in
+            guard let value = point[keyPath: metric], value.isFinite, let date = parseDailyChartDate(point.date) else {
+                return nil
+            }
+            return ValuationDailyRenderedPoint(
+                id: offset,
+                label: Self.dayLabelFormatter.string(from: date),
+                value: value
             )
-        )
+        }
+        points = rebuilt
+        seriesValues = rebuilt.map(\.value)
     }
 
-    private func dailySelectionPopover(for date: Date) -> some View {
-        guard let match = nearestPlotPoint(to: date) else {
-            return AnyView(EmptyView())
+    private func resetScrollPosition() {
+        guard !points.isEmpty else {
+            scrollPosition = 0
+            return
         }
-        let value = match.value
-        let label = Self.dayLabelFormatter.string(from: match.date)
-
-        var metrics: [ChartPopoverMetric] = [
-            ChartPopoverMetric(
-                id: "current",
-                label: "Giá trị",
-                value: String(format: "%.2f", value),
-                color: lineColor
-            ),
-        ]
-        if let m = rangeMedian {
-            metrics.append(
-                ChartPopoverMetric(
-                    id: "median",
-                    label: "Trung vị (trong khoảng)",
-                    value: String(format: "%.2f", m),
-                    color: .orange
-                ))
-        }
-        if let a = rangeMean, a.isFinite {
-            metrics.append(
-                ChartPopoverMetric(
-                    id: "mean",
-                    label: "Trung bình (trong khoảng)",
-                    value: String(format: "%.2f", a),
-                    color: .purple
-                ))
-        }
-
-        return AnyView(
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(label)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                Text(title)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                ForEach(metrics, id: \.id) { metric in
-                    HStack(spacing: Spacing.xs) {
-                        Circle()
-                            .fill(metric.color)
-                            .frame(width: 6, height: 6)
-                        Text(metric.label)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Spacer(minLength: 0)
-                        Text(metric.value)
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                    }
-                }
-            }
-            .padding(Spacing.sm)
-            .background(AppColors.appBackground)
-            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
-        )
+        scrollPosition = max(points.count - visibleLength, 0)
     }
 
-    private func nearestPlotPoint(to date: Date) -> (date: Date, value: Double)? {
-        guard !plotPoints.isEmpty else { return nil }
-        let cal = Self.vnCalendar
-        if let sameDay = plotPoints.first(where: { cal.isDate($0.date, inSameDayAs: date) }) {
-            return (sameDay.date, sameDay.value)
+    private func strideSample<T>(_ values: [T], maxPoints: Int) -> [T] {
+        guard values.count > maxPoints, maxPoints > 1 else { return values }
+        let stride = max(1, Int(ceil(Double(values.count) / Double(maxPoints))))
+        var sampled: [T] = []
+        sampled.reserveCapacity((values.count / stride) + 2)
+        var lastAppendedIndex: Int?
+        for index in Swift.stride(from: 0, to: values.count, by: stride) {
+            sampled.append(values[index])
+            lastAppendedIndex = index
         }
-        return plotPoints.min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) })
+        if let last = values.last, lastAppendedIndex != values.count - 1 {
+            sampled.append(last)
+        }
+        return sampled
     }
 }

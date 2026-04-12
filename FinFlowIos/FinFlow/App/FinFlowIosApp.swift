@@ -52,11 +52,15 @@ struct AppRootView: View {
         @Bindable var observableRouter = router
 
         ZStack {
-            // Main Content Switching
+            // Main Content Switching — use opacity transition so splash→dashboard is smooth.
+            // NOTE: `.id()` is intentionally NOT used here; each branch is stable in identity.
+            // `resetCachedHomeViewModel` / `resetCachedTransactionListViewModel` in `onChange(of: root)`
+            // clears stale dashboard VMs on logout without requiring forced view recreation.
             Group {
                 switch observableRouter.root {
                 case .splash:
-                    ProgressView()  // Or SplashView
+                    ProgressView()
+                        .transition(.opacity)
                 case .authentication, .welcomeBack:
                     NavigationStack(path: $observableRouter.authPath) {
                         container.makeAuthenticationView(router: router)
@@ -64,10 +68,12 @@ struct AppRootView: View {
                                 makeDestination(for: route)
                             }
                     }
+                    .transition(.opacity)
                 case .dashboard:
                     container.makeMainTabView(router: router) { route in
                         makeDestination(for: route)
                     }
+                    .transition(.opacity)
                 case .locked:
                     if case .locked(let user, let bioAvailable) = container.sessionManager.state {
                         container.makeLockScreenView(
@@ -77,32 +83,46 @@ struct AppRootView: View {
                     }
                 }
             }
-            .id(observableRouter.root)
+            .animation(.easeInOut(duration: 0.2), value: observableRouter.root)
             .sheet(item: $observableRouter.presentedSheet) { route in
                 NavigationStack {
                     makeDestination(for: route)
                 }
-                .presentationDetents(route == .finFlowBotChat ? [.medium, .large] : [.large])
-                .presentationDragIndicator(route == .finFlowBotChat ? .visible : .hidden)
+                .presentationDetents({
+                    if case .finFlowBotChat = route { return [.medium, .large] }
+                    return [.large]
+                }())
+                .presentationDragIndicator({
+                    if case .finFlowBotChat = route { return .visible }
+                    return .hidden
+                }())
             }
-
+            .onChange(of: observableRouter.presentedSheet) { oldValue, newValue in
+                if case .finFlowBotChat = oldValue, newValue == nil {
+                    NotificationCenter.default.post(name: .transactionDidSave, object: nil)
+                }
+            }
             if shouldShowGlobalBotOrb(root: observableRouter.root, presentedSheet: observableRouter.presentedSheet) {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        FinFlowBotGlassOrb(
-                            mascotAssetName: "FinFlowBotMascot",
-                            mascotBundle: .main,
-                            showsNotificationDot: hasUnreadBotSuggestion
-                        ) {
-                            hasUnreadBotSuggestion = false
-                            router.presentSheet(.finFlowBotChat)
-                        }
+                // Avoid `HStack { Spacer(); Button(...) }`: the row can span the full width and the
+                // plain `Button` may expand horizontally, drawing a stray gray/luminous rect over the
+                // trailing tab (especially "Đầu tư") where the orb sits. Pin the orb with alignment only.
+                ZStack(alignment: .bottomTrailing) {
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .allowsHitTesting(false)
+                    FinFlowBotGlassOrb(
+                        mascotAssetName: "FinFlowBotMascot",
+                        mascotBundle: .main,
+                        showsNotificationDot: hasUnreadBotSuggestion
+                    ) {
+                        hasUnreadBotSuggestion = false
+                        router.presentSheet(.finFlowBotChat())
                     }
+                    .fixedSize(horizontal: true, vertical: true)
                     .padding(.trailing, Spacing.sm)
                     .padding(.bottom, orbBottomPadding(for: observableRouter.root))
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
                 .transition(.opacity)
                 .zIndex(500)
@@ -122,6 +142,7 @@ struct AppRootView: View {
         .onChange(of: observableRouter.root) { _, newRoot in
             if newRoot != .dashboard {
                 container.resetCachedHomeViewModel()
+                container.resetCachedTransactionListViewModel()
             }
         }
     }
@@ -179,9 +200,9 @@ struct AppRootView: View {
             container.makeForgotPasswordView(router: router)
                 .navigationTitle("Quên Mật Khẩu")
         case .dashboard:
-            container.makeMainTabView(router: router) { route in
-                AnyView(makeDestination(for: route))
-            }
+            // `.dashboard` is an AppRoot transition, not a navigation destination.
+            // It should never be pushed onto a NavigationStack path.
+            EmptyView()
         case .profile:
             container.makeProfileView(router: router)
         case .settings:
@@ -207,8 +228,8 @@ struct AppRootView: View {
             container.makeAddBudgetView(router: router)
         case .editBudget(let budget):
             container.makeAddBudgetView(router: router, budgetToEdit: budget)
-        case .finFlowBotChat:
-            FinFlowBotChatView()
+        case .finFlowBotChat(let initialPrompt):
+            container.makeFinFlowBotChatView(initialPrompt: initialPrompt)
         }
     }
 

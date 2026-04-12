@@ -6,6 +6,7 @@
 import FinFlowCore
 import Foundation
 import LocalAuthentication
+import Observation
 
 @MainActor
 @Observable
@@ -173,7 +174,7 @@ public class WelcomeBackViewModel {
             await MainActor.run {
                 self.showPINInput = false
             }
-            try? await Task.sleep(nanoseconds: 300_000_000)  // 0.3s delay for animation
+            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
 
             await MainActor.run {
                 if hasPassword {
@@ -200,7 +201,7 @@ public class WelcomeBackViewModel {
                 self.showPINInput = false
             }
             // Small delay to allow dismissal animation
-            try? await Task.sleep(nanoseconds: 300_000_000)  // 0.3s
+            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
 
             await MainActor.run {
                 self.showOtpInput = true

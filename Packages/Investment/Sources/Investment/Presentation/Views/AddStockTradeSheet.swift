@@ -200,7 +200,7 @@ public struct AddStockTradeSheet: View {
 
         suggestTask = Task { @MainActor in
             // debounce
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
             if Task.isCancelled { return }
 
             do {

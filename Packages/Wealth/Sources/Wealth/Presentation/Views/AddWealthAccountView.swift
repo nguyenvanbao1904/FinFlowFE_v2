@@ -8,11 +8,11 @@ public struct AddWealthAccountView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: AddWealthAccountViewModel
+    @Bindable var viewModel: AddWealthAccountViewModel
     @State private var activeSheet: ActiveSheet?
 
     public init(viewModel: AddWealthAccountViewModel) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {

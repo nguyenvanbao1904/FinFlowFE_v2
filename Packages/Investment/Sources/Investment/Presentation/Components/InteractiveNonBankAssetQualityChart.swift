@@ -4,7 +4,6 @@ import SwiftUI
 
 struct InteractiveNonBankAssetQualityChart: View {
     let items: [NonBankFinancialDataPoint]
-    let showQuarterly: Bool
     let height: CGFloat
     let fullScreen: Bool
 
@@ -14,6 +13,7 @@ struct InteractiveNonBankAssetQualityChart: View {
     @State private var scrollLabel: String = ""
 
     private struct AssetQualityPoint {
+        let periodLabel: String
         let year: Int
         let cashValue: Double
         let shortInvestValue: Double
@@ -26,24 +26,37 @@ struct InteractiveNonBankAssetQualityChart: View {
         let receivableRatioPct: Double
     }
 
-    private var points: [AssetQualityPoint] {
-        items.compactMap(makeAssetQualityPoint)
+    private var legendGridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: Spacing.xs), count: 3)
     }
 
-    private var labels: [String] {
-        points.indices.map { idx in
-            let item = items.sorted { $0.year < $1.year }[idx]
-            if showQuarterly && item.quarter != 0 {
-                return "Q\(item.quarter) \(item.year % 100)"
+    private var points: [AssetQualityPoint] {
+        items
+            .sorted { a, b in
+                if a.year != b.year { return a.year < b.year }
+                return a.quarter < b.quarter
             }
-            return "\(item.year)"
-        }
+            .compactMap(makeAssetQualityPoint)
     }
+
+    private var labels: [String] { points.map(\.periodLabel) }
+
     private var visibleLength: Int { fullScreen ? min(8, max(1, points.count)) : min(4, max(1, points.count)) }
-    private let legendReserved: CGFloat = 148
+
+    private var legendGridReserved: CGFloat {
+        let legendItemCount = 8
+        if legendItemCount <= 3 { return 26 }
+        if legendItemCount <= 6 { return 52 }
+        return 78
+    }
+
+    private var footnoteReserved: CGFloat { Spacing.xs + 36 }
+
+    private var legendReserved: CGFloat { legendGridReserved + footnoteReserved }
+
     private var chartHeight: CGFloat {
         if fullScreen {
-            return max(120, height - legendReserved - 48)
+            return max(110, height - legendReserved - 20)
         }
         return max(140, height - legendReserved)
     }
@@ -101,9 +114,6 @@ struct InteractiveNonBankAssetQualityChart: View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Chart(Array(points.enumerated()), id: \.offset) { idx, d in
                 let label = labels[idx]
-                RuleMark(y: .value("0%", scalePctToBarDomain(0)))
-                    .foregroundStyle(Color.primary.opacity(0.8))
-                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
 
                 BarMark(x: .value("Kỳ", label), y: .value("Tiền", d.cashValue))
                     .foregroundStyle(AppColors.chartAssetCash)
@@ -125,13 +135,14 @@ struct InteractiveNonBankAssetQualityChart: View {
                     y: .value("Tỷ lệ phải thu trên tổng tài sản", lineYValue(for: d))
                 )
                 .foregroundStyle(Color.orange)
-                .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                .interpolationMethod(.monotone)
                 PointMark(
                     x: .value("Kỳ", label),
                     y: .value("Tỷ lệ phải thu trên tổng tài sản", lineYValue(for: d))
                 )
                 .foregroundStyle(Color.orange)
-                .symbolSize(34)
+                .symbolSize(30)
             }
             .chartYAxis {
                 AxisMarks(position: .trailing, values: .automatic(desiredCount: 5)) { value in
@@ -186,26 +197,22 @@ struct InteractiveNonBankAssetQualityChart: View {
             .frame(height: chartHeight)
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                HStack(alignment: .top, spacing: Spacing.xs) {
-                    chartLegendItem("Tiền", color: AppColors.chartAssetCash).frame(maxWidth: .infinity, alignment: .leading)
-                    chartLegendItem("Đầu tư ngắn hạn", color: AppColors.chartCapitalDeposits).frame(maxWidth: .infinity, alignment: .leading)
-                    chartLegendItem("Phải thu ngắn hạn", color: AppColors.chartAssetTrading).frame(maxWidth: .infinity, alignment: .leading)
+                LazyVGrid(columns: legendGridColumns, spacing: Spacing.xs) {
+                    chartLegendItem("Tiền", color: AppColors.chartAssetCash)
+                    chartLegendItem("Đầu tư ngắn hạn", color: AppColors.chartCapitalDeposits)
+                    chartLegendItem("Phải thu ngắn hạn", color: AppColors.chartAssetTrading)
+                    chartLegendItem("Hàng tồn kho", color: AppColors.chartInventory)
+                    chartLegendItem("Tài sản cố định", color: AppColors.chartGrowthStrong)
+                    chartLegendItem("Phải thu dài hạn", color: AppColors.chartIncomeOther)
+                    chartLegendItem("Tài sản khác", color: AppColors.chartAssetLoans)
+                    chartLegendItem("Phải thu / tổng TS", color: .orange)
                 }
-                HStack(alignment: .top, spacing: Spacing.xs) {
-                    chartLegendItem("Hàng tồn kho", color: AppColors.chartInventory).frame(maxWidth: .infinity, alignment: .leading)
-                    chartLegendItem("Tài sản cố định", color: AppColors.chartGrowthStrong).frame(maxWidth: .infinity, alignment: .leading)
-                    chartLegendItem("Phải thu dài hạn", color: AppColors.chartIncomeOther).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                HStack(alignment: .top, spacing: Spacing.xs) {
-                    chartLegendItem("Tài sản khác", color: AppColors.chartAssetLoans).frame(maxWidth: .infinity, alignment: .leading)
-                    Spacer(minLength: 0).frame(maxWidth: .infinity)
-                    Spacer(minLength: 0).frame(maxWidth: .infinity)
-                }
-                HStack(alignment: .top, spacing: Spacing.xs) {
-                    chartLegendItem("Tỷ lệ phải thu / tổng tài sản", color: .orange).frame(maxWidth: .infinity, alignment: .leading)
-                    Spacer(minLength: 0).frame(maxWidth: .infinity)
-                    Spacer(minLength: 0).frame(maxWidth: .infinity)
-                }
+                .frame(height: legendGridReserved, alignment: .top)
+                Text("Đường cam: phải thu / tổng tài sản · Trục trái 0 … 100%.")
+                    .font(AppTypography.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
             }
             .frame(height: legendReserved, alignment: .top)
         }
@@ -223,6 +230,7 @@ struct InteractiveNonBankAssetQualityChart: View {
         guard denom > 0 else { return nil }
 
         return AssetQualityPoint(
+            periodLabel: item.periodLabel,
             year: item.year,
             cashValue: cash,
             shortInvestValue: shortInvest,

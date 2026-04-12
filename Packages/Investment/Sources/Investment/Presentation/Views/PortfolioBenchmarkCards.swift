@@ -82,12 +82,17 @@ struct PortfolioBenchmarkCards: View {
             return "Gần bằng \(benchmark.benchmarkCode) (chênh lệch < 0,1%)."
         }
         let dir = delta >= 0 ? "Cao hơn" : "Thấp hơn"
-        return "\(dir) \(benchmark.benchmarkCode) khoảng \(String(format: "%.1f", abs(delta)))%."
+        let hint = delta >= 0
+            ? "→ Danh mục đang được định giá đắt hơn thị trường."
+            : "→ Danh mục đang được định giá rẻ hơn thị trường."
+        return "\(dir) \(benchmark.benchmarkCode) khoảng \(String(format: "%.1f", abs(delta)))%. \(hint)"
     }
 
     private func summaryColor(_ comparison: PortfolioMetricComparison) -> Color {
         guard let delta = comparison.deltaPct else { return .secondary }
         if abs(delta) < 0.1 { return .secondary }
+        // For valuation ratios (P/E, P/B, P/S): lower than market = cheaper = GOOD (green)
+        // Higher than market = more expensive = WARNING (orange)
         return delta >= 0 ? AppColors.chartGrowthStable : AppColors.chartGrowthStrong
     }
 }

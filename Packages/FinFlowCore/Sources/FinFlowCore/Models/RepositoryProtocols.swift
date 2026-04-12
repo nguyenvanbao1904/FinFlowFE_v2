@@ -110,11 +110,16 @@ public protocol PortfolioRepositoryProtocol: Sendable {
         portfolioId: String,
         code: String
     ) async throws -> PortfolioMarketBenchmarkResponse
+}
 
-    func getPortfolioPerformance(
-        portfolioId: String,
-        range: String
-    ) async throws -> PortfolioPerformanceResponse
+// MARK: - AI Chat Repository Protocol
+
+/// Handles authenticated AI chat operations (threads/messages).
+public protocol ChatRepositoryProtocol: Sendable {
+    func createThread(title: String?) async throws -> ChatThreadResponse
+    func listThreads() async throws -> [ChatThreadResponse]
+    func listMessages(threadId: String) async throws -> [ChatMessageResponse]
+    func sendMessage(threadId: String, content: String) async throws -> SendChatMessageResponse
 }
 
 // MARK: - Composite Protocol (Backward Compatibility)

@@ -23,7 +23,7 @@ extension DependencyContainer {
     }
 
     func makeRegisterViewModel(
-        onSuccess: @escaping () -> Void,
+        onSuccess: @escaping (String) -> Void,
         onNavigateToLogin: @escaping () -> Void
     ) -> RegisterViewModel {
         return RegisterViewModel(

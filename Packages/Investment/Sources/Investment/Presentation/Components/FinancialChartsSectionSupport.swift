@@ -1,11 +1,14 @@
 import FinFlowCore
 import SwiftUI
 
-struct RoeRoaPoint {
+struct RoeRoaPoint: Identifiable {
     let year: Int
     let quarter: Int
     let roe: Double?
     let roa: Double?
+
+    var id: String { "\(year)-\(quarter)" }
+    var periodLabel: String { quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)" }
 }
 
 enum ChartKind: String, Identifiable, Equatable {

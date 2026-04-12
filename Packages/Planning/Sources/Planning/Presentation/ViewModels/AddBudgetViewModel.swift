@@ -1,4 +1,5 @@
 import FinFlowCore
+import Observation
 import SwiftUI
 
 @MainActor
@@ -9,7 +10,6 @@ public final class AddBudgetViewModel {
     public var startDate: Date = AddBudgetViewModel.computeDefaultStartDate()
     public var endDate: Date = AddBudgetViewModel.computeDefaultEndDate()
     public var isRecurring: Bool = true
-    public var showCategoryPicker: Bool = false
     public var categories: [CategoryResponse] = []
     public var isLoading: Bool = false
     public var loadError: AppErrorAlert?
@@ -18,7 +18,6 @@ public final class AddBudgetViewModel {
         categories.filter { $0.type == .expense }
     }
 
-    private let router: any AppRouterProtocol
     private let createBudgetUseCase: CreateBudgetUseCase
     private let updateBudgetUseCase: UpdateBudgetUseCase
     private let getCategoriesUseCase: any GetCategoriesUseCaseProtocol
@@ -55,7 +54,6 @@ public final class AddBudgetViewModel {
     }
 
     public init(
-        router: any AppRouterProtocol,
         createBudgetUseCase: CreateBudgetUseCase,
         updateBudgetUseCase: UpdateBudgetUseCase,
         getCategoriesUseCase: any GetCategoriesUseCaseProtocol,
@@ -63,7 +61,6 @@ public final class AddBudgetViewModel {
         budgetToEdit: BudgetResponse? = nil,
         onSuccess: @escaping () -> Void = {}
     ) {
-        self.router = router
         self.createBudgetUseCase = createBudgetUseCase
         self.updateBudgetUseCase = updateBudgetUseCase
         self.getCategoriesUseCase = getCategoriesUseCase
@@ -99,15 +96,7 @@ public final class AddBudgetViewModel {
         do {
             categories = try await getCategoriesUseCase.execute()
         } catch {
-            if error is CancellationError { return }
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    [sessionManager] in
-                    Task { @MainActor in await sessionManager.clearExpiredSession() }
-                }
-                return
-            }
-            loadError = error.toAppAlert(defaultTitle: "Lỗi tải danh mục")
+            loadError = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tải danh mục")
         }
     }
 
@@ -151,14 +140,7 @@ public final class AddBudgetViewModel {
             NotificationCenter.default.post(name: .budgetDidSave, object: nil)
             onSuccess()
         } catch {
-            if let appError = error as? AppError, case .unauthorized = appError {
-                loadError = .authWithAction(message: AppErrorAlert.sessionExpiredMessage) {
-                    [sessionManager] in
-                    Task { @MainActor in await sessionManager.clearExpiredSession() }
-                }
-                return
-            }
-            loadError = error.toAppAlert(defaultTitle: "Lỗi")
+            loadError = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi lưu ngân sách")
         }
     }
 
