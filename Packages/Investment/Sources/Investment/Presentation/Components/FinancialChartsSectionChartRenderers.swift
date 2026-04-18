@@ -1,6 +1,11 @@
 import FinFlowCore
 import SwiftUI
 
+enum NonBankMetricYoYKind {
+    case revenue
+    case profit
+}
+
 extension FinancialChartsSection {
     // MARK: - Chart Renderers
 
@@ -65,12 +70,28 @@ extension FinancialChartsSection {
 
     // --- ROE & ROA (Dual Line) ---
     func roeRoaChart(_ data: [RoeRoaPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        InteractiveRoeRoaChart(
-            data: data,
-            showQuarterly: showQuarterly,
+        let values = data.flatMap { [$0.roe, $0.roa].compactMap { $0 } }
+        let domain = roeRoaYDomain(values: values)
+        return InteractiveDualLineChart(
+            items: data,
+            labelKey: \.periodLabel,
+            line1: .init(name: "ROE", color: AppColors.chartGrowthStrong, value: \.roe),
+            line2: .init(name: "ROA", color: AppColors.chartCapitalDeposits, value: \.roa),
+            popoverSubtitle: "ROE & ROA",
             height: height,
-            fullScreen: fullScreen
+            fullScreen: fullScreen,
+            yDomain: domain,
+            yAxisFormat: .auto
         )
+    }
+
+    private func roeRoaYDomain(values: [Double]) -> ClosedRange<Double> {
+        guard !values.isEmpty else { return 0...1 }
+        let maxV = values.max()!
+        let padded = maxV * 1.12
+        let niceStep: Double = 10
+        let upper = max(ceil(padded / niceStep) * niceStep, maxV + 1)
+        return 0...upper
     }
 
     func bankNimChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
@@ -84,20 +105,35 @@ extension FinancialChartsSection {
 
     // --- NonBank: metric column (DT or LNST) + YoY line ---
     func nonBankRevenueYoYChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        InteractiveNonBankMetricYoYChart(
-            kind: .revenue,
-            items: items,
-            showQuarterly: showQuarterly,
-            height: height,
-            fullScreen: fullScreen
-        )
+        nonBankMetricYoYChart(items, kind: .revenue, height: height, fullScreen: fullScreen)
     }
 
     func nonBankProfitYoYChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        InteractiveNonBankMetricYoYChart(
-            kind: .profit,
-            items: items,
-            showQuarterly: showQuarterly,
+        nonBankMetricYoYChart(items, kind: .profit, height: height, fullScreen: fullScreen)
+    }
+
+    private func nonBankMetricYoYChart(
+        _ items: [NonBankFinancialDataPoint],
+        kind: NonBankMetricYoYKind,
+        height: CGFloat,
+        fullScreen: Bool
+    ) -> some View {
+        let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
+        let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
+            let v: Double? = kind == .revenue ? item.netRevenue : item.profitAfterTax
+            return .init(id: item.id.uuidString, periodLabel: item.periodLabel, value: v)
+        }
+        let barColor = kind == .revenue ? AppColors.chartRevenue : AppColors.chartProfit
+        let barLabel = kind == .revenue ? "Doanh thu" : "LNST"
+        let yoyLabel = kind == .revenue ? "Tăng trưởng DT YoY" : "Tăng trưởng LNST YoY"
+        let subtitle = kind == .revenue ? "Doanh thu & tăng trưởng YoY" : "LNST & tăng trưởng YoY"
+        return InteractiveSingleBarYoYChart(
+            rows: rows,
+            barColor: barColor,
+            barLabel: barLabel,
+            yoyLineColor: AppColors.chartGrowthStable,
+            yoyLabel: yoyLabel,
+            popoverSubtitle: subtitle,
             height: height,
             fullScreen: fullScreen
         )
@@ -105,11 +141,17 @@ extension FinancialChartsSection {
 
     // --- NonBank margins (two lines) ---
     func nonBankMarginsLineChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        InteractiveNonBankMarginsChart(
-            items: items,
-            showQuarterly: showQuarterly,
+        let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
+        return InteractiveDualLineChart(
+            items: sorted,
+            labelKey: \.periodLabel,
+            line1: .init(name: "Biên gộp %", color: AppColors.chartIncomeFee, value: \.grossMargin),
+            line2: .init(name: "Biên ròng %", color: AppColors.chartCapitalEquity, value: \.netMargin),
+            popoverSubtitle: "Biên LN gộp & ròng",
             height: height,
-            fullScreen: fullScreen
+            fullScreen: fullScreen,
+            yDomain: nil,
+            yAxisFormat: .percent
         )
     }
 
@@ -119,9 +161,17 @@ extension FinancialChartsSection {
         height: CGFloat,
         fullScreen: Bool
     ) -> some View {
-        InteractiveBankProfitYoYGrowthChart(
-            points: data,
-            showQuarterly: showQuarterly,
+        let rows = data.map { p -> InteractiveSingleBarYoYChart.BarYoYRow in
+            let label = (showQuarterly && p.quarter != 0) ? "Q\(p.quarter) \(p.year % 100)" : "\(p.year)"
+            return .init(id: "\(p.year)-\(p.quarter)", periodLabel: label, value: p.value)
+        }
+        return InteractiveSingleBarYoYChart(
+            rows: rows,
+            barColor: AppColors.chartProfit,
+            barLabel: "LNST",
+            yoyLineColor: AppColors.chartGrowthStable,
+            yoyLabel: "Tăng trưởng YoY",
+            popoverSubtitle: "Chi tiết LNST & YoY",
             height: height,
             fullScreen: fullScreen
         )
