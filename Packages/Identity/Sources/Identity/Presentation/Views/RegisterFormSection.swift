@@ -77,14 +77,16 @@ struct RegisterFormSection: View {
         return EmailFieldWithOTP(
             email: $vm.email,
             otpCode: $vm.otpCode,
-            isEmailVerified: vm.isEmailVerified,
-            isEmailValid: vm.isEmailValid,
-            showOTPInput: vm.showOTPInput,
-            isSendingOTP: vm.isSendingOTP,
-            isCheckingEmail: vm.isCheckingEmail,
-            canSendOTP: vm.canSendOTP,
-            cooldownRemaining: vm.otpCooldownRemaining,
-            validationMessage: vm.emailValidationMessage,
+            config: EmailOTPConfig(
+                isEmailVerified: vm.isEmailVerified,
+                isEmailValid: vm.isEmailValid,
+                showOTPInput: vm.showOTPInput,
+                isSendingOTP: vm.isSendingOTP,
+                isCheckingEmail: vm.isCheckingEmail,
+                canSendOTP: vm.canSendOTP,
+                cooldownRemaining: vm.otpCooldownRemaining,
+                validationMessage: vm.emailValidationMessage
+            ),
             onSendOTP: { await vm.sendOTP() },
             onVerifyOTP: { await vm.verifyOTP() }
         )

@@ -9,54 +9,40 @@
 import FinFlowCore
 import SwiftUI
 
+/// Configuration struct grouping EmailFieldWithOTP state flags
+struct EmailOTPConfig {
+    var isEmailVerified: Bool = false
+    var isEmailValid: Bool = true
+    var showOTPInput: Bool = false
+    var isSendingOTP: Bool = false
+    var isVerifyingOTP: Bool = false
+    var isCheckingEmail: Bool = false
+    var canSendOTP: Bool = true
+    var cooldownRemaining: Int = 0
+    var showSendButton: Bool = true
+    var validationMessage: String?
+}
+
 /// Reusable Email field với OTP verification
 /// Dùng cho Register và ForgotPassword flows
 struct EmailFieldWithOTP: View {
     @Binding var email: String
     @Binding var otpCode: String
 
-    let isEmailVerified: Bool
-    let isEmailValid: Bool
-    let showOTPInput: Bool
-    let isSendingOTP: Bool
-    let isVerifyingOTP: Bool
-    let isCheckingEmail: Bool
-    let canSendOTP: Bool
-    let cooldownRemaining: Int
-    let showSendButton: Bool
-    let validationMessage: String?
-
+    let config: EmailOTPConfig
     let onSendOTP: () async -> Void
     let onVerifyOTP: () async -> Void
 
     init(
         email: Binding<String>,
         otpCode: Binding<String>,
-        isEmailVerified: Bool,
-        isEmailValid: Bool,
-        showOTPInput: Bool,
-        isSendingOTP: Bool,
-        isVerifyingOTP: Bool = false,
-        isCheckingEmail: Bool = false,
-        canSendOTP: Bool = true,
-        cooldownRemaining: Int = 0,
-        showSendButton: Bool = true,
-        validationMessage: String? = nil,
+        config: EmailOTPConfig,
         onSendOTP: @escaping () async -> Void,
         onVerifyOTP: @escaping () async -> Void
     ) {
         self._email = email
         self._otpCode = otpCode
-        self.isEmailVerified = isEmailVerified
-        self.isEmailValid = isEmailValid
-        self.showOTPInput = showOTPInput
-        self.isSendingOTP = isSendingOTP
-        self.isVerifyingOTP = isVerifyingOTP
-        self.isCheckingEmail = isCheckingEmail
-        self.canSendOTP = canSendOTP
-        self.cooldownRemaining = cooldownRemaining
-        self.showSendButton = showSendButton
-        self.validationMessage = validationMessage
+        self.config = config
         self.onSendOTP = onSendOTP
         self.onVerifyOTP = onVerifyOTP
     }
@@ -66,18 +52,18 @@ struct EmailFieldWithOTP: View {
             // Email Input with Action Button
             EmailFieldRow(
                 email: $email,
-                isVerified: isEmailVerified,
-                isValid: isEmailValid,
-                isChecking: isCheckingEmail,
-                isSending: isSendingOTP,
-                showButton: showSendButton,
-                canSend: canSendOTP,
-                cooldown: cooldownRemaining,
+                isVerified: config.isEmailVerified,
+                isValid: config.isEmailValid,
+                isChecking: config.isCheckingEmail,
+                isSending: config.isSendingOTP,
+                showButton: config.showSendButton,
+                canSend: config.canSendOTP,
+                cooldown: config.cooldownRemaining,
                 onSendOTP: onSendOTP
             )
 
             // Validation Message
-            if let message = validationMessage {
+            if let message = config.validationMessage {
                 HStack {
                     Text(message)
                         .font(AppTypography.caption)
@@ -91,10 +77,10 @@ struct EmailFieldWithOTP: View {
             }
 
             // OTP Input
-            if showOTPInput {
+            if config.showOTPInput {
                 OTPFieldRow(
                     otpCode: $otpCode,
-                    isVerifying: isVerifyingOTP,
+                    isVerifying: config.isVerifyingOTP,
                     onVerifyOTP: onVerifyOTP
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))

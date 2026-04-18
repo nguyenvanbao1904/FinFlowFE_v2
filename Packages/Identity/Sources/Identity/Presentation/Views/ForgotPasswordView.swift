@@ -95,17 +95,17 @@ public struct ForgotPasswordView: View {
             // Dùng EmailFieldWithOTP component (giống RegisterView)
             EmailFieldWithOTP(
                 email: $viewModel.email,
-                otpCode: .constant(""),  // Không dùng inline OTP ở đây
-                isEmailVerified: false,  // Forgot password không cần verify inline
-                isEmailValid: viewModel.isEmailValid,
-                showOTPInput: false,  // Không show OTP input inline
-                isSendingOTP: viewModel.isSendingOTP,
-                isCheckingEmail: viewModel.isCheckingEmail,
-                canSendOTP: false,  // Disable inline button
-                showSendButton: false,  // Ẩn nút gửi mã trong input
-                validationMessage: viewModel.emailValidationMessage,
-                onSendOTP: {},  // No-op, dùng button bên dưới
-                onVerifyOTP: {}  // No-op
+                otpCode: .constant(""),
+                config: EmailOTPConfig(
+                    isEmailValid: viewModel.isEmailValid,
+                    isSendingOTP: viewModel.isSendingOTP,
+                    isCheckingEmail: viewModel.isCheckingEmail,
+                    canSendOTP: false,
+                    showSendButton: false,
+                    validationMessage: viewModel.emailValidationMessage
+                ),
+                onSendOTP: {},
+                onVerifyOTP: {}
             )
 
             Button("Gửi Mã OTP") {

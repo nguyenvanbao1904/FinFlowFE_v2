@@ -4,8 +4,9 @@ import SwiftUI
 /// Centralized alert handling extension for SwiftUI Views
 /// Provides consistent logging, haptics, and analytics for all alerts
 extension View {
-    
+
     /// Standard alert handler with automatic logging and haptic feedback
+    /// Uses modern SwiftUI alert API (title + actions + message)
     /// - Parameters:
     ///   - alert: Binding to optional AppErrorAlert
     ///   - onDismiss: Optional callback when alert is dismissed
@@ -14,29 +15,35 @@ extension View {
         _ alert: Binding<AppErrorAlert?>,
         onDismiss: (() -> Void)? = nil
     ) -> some View {
-        self.alert(item: alert) { alertItem in
-            // Centralized logic runs for EVERY alert
-            handleAlertPresentation(alertItem)
-            
-            // Build and return the SwiftUI Alert
-            return buildAlert(from: alertItem, onDismiss: onDismiss)
+        self.alert(
+            alert.wrappedValue?.title ?? "",
+            isPresented: Binding(value: alert),
+            presenting: alert.wrappedValue
+        ) { alertItem in
+            buildActions(from: alertItem, onDismiss: onDismiss)
+        } message: { alertItem in
+            if let subtitle = alertItem.subtitle {
+                Text(subtitle)
+            }
+        }
+        .onChange(of: alert.wrappedValue != nil) { _, isPresented in
+            if isPresented, let alertItem = alert.wrappedValue {
+                handleAlertPresentation(alertItem)
+            }
         }
     }
-    
+
     // MARK: - Private Helpers
-    
+
     /// Handles side effects when alert is presented
     private func handleAlertPresentation(_ alert: AppErrorAlert) {
         // 1. Logging
         logAlert(alert)
-        
+
         // 2. Haptic Feedback
         triggerHapticFeedback(for: alert)
-        
-        // 3. Analytics (optional - can be enabled later)
-        // trackAlertAnalytics(alert)
     }
-    
+
     /// Logs alert information with type-appropriate emoji
     private func logAlert(_ alert: AppErrorAlert) {
         let emoji: String
@@ -50,14 +57,14 @@ extension View {
         case .info:
             emoji = "ℹ️"
         }
-        
+
         Logger.info("\(emoji) Alert: \(alert.title) - \(alert.message)", category: "UI")
     }
-    
+
     /// Triggers appropriate haptic feedback based on alert type
     private func triggerHapticFeedback(for alert: AppErrorAlert) {
         let generator = UINotificationFeedbackGenerator()
-        
+
         switch alert.alertType {
         case .error:
             generator.notificationOccurred(.error)
@@ -67,52 +74,34 @@ extension View {
             generator.notificationOccurred(.warning)
         }
     }
-    
-    /// Builds SwiftUI Alert from AppErrorAlert
-    private func buildAlert(
+
+    /// Builds modern alert actions from AppErrorAlert
+    @ViewBuilder
+    private func buildActions(
         from alert: AppErrorAlert,
         onDismiss: (() -> Void)?
-    ) -> Alert {
-        let titleText = Text(alert.title)
-        let messageText = alert.subtitle.map { Text($0) }
-        
+    ) -> some View {
         switch alert {
         case .network(let onRetry):
-            return Alert(
-                title: titleText,
-                message: messageText,
-                primaryButton: .default(Text("Thử lại"), action: onRetry),
-                secondaryButton: .cancel { onDismiss?() }
-            )
-            
+            Button("Thử lại", action: onRetry)
+            Button("Hủy", role: .cancel) { onDismiss?() }
+
         case .authWithAction(_, let onOK):
-            return Alert(
-                title: titleText,
-                message: messageText,
-                dismissButton: .default(Text("OK")) {
-                    onOK()
-                    onDismiss?()
-                }
-            )
-            
+            Button("OK", role: .cancel) {
+                onOK()
+                onDismiss?()
+            }
+
         case .success(_, let onOK):
-            return Alert(
-                title: titleText,
-                message: messageText,
-                dismissButton: .default(Text("OK")) {
-                    onOK()
-                    onDismiss?()
-                }
-            )
-            
+            Button("OK", role: .cancel) {
+                onOK()
+                onDismiss?()
+            }
+
         default:
-            return Alert(
-                title: titleText,
-                message: messageText,
-                dismissButton: .default(Text("OK")) {
-                    onDismiss?()
-                }
-            )
+            Button("OK", role: .cancel) {
+                onDismiss?()
+            }
         }
     }
 }

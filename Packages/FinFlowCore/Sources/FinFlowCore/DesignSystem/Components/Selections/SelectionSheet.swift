@@ -58,9 +58,30 @@ public struct SelectionSheet<Item: Identifiable & Equatable, ItemView: View>: Vi
     }
 }
 
+// MARK: - Default Item View
+
+/// Default text + checkmark row used by `SelectionSheet` convenience init
+public struct DefaultSelectionItemView: View {
+    let text: String
+    let isSelected: Bool
+
+    public var body: some View {
+        HStack {
+            Text(text)
+                .font(AppTypography.body)
+                .foregroundStyle(.primary)
+            Spacer()
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .foregroundStyle(AppColors.primary)
+            }
+        }
+    }
+}
+
 // MARK: - Convenience Init with Default Item View
 
-extension SelectionSheet where ItemView == AnyView {
+extension SelectionSheet where ItemView == DefaultSelectionItemView {
     /// Convenience initializer with default text-only item view
     public init(
         isPresented: Binding<Bool>,
@@ -74,18 +95,7 @@ extension SelectionSheet where ItemView == AnyView {
             items: items,
             title: title
         ) { item, isSelected in
-            AnyView(
-                HStack {
-                    Text(item.description)
-                        .font(AppTypography.body)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    if isSelected {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(AppColors.primary)
-                    }
-                }
-            )
+            DefaultSelectionItemView(text: item.description, isSelected: isSelected)
         }
     }
 }
