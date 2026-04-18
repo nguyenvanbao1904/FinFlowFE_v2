@@ -1,11 +1,12 @@
 //
 //  AccountSelectionSheet.swift
-//  FinFlowCore
+//  Transaction
 //
 //  Account selection for transactions (transaction-eligible accounts only).
 //  Follows Apple HIG: single clear action, recognizable list.
 //
 
+import FinFlowCore
 import SwiftUI
 
 /// Account selection sheet with balance display; use with transaction-eligible accounts only.

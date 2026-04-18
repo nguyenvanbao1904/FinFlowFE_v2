@@ -1,14 +1,15 @@
 //
-//  FinFlowBotGlassOrb.swift
-//  FinFlowCore
+//  BotGlassOrb.swift
+//  FinFlow
 //
 //  Quả cầu kính tối giản — chỉ icon Bot, góc dưới-phải; chấm đỏ khi có gợi ý mới.
 //
 
+import FinFlowCore
 import SwiftUI
 
 /// Nút trợ lý dạng quả cầu kính (glassmorphism), không kèm bong bóng chữ.
-public struct FinFlowBotGlassOrb: View {
+struct FinFlowBotGlassOrb: View {
     private let mascotAssetName: String?
     private let mascotBundle: Bundle
     private let showsNotificationDot: Bool
@@ -32,7 +33,7 @@ public struct FinFlowBotGlassOrb: View {
     ///   - mascotBundle: Bundle chứa asset.
     ///   - showsNotificationDot: Chấm đỏ khi có gợi ý chưa xem (sau này gắn API).
     ///   - onTap: Mở sheet / chat.
-    public init(
+    init(
         mascotAssetName: String? = nil,
         mascotBundle: Bundle = .main,
         showsNotificationDot: Bool = false,
@@ -44,7 +45,7 @@ public struct FinFlowBotGlassOrb: View {
         self.onTap = onTap
     }
 
-    public var body: some View {
+    var body: some View {
         Button(action: onTap) {
             ZStack {
                 Circle()

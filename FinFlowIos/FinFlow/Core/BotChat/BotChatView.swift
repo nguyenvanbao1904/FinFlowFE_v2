@@ -1,10 +1,11 @@
 //
-//  FinFlowBotChatPlaceholderView.swift
-//  FinFlowCore
+//  BotChatView.swift
+//  FinFlow
 //
 //  Professional chat surface for FinFlow Bot.
 //
 
+import FinFlowCore
 import SwiftUI
 
 private enum FinFlowBotChatDefaults {
@@ -17,7 +18,7 @@ private enum FinFlowBotChatDefaults {
 }
 
 /// Sheet chat FinFlow Bot theo phong cách native iOS.
-public struct FinFlowBotChatView: View {
+struct FinFlowBotChatView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var draft = ""
     @State private var isBotTyping = false
@@ -34,7 +35,7 @@ public struct FinFlowBotChatView: View {
     private let sendMessageHandler: (@Sendable (String) async throws -> FinFlowBotSendResult)?
     private let resetConversationHandler: (@Sendable () async throws -> [FinFlowBotChatMessage])?
 
-    public init(
+    init(
         quickPrompts: [String] = [
             "Tóm tắt chi tiêu tuần này",
             "Kiểm tra ngân sách tháng này",
@@ -53,7 +54,7 @@ public struct FinFlowBotChatView: View {
         self._messages = State(initialValue: Self.defaultMessages())
     }
 
-    public var body: some View {
+    var body: some View {
         VStack(spacing: .zero) {
             List {
             Section {
@@ -314,7 +315,7 @@ public struct FinFlowBotChatView: View {
                         )
                     )
                 } else {
-                    try await Task.sleep(nanoseconds: 650_000_000)
+                    try await Task.sleep(for: .milliseconds(650))
                     messages.append(
                         FinFlowBotChatMessage(
                             sender: .bot,
@@ -444,9 +445,6 @@ public struct FinFlowBotChatView: View {
         ]
     }
 }
-
-@available(*, deprecated, renamed: "FinFlowBotChatView")
-public typealias FinFlowBotChatPlaceholderView = FinFlowBotChatView
 
 private struct FinFlowBotChatMessageRow: View {
     let message: FinFlowBotChatMessage

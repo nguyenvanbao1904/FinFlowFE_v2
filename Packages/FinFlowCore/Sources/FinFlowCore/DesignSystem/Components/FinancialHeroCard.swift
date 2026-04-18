@@ -65,7 +65,6 @@ public struct FinancialHeroCard<Content: View>: View {
             content
                 .foregroundStyle(AppColors.textInverted)
         }
-        .environment(\.colorScheme, .dark)
         .padding(Spacing.lg)
         .background(
             ZStack {
