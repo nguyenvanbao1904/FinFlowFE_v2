@@ -145,7 +145,7 @@ public struct LoginView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
                         .shadow(color: AppColors.primary.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(viewModel.isLoading)

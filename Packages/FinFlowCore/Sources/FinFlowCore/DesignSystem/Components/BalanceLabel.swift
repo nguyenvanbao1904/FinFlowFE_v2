@@ -32,7 +32,7 @@ public struct BalanceLabel: View {
     }
 
     private var balanceColor: Color {
-        if balance < 0 { return AppColors.google }
+        if balance < 0 { return AppColors.expense }
         switch style {
         case .plain: return .primary
         case .signed: return AppColors.success

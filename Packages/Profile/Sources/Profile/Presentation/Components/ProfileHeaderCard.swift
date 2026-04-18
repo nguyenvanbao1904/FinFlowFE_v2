@@ -36,6 +36,6 @@ public struct ProfileHeaderCard: View {
         }
         .padding()
         .background(AppColors.textInverted)
-        .clipShape(.rect(cornerRadius: 12))
+        .clipShape(.rect(cornerRadius: CornerRadius.small))
     }
 }

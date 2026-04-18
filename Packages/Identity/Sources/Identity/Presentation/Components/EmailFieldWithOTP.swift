@@ -82,7 +82,7 @@ struct EmailFieldWithOTP: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.google)
+                            message.contains("✅") ? AppColors.success : AppColors.expense)
                     Spacer()
                 }
                 // swiftlint:disable:next no_hardcoded_padding

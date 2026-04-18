@@ -14,7 +14,7 @@ private struct SettingsCardModifier: ViewModifier {
         }
         .padding()
         .background(AppColors.settingsCardBackground)
-        .clipShape(.rect(cornerRadius: 12))
+        .clipShape(.rect(cornerRadius: CornerRadius.small))
     }
 }
 

@@ -170,7 +170,7 @@ public struct BudgetListView: View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(AppTypography.iconMedium)
-                .foregroundStyle(AppColors.google)
+                .foregroundStyle(AppColors.expense)
             VStack(alignment: .leading, spacing: Spacing.xs / 2) {
                 Text("Cảnh báo ngân sách")
                     .font(AppTypography.subheadline)
@@ -185,11 +185,11 @@ public struct BudgetListView: View {
             Spacer()
         }
         .padding(Spacing.md)
-        .background(AppColors.google.opacity(OpacityLevel.ultraLight))
+        .background(AppColors.expense.opacity(OpacityLevel.ultraLight))
         .clipShape(.rect(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
-                .stroke(AppColors.google.opacity(OpacityLevel.low), lineWidth: BorderWidth.thin)
+                .stroke(AppColors.expense.opacity(OpacityLevel.low), lineWidth: BorderWidth.thin)
         )
     }
 
@@ -213,8 +213,7 @@ private struct BudgetRow: View {
 
     private var progressColor: Color {
         let progress = budget.targetAmount > 0 ? spentAmount / budget.targetAmount : 0
-        if progress >= 1.0 { return AppColors.google }
-        if progress >= 0.9 { return AppColors.google }
+        if progress >= 0.9 { return AppColors.expense }
         if progress >= 0.75 { return AppColors.accent }
         return AppColors.success
     }

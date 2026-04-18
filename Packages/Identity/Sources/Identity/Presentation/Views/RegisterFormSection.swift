@@ -64,7 +64,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.google)
+                            message.contains("✅") ? AppColors.success : AppColors.expense)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)
@@ -109,7 +109,7 @@ struct RegisterFormSection: View {
                         Text(message)
                             .font(AppTypography.caption)
                             .foregroundStyle(
-                                message.contains("✅") ? AppColors.success : AppColors.google)
+                                message.contains("✅") ? AppColors.success : AppColors.expense)
                         Spacer()
                     }
                     .padding(.horizontal, Spacing.xs)
@@ -132,7 +132,7 @@ struct RegisterFormSection: View {
                         Text(message)
                             .font(AppTypography.caption)
                             .foregroundStyle(
-                                message.contains("✅") ? AppColors.success : AppColors.google)
+                                message.contains("✅") ? AppColors.success : AppColors.expense)
                         Spacer()
                     }
                     .padding(.horizontal, Spacing.xs)
@@ -165,7 +165,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.google)
+                            message.contains("✅") ? AppColors.success : AppColors.expense)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)
@@ -192,7 +192,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.google)
+                            message.contains("✅") ? AppColors.success : AppColors.expense)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)

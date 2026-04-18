@@ -121,7 +121,7 @@ struct ProfileSettingsListContent: View {
                         Spacer()
                         Text("Đăng xuất")
                             .font(AppTypography.body)
-                            .foregroundStyle(AppColors.google)
+                            .foregroundStyle(AppColors.expense)
                             .fontWeight(.medium)
                         Spacer()
                     }

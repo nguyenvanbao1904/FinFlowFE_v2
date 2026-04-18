@@ -66,7 +66,7 @@ public struct AddStockTradeSheet: View {
                         TypeOptionButton(
                             title: "Bán",
                             isSelected: tradeType == .SELL,
-                            color: AppColors.google
+                            color: AppColors.expense
                         ) {
                             tradeType = .SELL
                         }
@@ -200,7 +200,7 @@ public struct AddStockTradeSheet: View {
 
         suggestTask = Task { @MainActor in
             // debounce
-            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+            try? await Task.sleep(for: AnimationTiming.navigationDelay)
             if Task.isCancelled { return }
 
             do {

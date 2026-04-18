@@ -39,7 +39,7 @@ public struct AddCashTransactionSheet: View {
                         TypeOptionButton(
                             title: "Rút tiền",
                             isSelected: tradeType == .WITHDRAW,
-                            color: AppColors.google
+                            color: AppColors.expense
                         ) {
                             tradeType = .WITHDRAW
                         }

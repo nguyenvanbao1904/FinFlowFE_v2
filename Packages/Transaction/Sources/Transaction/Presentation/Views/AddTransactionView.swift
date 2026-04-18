@@ -253,7 +253,7 @@ public struct AddTransactionView: View {
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .amount)
                     .font(AppTypography.displayXL)
-                    .foregroundStyle(viewModel.isIncome ? AppColors.success : AppColors.google)
+                    .foregroundStyle(viewModel.isIncome ? AppColors.success : AppColors.expense)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .frame(height: Layout.inputRowHeight)
@@ -275,7 +275,7 @@ public struct AddTransactionView: View {
             TypeOptionButton(
                 title: "Chi tiêu",
                 isSelected: !viewModel.isIncome,
-                color: AppColors.google
+                color: AppColors.expense
             ) {
                 withAnimation { viewModel.isIncome = false }
             }

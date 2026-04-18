@@ -7,7 +7,7 @@ struct SettingsRowIcon: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: CornerRadius.micro)
                 .fill(color)
                 .frame(width: UILayout.socialIconSize, height: UILayout.socialIconSize)
 

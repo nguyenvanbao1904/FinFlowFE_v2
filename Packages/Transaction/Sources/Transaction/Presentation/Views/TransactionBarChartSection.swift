@@ -126,7 +126,7 @@ struct TransactionBarChartSection: View {
                                  ? 1.0 : OpacityLevel.low)
                 }
             }
-            .chartForegroundStyleScale(["Thu nhập": AppColors.success, "Chi tiêu": AppColors.google])
+            .chartForegroundStyleScale(["Thu nhập": AppColors.success, "Chi tiêu": AppColors.expense])
             .chartLegend(position: .top, alignment: .leading)
             .chartXScale(domain: Self.weekdayCategories)
             .chartYAxis {
@@ -176,7 +176,7 @@ struct TransactionBarChartSection: View {
                                  ? 1.0 : OpacityLevel.low)
                 }
             }
-            .chartForegroundStyleScale(["Thu nhập": AppColors.success, "Chi tiêu": AppColors.google])
+            .chartForegroundStyleScale(["Thu nhập": AppColors.success, "Chi tiêu": AppColors.expense])
             .chartLegend(position: .top, alignment: .leading)
             .chartXScale(domain: xDomain)
             .chartYAxis {
@@ -225,9 +225,9 @@ struct TransactionBarChartSection: View {
                 subtitle: "Giữ và kéo để xem kỳ khác",
                 metrics: [
                     ChartPopoverMetric(id: "income",   label: "Thu",       value: CurrencyFormatter.format(dataPoint.income),  color: AppColors.success),
-                    ChartPopoverMetric(id: "expense",  label: "Chi",       value: CurrencyFormatter.format(dataPoint.expense), color: AppColors.google),
+                    ChartPopoverMetric(id: "expense",  label: "Chi",       value: CurrencyFormatter.format(dataPoint.expense), color: AppColors.expense),
                     ChartPopoverMetric(id: "balance",  label: "Chênh lệch",value: CurrencyFormatter.format(dataPoint.income - dataPoint.expense),
-                                       color: dataPoint.income >= dataPoint.expense ? AppColors.success : AppColors.google),
+                                       color: dataPoint.income >= dataPoint.expense ? AppColors.success : AppColors.expense),
                 ]
             )
             .frame(maxWidth: 290)

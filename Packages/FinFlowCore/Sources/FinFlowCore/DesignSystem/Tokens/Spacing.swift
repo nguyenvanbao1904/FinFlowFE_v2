@@ -31,6 +31,7 @@ public typealias AppSpacing = Spacing
 // MARK: - Corner Radius
 
 public enum CornerRadius {
+    public static let micro: CGFloat = 6
     public static let small: CGFloat = 12
     public static let medium: CGFloat = 16
     public static let large: CGFloat = 20
@@ -70,7 +71,7 @@ public enum Layout {
 
 public enum AnimationTiming {
     /// Standard short delay for navigation/dismissal animations (0.3 s).
-    public static let navigationDelay: UInt64 = 300_000_000
+    public static let navigationDelay: Duration = .milliseconds(300)
 }
 
 // MARK: - Shadow

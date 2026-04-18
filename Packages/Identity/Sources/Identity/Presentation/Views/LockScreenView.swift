@@ -52,7 +52,7 @@ public struct LockScreenView: View {
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .font(AppTypography.caption)
-                        .foregroundStyle(AppColors.google)
+                        .foregroundStyle(AppColors.expense)
                         .padding(.top, Spacing.xs)
                 }
 
