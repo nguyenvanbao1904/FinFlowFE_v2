@@ -85,8 +85,7 @@ private actor AutoSubmitDebouncer {
     ) {
         pendingTask?.cancel()
         pendingTask = Task {
-            let delayNs = UInt64(max(0, delay) * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: delayNs)
+            try? await Task.sleep(for: .seconds(max(0, delay)))
             guard !Task.isCancelled else { return }
             let finalText = latestTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !finalText.isEmpty else { return }

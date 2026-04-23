@@ -275,7 +275,7 @@ public struct TransactionListView: View {
     private var analyticsTab: some View {
         TransactionAnalyticsView(
             summary: viewModel.summary,
-            insights: mappedInsights(viewModel.aiInsights),
+            insights: viewModel.mappedInsights,
             chartData: viewModel.chartData,
             currentRange: viewModel.chartRange,
             onRangeChange: { newRange in
@@ -297,28 +297,6 @@ public struct TransactionListView: View {
                 viewModel.generateDetailedReport()
             }
         )
-    }
-
-    private func mappedInsights(_ source: [AnalyticsInsightResponse]) -> [TransactionAIInsight] {
-        source.map { item in
-            let icon: String
-            let color: Color
-            switch item.type {
-            case .warning:
-                icon = "exclamationmark.triangle.fill"
-                color = AppColors.primary
-            case .tip:
-                icon = "leaf.fill"
-                color = AppColors.success
-            }
-            return TransactionAIInsight(
-                id: item.id,
-                title: item.title,
-                message: item.message,
-                icon: icon,
-                color: color
-            )
-        }
     }
 
 }

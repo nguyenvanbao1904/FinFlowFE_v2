@@ -1,4 +1,3 @@
-import Foundation
 import FinFlowCore
 
 public protocol AnalyzeTextUseCaseProtocol: Sendable {

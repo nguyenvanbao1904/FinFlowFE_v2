@@ -18,7 +18,8 @@ struct ProfileSettingsListContent: View {
                 Section {
                     Button {
                         onDismiss()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        Task {
+                            try? await Task.sleep(for: AnimationTiming.navigationDelay)
                             onNavigateUpdateProfile()
                         }
                     } label: {
@@ -80,12 +81,13 @@ struct ProfileSettingsListContent: View {
             Section {
                 Button {
                     onDismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    Task {
+                        try? await Task.sleep(for: AnimationTiming.navigationDelay)
                         accountVM.navigateToChangePassword()
                     }
                 } label: {
                     HStack {
-                        SettingsRowIcon(icon: "lock.rotation", color: .gray)
+                        SettingsRowIcon(icon: "lock.rotation", color: AppColors.disabled)
                         Text(
                             (profileVM.profile?.hasPassword == false)
                                 ? "Tạo mật khẩu" : "Đổi mật khẩu"
@@ -103,7 +105,7 @@ struct ProfileSettingsListContent: View {
                     accountVM.initiateAccountDeletion()
                 } label: {
                     HStack {
-                        SettingsRowIcon(icon: "trash.fill", color: .red)
+                        SettingsRowIcon(icon: "trash.fill", color: AppColors.destructive)
                         Text("Xóa tài khoản")
                             .font(AppTypography.body)
                     }

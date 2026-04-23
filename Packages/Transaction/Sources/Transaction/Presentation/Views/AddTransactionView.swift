@@ -28,24 +28,8 @@ public struct AddTransactionView: View {
     }
 
     @Bindable var viewModel: AddTransactionViewModel
-
-    // AI / Smart State - Keeping locally for UI effect
-    @State private var aiInputText: String = ""
-    @State private var isAnalyzing: Bool = false
-    @State private var speechManager = SpeechToTextManager()
-    @State private var speechErrorMessage: String?
+    @State private var assistant = TransactionInputAssistant()
     @State private var cameraSheet: CameraSheet?
-    @State private var showCameraOptions: Bool = false
-    @State private var showPhotoPicker: Bool = false
-    @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var selectedImage: UIImage?
-    @State private var isOCRing: Bool = false
-    @State private var ocrErrorMessage: String?
-
-    // Animation trigger for "Magical" auto-fill effect
-    @State private var showMagicEffect: Bool = false
-
-    // Category Selection State
     @State private var activeSheet: ActiveSheet?
     @FocusState private var focusedField: InputField?
 
@@ -55,32 +39,29 @@ public struct AddTransactionView: View {
 
     public var body: some View {
         VStack(spacing: .zero) {
-            // 1. The "Brain" - Smart Input Bar (Pinned at top)
             AISmartInputBar(
-                text: $aiInputText,
+                text: $assistant.aiInputText,
                 isAnalyzing: Binding(
-                    get: { isAnalyzing || isOCRing || speechManager.isListening },
+                    get: { assistant.isProcessing },
                     set: { _ in }
                 ),
                 placeholder: "Ví dụ: Đổ xăng 50 cành...",
                 onSubmit: { text in
-                    submitTextForAnalysis(text, mirrorToInput: true)
+                    focusedField = nil
+                    assistant.submitTextForAnalysis(text, mirrorToInput: true, analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
                 },
                 onVoice: {
-                    toggleVoiceInput()
+                    focusedField = nil
+                    assistant.toggleVoiceInput(analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
                 },
                 onCamera: {
-                    // Stop voice capture to avoid AVAudioSession conflicts.
-                    if speechManager.isListening {
-                        speechManager.stopListening()
-                    }
-                    showCameraOptions = true
+                    assistant.handleCameraTap()
                 }
             )
             .padding(.horizontal)
             .padding(.top, Spacing.md)
             .padding(.bottom, Spacing.sm)
-            .zIndex(1)  // Keep above scrollview
+            .zIndex(1)
 
             Form {
                 Section {
@@ -97,15 +78,11 @@ public struct AddTransactionView: View {
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
 
-                // 4. Details Form
                 detailsFormSection
 
                 Section {
-                    // 5. Save Button
                     Button("Lưu Giao Dịch") {
-                        Task {
-                            await viewModel.saveTransaction()
-                        }
+                        Task { await viewModel.saveTransaction() }
                     }
                     .primaryButton(isLoading: viewModel.isLoading)
                     .disabled(!viewModel.isSaveEnabled || viewModel.isLoading)
@@ -121,15 +98,11 @@ public struct AddTransactionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button("Hủy") {
-                    viewModel.cancel()
-                }
-                .foregroundStyle(AppColors.primary)
+                Button("Hủy") { viewModel.cancel() }
+                    .foregroundStyle(AppColors.primary)
             }
         }
-        .task {
-            await viewModel.fetchCategories()
-        }
+        .task { await viewModel.fetchCategories() }
         // swiftlint:disable:next no_direct_sheet_or_cover
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -137,9 +110,7 @@ public struct AddTransactionView: View {
                 CategorySelectionSheet(
                     isPresented: Binding(
                         get: { activeSheet == .categoryPicker },
-                        set: { isPresented in
-                            if !isPresented { activeSheet = nil }
-                        }
+                        set: { if !$0 { activeSheet = nil } }
                     ),
                     selectedCategory: $viewModel.selectedCategory,
                     categories: viewModel.filteredCategories
@@ -148,9 +119,7 @@ public struct AddTransactionView: View {
                 AccountSelectionSheet(
                     isPresented: Binding(
                         get: { activeSheet == .accountPicker },
-                        set: { isPresented in
-                            if !isPresented { activeSheet = nil }
-                        }
+                        set: { if !$0 { activeSheet = nil } }
                     ),
                     selectedAccount: $viewModel.selectedAccount,
                     accounts: viewModel.transactionEligibleAccounts
@@ -164,76 +133,53 @@ public struct AddTransactionView: View {
             )
         )
         .alert("Lỗi ghi âm", isPresented: Binding(
-            get: { speechErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented { speechErrorMessage = nil }
-            }
+            get: { assistant.speechErrorMessage != nil },
+            set: { if !$0 { assistant.speechErrorMessage = nil } }
         )) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text(speechErrorMessage ?? "")
+            Text(assistant.speechErrorMessage ?? "")
         }
         .alert("Lỗi OCR", isPresented: Binding(
-            get: { ocrErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented { ocrErrorMessage = nil }
-            }
+            get: { assistant.ocrErrorMessage != nil },
+            set: { if !$0 { assistant.ocrErrorMessage = nil } }
         )) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text(ocrErrorMessage ?? "")
+            Text(assistant.ocrErrorMessage ?? "")
         }
         .confirmationDialog(
             "Chọn nguồn hoá đơn",
-            isPresented: $showCameraOptions,
+            isPresented: $assistant.showCameraOptions,
             titleVisibility: .visible
         ) {
-            Button("Chụp ảnh") {
-                cameraSheet = .camera
-            }
+            Button("Chụp ảnh") { cameraSheet = .camera }
             Button("Ảnh đã có") {
-                selectedPhotoItem = nil
-                showPhotoPicker = true
+                assistant.selectedPhotoItem = nil
+                assistant.showPhotoPicker = true
             }
             Button("Hủy", role: .cancel) {}
         }
         .photosPicker(
-            isPresented: $showPhotoPicker,
-            selection: $selectedPhotoItem,
+            isPresented: $assistant.showPhotoPicker,
+            selection: $assistant.selectedPhotoItem,
             matching: .images
         )
         .sheet(item: $cameraSheet) { _ in
             CameraImagePicker(
                 onImagePicked: { image in
-                selectedImage = image
-                cameraSheet = nil
-                Task { await runOCRAndAnalyzeIfPossible() }
-            }
+                    cameraSheet = nil
+                    assistant.handleImagePicked(image, analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
+                }
             ) {
                 cameraSheet = nil
             }
             .ignoresSafeArea()
         }
-        .onChange(of: selectedPhotoItem) { _, newItem in
-            guard let newItem else { return }
-            Task {
-                do {
-                    if let data = try await newItem.loadTransferable(type: Data.self),
-                        let image = UIImage(data: data) {
-                        selectedImage = image
-                        showPhotoPicker = false
-                        await runOCRAndAnalyzeIfPossible()
-                    } else {
-                        ocrErrorMessage = "Không thể đọc ảnh đã chọn."
-                    }
-                } catch {
-                    ocrErrorMessage = "Không thể đọc ảnh đã chọn: \(error.localizedDescription)"
-                }
-            }
+        .onChange(of: assistant.selectedPhotoItem) { _, newItem in
+            assistant.handlePhotoSelected(newItem, analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
         }
-        .onDisappear {
-            speechManager.stopListening()
-        }
+        .onDisappear { assistant.stopListening() }
     }
 
     // MARK: - Core UI Sections
@@ -257,10 +203,10 @@ public struct AddTransactionView: View {
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .frame(height: Layout.inputRowHeight)
-                    .blur(radius: isAnalyzing ? 3 : 0)
-                    .scaleEffect(showMagicEffect ? 1.05 : 1.0)
+                    .blur(radius: assistant.isAnalyzing ? 3 : 0)
+                    .scaleEffect(assistant.showMagicEffect ? 1.05 : 1.0)
                     .onChange(of: viewModel.amount) { _, newValue in
-                        let formatted = formatCurrency(newValue)
+                        let formatted = CurrencyFormatter.formatInput(newValue)
                         if viewModel.amount != formatted {
                             viewModel.amount = formatted
                         }
@@ -302,15 +248,14 @@ public struct AddTransactionView: View {
                         Circle()
                             .fill(AppColors.accent.opacity(OpacityLevel.ultraLight))
                             .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
-                            .scaleEffect(showMagicEffect ? 1.1 : 1.0)
+                            .scaleEffect(assistant.showMagicEffect ? 1.1 : 1.0)
 
-                        // Icon mapping will require a helper, using default for now
                         Image(
                             systemName: viewModel.selectedCategory?.icon ?? "square.grid.2x2.fill"
                         )
                         .foregroundStyle(AppColors.accent)
                         .font(AppTypography.iconMedium)
-                        .rotationEffect(.degrees(showMagicEffect ? 360 : 0))
+                        .rotationEffect(.degrees(assistant.showMagicEffect ? 360 : 0))
                     }
 
                     VStack(alignment: .leading, spacing: Spacing.xs / 2) {
@@ -320,7 +265,7 @@ public struct AddTransactionView: View {
                         Text(viewModel.selectedCategory?.name ?? "Chọn danh mục")
                             .font(AppTypography.body)
                             .foregroundStyle(.primary)
-                            .contentTransition(.numericText())  // iOS 16+ fluid text transition
+                            .contentTransition(.numericText())
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
@@ -329,9 +274,9 @@ public struct AddTransactionView: View {
                 }
             }
             .buttonStyle(.plain)
-            .listRowBackground(showMagicEffect ? AppColors.accent.opacity(0.1) : nil)
+            .listRowBackground(assistant.showMagicEffect ? AppColors.accent.opacity(0.1) : nil)
 
-            // Account Selector (transaction-eligible only)
+            // Account Selector
             Button {
                 if !viewModel.transactionEligibleAccounts.isEmpty {
                     activeSheet = .accountPicker
@@ -343,7 +288,8 @@ public struct AddTransactionView: View {
             } label: {
                 HStack {
                     ZStack {
-                        let iconColor = Color(hex: viewModel.selectedAccount?.accountType.color ?? "#10B981")
+                        let rawHex = viewModel.selectedAccount?.accountType.color
+                        let iconColor = rawHex.map { Color(hex: $0) } ?? AppColors.success
                         Circle()
                             .fill(iconColor.opacity(OpacityLevel.ultraLight))
                             .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
@@ -386,7 +332,7 @@ public struct AddTransactionView: View {
                     .font(AppTypography.body)
                     .foregroundStyle(.primary)
             }
-            .listRowBackground(showMagicEffect ? AppColors.primary.opacity(0.1) : nil)
+            .listRowBackground(assistant.showMagicEffect ? AppColors.primary.opacity(0.1) : nil)
 
             // Date Picker
             HStack {
@@ -397,92 +343,5 @@ public struct AddTransactionView: View {
                     .foregroundStyle(.primary)
             }
         }
-    }
-
-    // MARK: - Helpers
-
-    private func triggerAIAnalysis(text: String) {
-        focusedField = nil
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-            isAnalyzing = true
-        }
-
-        Task {
-            await viewModel.analyzeText(input: text)
-
-            await MainActor.run {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                    isAnalyzing = false
-                }
-            }
-
-            guard viewModel.alert == nil else { return }
-
-            await MainActor.run {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                    showMagicEffect = true
-                    aiInputText = ""
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation { showMagicEffect = false }
-                }
-            }
-        }
-    }
-
-    private func toggleVoiceInput() {
-        if speechManager.isListening {
-            let finalText = speechManager.latestTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-            speechManager.stopListening()
-            if !finalText.isEmpty {
-                submitTextForAnalysis(finalText, mirrorToInput: true)
-            }
-            return
-        }
-
-        speechManager.startListening(
-            onPartialText: { partialText in
-                aiInputText = partialText
-            },
-            onError: { message in
-                speechErrorMessage = message
-            },
-            onAutoSubmit: { finalText in
-                // User stopped speaking — stop mic and send to AI automatically.
-                speechManager.stopListening()
-                submitTextForAnalysis(finalText, mirrorToInput: true)
-            }
-        )
-    }
-
-    private func runOCRAndAnalyzeIfPossible() async {
-        guard let image = selectedImage else { return }
-        guard !isOCRing else { return }
-        isOCRing = true
-        defer {
-            isOCRing = false
-            selectedImage = nil
-            selectedPhotoItem = nil
-        }
-
-        do {
-            let text = try await ReceiptOCRService().recognizeText(from: image)
-            submitTextForAnalysis(text, mirrorToInput: false)
-        } catch {
-            ocrErrorMessage = error.localizedDescription
-        }
-    }
-
-    private func submitTextForAnalysis(_ text: String, mirrorToInput: Bool) {
-        let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalized.isEmpty else { return }
-        if mirrorToInput {
-            aiInputText = normalized
-        }
-        triggerAIAnalysis(text: normalized)
-    }
-
-    private func formatCurrency(_ input: String) -> String {
-        return CurrencyFormatter.formatInput(input)
     }
 }

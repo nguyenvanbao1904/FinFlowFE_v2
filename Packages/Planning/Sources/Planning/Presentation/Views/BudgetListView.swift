@@ -133,7 +133,7 @@ public struct BudgetListView: View {
                     ProgressBar(
                         current: viewModel.totalSpent,
                         total: viewModel.totalBudget,
-                        color: .white
+                        color: AppColors.textInverted
                     )
                 }
                 Divider()

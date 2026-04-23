@@ -1,5 +1,4 @@
 import FinFlowCore
-import Foundation
 
 public actor BudgetRepository: BudgetRepositoryProtocol {
     private let client: any HTTPClientProtocol

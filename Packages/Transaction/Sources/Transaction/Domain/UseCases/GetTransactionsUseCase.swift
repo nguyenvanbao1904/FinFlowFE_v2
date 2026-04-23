@@ -1,5 +1,5 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 
 public struct GetTransactionsUseCase: Sendable {
     private let repository: any TransactionRepositoryProtocol

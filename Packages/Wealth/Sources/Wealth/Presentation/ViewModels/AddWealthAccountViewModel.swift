@@ -40,6 +40,7 @@ public final class AddWealthAccountViewModel {
         self.onSuccess = onSuccess
         if let existing = existingAccount {
             self.name = existing.name
+            // Format số dư hiện tại thành string cho text field (giữ dấu âm nếu có)
             let absBalance = abs(existing.balance)
             let formatted = CurrencyFormatter.format(absBalance).replacingOccurrences(of: " ₫", with: "")
             self.amount = existing.balance < 0 ? "-" + formatted : formatted
@@ -47,20 +48,11 @@ public final class AddWealthAccountViewModel {
         }
     }
 
+    /// UI-level check: có đủ input để bật nút Save không.
     public var isValid: Bool {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
-        let (_, digits) = parseSignedAmount(amount)
-        if digits.isEmpty { return false }
-        guard Double(digits) != nil else { return false }
-        return selectedAccountType != nil
-    }
-
-    /// Parses amount string (e.g. "-10.000" or "10.000") into sign and digits; returns (hasLeadingMinus, digitsOnly).
-    private func parseSignedAmount(_ value: String) -> (negative: Bool, digits: String) {
-        let t = value.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: ",", with: "")
-        let neg = t.hasPrefix("-")
-        let digits = String(t.dropFirst(neg ? 1 : 0).filter { "0123456789".contains($0) })
-        return (neg, digits)
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !amount.isEmpty
+            && selectedAccountType != nil
     }
 
     public func loadAccountTypes() async {
@@ -84,38 +76,27 @@ public final class AddWealthAccountViewModel {
     }
 
     public func save() async {
-        guard isValid,
-              let type = selectedAccountType else { return }
-
-        let (negative, digits) = parseSignedAmount(amount)
-        let numeric = Double(digits) ?? 0
-        let signed = negative ? -numeric : numeric
-        let balance: Double
-        if type.debt {
-            balance = signed <= 0 ? signed : -signed
-        } else {
-            balance = signed
-        }
+        guard isValid, let type = selectedAccountType else { return }
 
         isLoading = true
         defer { isLoading = false }
+
         do {
             if let existing = existingAccount, let updateUC = updateWealthAccountUseCase {
-                let request = UpdateWealthAccountRequest(
-                    name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-                    accountTypeId: type.id,
-                    balance: balance,
+                _ = try await updateUC.execute(
+                    id: existing.id,
+                    name: name,
+                    amountString: amount,
+                    accountType: type,
                     includeInNetWorth: includeInNetWorth
                 )
-                _ = try await updateUC.execute(id: existing.id, request: request)
             } else {
-                let request = CreateWealthAccountRequest(
-                    name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-                    accountTypeId: type.id,
-                    balance: balance,
+                _ = try await createWealthAccountUseCase.execute(
+                    name: name,
+                    amountString: amount,
+                    accountType: type,
                     includeInNetWorth: includeInNetWorth
                 )
-                _ = try await createWealthAccountUseCase.execute(request: request)
             }
             onSuccess()
         } catch {

@@ -12,7 +12,7 @@ import Observation
 /// Responsibility: Quản lý PIN và Biometric authentication
 @MainActor
 @Observable
-public class SecuritySettingsViewModel {
+public final class SecuritySettingsViewModel {
     // MARK: - State
     public var pinAlert: AppErrorAlert?
     public var showPINVerification = false
@@ -31,7 +31,7 @@ public class SecuritySettingsViewModel {
     private let pinManager: any PINManagerProtocol
     private let authRepository: AuthRepositoryProtocol
     private let router: any AppRouterProtocol
-    public let sessionManager: any SessionManagerProtocol
+    private let sessionManager: any SessionManagerProtocol
     private let otpHandler: OTPInputHandler
     private var userEmail: String
     
@@ -116,16 +116,7 @@ public class SecuritySettingsViewModel {
             
             Logger.info("✅ Biometric toggled: \(enabled)", category: "SecurityVM")
         } catch {
-            // Nếu session hết hạn/refresh token hỏng -> yêu cầu user đăng nhập lại
-            if let appError = error as? AppError, case .unauthorized = appError {
-                pinAlert = .authWithAction(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.") { [sessionManager] in
-                    Task { @MainActor in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-            } else {
-                pinAlert = error.toAppAlert(defaultTitle: "Lỗi")
-            }
+            pinAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi")
         }
     }
     
@@ -134,11 +125,11 @@ public class SecuritySettingsViewModel {
         // Close PIN input first to avoid stacked/hovering modal transitions on small screens.
         showPINVerification = false
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 250_000_000)
+            try? await Task.sleep(for: .milliseconds(250))
             self.showForgotPINAlert = true
         }
     }
-    
+
     /// Send OTP to reset PIN
     public func sendResetPinOTP() async {
         isLoading = true
@@ -150,10 +141,10 @@ public class SecuritySettingsViewModel {
             showForgotPINAlert = false
             showPINVerification = false
             // Keep transition stable between alert -> sheet on iPhone small heights.
-            try? await Task.sleep(nanoseconds: 250_000_000)
+            try? await Task.sleep(for: .milliseconds(250))
             showResetPinOtpInput = true
         } catch {
-            pinAlert = error.toAppAlert(defaultTitle: "Lỗi gửi mã OTP")
+            pinAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi gửi mã OTP")
         }
         
         isLoading = false
@@ -184,7 +175,7 @@ public class SecuritySettingsViewModel {
             pinAlert = .general(title: "Thành công", message: "Mã PIN đã được xóa. Vui lòng tạo mã PIN mới.")
             
         } catch {
-            otpErrorMessage = (error as? AppError)?.localizedDescription ?? error.localizedDescription
+            pinAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi xác thực OTP")
         }
         
         isLoading = false

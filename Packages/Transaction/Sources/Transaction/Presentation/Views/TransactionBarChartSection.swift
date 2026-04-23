@@ -57,11 +57,12 @@ struct TransactionBarChartSection: View {
                 Image(systemName: "chevron.left")
                     .font(AppTypography.body)
                     .foregroundStyle(AppColors.primary)
-                    .frame(width: 36, height: 36)
+                    .frame(width: UILayout.navBarProfileIconChip, height: UILayout.navBarProfileIconChip)
                     .contentShape(Rectangle())
             }
             .disabled(isChartLoading)
             .buttonStyle(.plain)
+            .accessibilityLabel("Kỳ trước")
             Spacer()
             Text(chartData?.periodLabel ?? "Biến động Số Dư")
                 .font(AppTypography.headline)
@@ -73,11 +74,12 @@ struct TransactionBarChartSection: View {
                     .foregroundStyle(
                         canGoForward ? AppColors.primary : .secondary.opacity(OpacityLevel.low)
                     )
-                    .frame(width: 36, height: 36)
+                    .frame(width: UILayout.navBarProfileIconChip, height: UILayout.navBarProfileIconChip)
                     .contentShape(Rectangle())
             }
             .disabled(!canGoForward || isChartLoading)
             .buttonStyle(.plain)
+            .accessibilityLabel("Kỳ tiếp theo")
         }
         .padding(.horizontal, AppSpacing.md)
     }
@@ -337,7 +339,7 @@ struct TransactionBarChartSection: View {
         return points.indices.first { plotSlot(forIndex: $0, label: points[$0].label) == slot }
     }
 
-    private static let axisDateFormatter: DateFormatter = {
+    private nonisolated(unsafe) static let axisDateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_GB")

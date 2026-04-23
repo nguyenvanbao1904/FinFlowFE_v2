@@ -10,13 +10,14 @@ import Observation
 /// Responsibility: Quản lý hiển thị và cập nhật profile
 @MainActor
 @Observable
-public class ProfileViewModel {
+public final class ProfileViewModel {
     // MARK: - State
     public var profile: UserProfile?
     public var alert: AppErrorAlert?
     public var isLoading = false
     public var isRefreshing = false
     public var hasLoadError = false
+    /// True khi session hết hạn (401) — dùng để hiển thị ProfileAuthExpiredStateView.
     public var hasAuthExpiredError = false
     
     // MARK: - Dependencies
@@ -87,35 +88,24 @@ public class ProfileViewModel {
                 isRefreshing = false
                 return
             }
-            
+
             Logger.error("Lỗi tải profile: \(error)", category: "ProfileVM")
-            
-            // Nếu token hết hạn/401, yêu cầu user đăng nhập lại
-            if let appError = error as? AppError, case .unauthorized = appError {
-                // Dừng trạng thái loading để UI chuyển sang màn hình chờ
-                isLoading = false
-                isRefreshing = false
-                hasAuthExpiredError = true
-                
-                alert = .authWithAction(message: "Phiên đăng nhập đã hết hạn hoặc không còn hiệu lực. Vui lòng đăng nhập lại.") { [sessionManager] in
-                    Task { @MainActor in
-                        await sessionManager.clearExpiredSession()
-                    }
-                }
-                return
-            }
-            
+
+            let handled = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tải dữ liệu")
+
             if profile == nil {
-                if let appError = error as? AppError {
-                    self.alert = .data(message: appError.localizedDescription)
-                } else {
-                    self.alert = .general(
-                        title: "Lỗi tải dữ liệu", message: error.localizedDescription)
-                }
-                hasLoadError = true
-                hasAuthExpiredError = false
+                // Chưa có data nào → hiển thị alert hoặc auth expired state
+                alert = handled
+                hasAuthExpiredError = handled?.isUnauthorized == true
+                hasLoadError = handled?.isUnauthorized == false
             } else {
+                // Đã có cached data → silent fail, không làm phiền user
                 Logger.warning("Không thể refresh, hiển thị dữ liệu đã lưu", category: "ProfileVM")
+                // Vẫn handle 401 dù đang có cache (session hết hạn cần logout)
+                if handled?.isUnauthorized == true {
+                    alert = handled
+                    hasAuthExpiredError = true
+                }
             }
         }
         

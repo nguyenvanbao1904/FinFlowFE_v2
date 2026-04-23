@@ -6,7 +6,6 @@
 //
 
 import FinFlowCore
-import Foundation
 
 public protocol GetProfileUseCaseProtocol: Sendable {
     func execute() async throws -> UserProfile

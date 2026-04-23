@@ -16,6 +16,14 @@ let package = Package(
             dependencies: [
                 .product(name: "FinFlowCore", package: "FinFlowCore")
             ]
+        ),
+        .testTarget(
+            name: "TransactionTests",
+            dependencies: [
+                "Transaction",
+                .product(name: "FinFlowCore", package: "FinFlowCore")
+            ],
+            path: "Tests/TransactionTests"
         )
     ]
 )

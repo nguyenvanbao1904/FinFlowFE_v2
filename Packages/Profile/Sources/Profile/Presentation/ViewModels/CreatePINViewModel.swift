@@ -4,12 +4,11 @@
 //
 
 import FinFlowCore
-import Foundation
 import Observation
 
 @MainActor
 @Observable
-public class CreatePINViewModel {
+public final class CreatePINViewModel {
     public var pin: String = ""
     public var confirmPIN: String = ""
     public var alert: AppErrorAlert?
@@ -22,11 +21,13 @@ public class CreatePINViewModel {
 
     private let email: String
     private let pinManager: any PINManagerProtocol
+    private let sessionManager: any SessionManagerProtocol
     private let onCompletion: () -> Void
 
-    public init(email: String, pinManager: any PINManagerProtocol, onCompletion: @escaping () -> Void) {
+    public init(email: String, pinManager: any PINManagerProtocol, sessionManager: any SessionManagerProtocol, onCompletion: @escaping () -> Void) {
         self.email = email
         self.pinManager = pinManager
+        self.sessionManager = sessionManager
         self.onCompletion = onCompletion
     }
 
@@ -73,7 +74,7 @@ public class CreatePINViewModel {
             onCompletion()
         } catch {
             Logger.error("❌ Failed to save PIN: \(error)", category: "PIN")
-            alert = .general(title: "Lỗi", message: "Không thể lưu mã PIN. Vui lòng thử lại.")
+            alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Lưu PIN")
         }
 
         isProcessing = false

@@ -1,17 +1,19 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 
 public actor TransactionRepository: TransactionRepositoryProtocol {
     private let client: any HTTPClientProtocol
-    private let queryDateFormatter: DateFormatter
 
-    public init(client: any HTTPClientProtocol) {
-        self.client = client
+    private nonisolated(unsafe) static let queryDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current
         formatter.dateFormat = "yyyy-MM-dd"
-        self.queryDateFormatter = formatter
+        return formatter
+    }()
+
+    public init(client: any HTTPClientProtocol) {
+        self.client = client
     }
 
     public func getCategories() async throws -> [CategoryResponse] {
@@ -119,7 +121,7 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
 
     public func getChart(range: ChartRange, referenceDate: Date) async throws
         -> TransactionChartResponse {
-        let dateStr = queryDateFormatter.string(from: referenceDate)
+        let dateStr = Self.queryDateFormatter.string(from: referenceDate)
         return try await client.request(
             endpoint: buildChartEndpoint(range: range, referenceDate: dateStr),
             method: "GET",
@@ -163,12 +165,12 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
 
         if let startDate {
             queryItems.append(
-                URLQueryItem(name: "startDate", value: queryDateFormatter.string(from: startDate)))
+                URLQueryItem(name: "startDate", value: Self.queryDateFormatter.string(from: startDate)))
         }
 
         if let endDate {
             queryItems.append(
-                URLQueryItem(name: "endDate", value: queryDateFormatter.string(from: endDate)))
+                URLQueryItem(name: "endDate", value: Self.queryDateFormatter.string(from: endDate)))
         }
 
         if let keyword {

@@ -1,10 +1,10 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 import Observation
 
 @MainActor
 @Observable
-public class AddTransactionViewModel {
+public final class AddTransactionViewModel {
     public var amount: String = ""
     public var isIncome: Bool = false
     public var selectedCategory: CategoryResponse?
@@ -119,8 +119,6 @@ public class AddTransactionViewModel {
 
     public var isSaveEnabled: Bool {
         !amount.isEmpty
-            && Double(amount.components(separatedBy: CharacterSet.decimalDigits.inverted).joined())
-                != nil
             && selectedCategory != nil
     }
 
@@ -137,36 +135,31 @@ public class AddTransactionViewModel {
             return
         }
 
-        let rawAmount = amount.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-        guard let numericAmount = Double(rawAmount) else {
-            self.alert = AppError.validationError("Số tiền không hợp lệ").toAppAlert(
-                defaultTitle: "Lỗi Dữ Liệu")
-            return
-        }
-
         let type: TransactionType = isIncome ? .income : .expense
-
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let dateString = formatter.string(from: date)
-
-        let request = AddTransactionRequest(
-            amount: numericAmount,
-            type: type,
-            categoryId: category.id,
-            accountId: account.id,
-            note: note.isEmpty ? nil : note,
-            transactionDate: dateString
-        )
 
         isLoading = true
         defer { isLoading = false }
 
         do {
             if let transaction = transactionToEdit {
-                _ = try await updateUseCase.execute(id: transaction.id, request: request)
+                _ = try await updateUseCase.execute(
+                    id: transaction.id,
+                    amount: amount,
+                    type: type,
+                    categoryId: category.id,
+                    accountId: account.id,
+                    note: note.isEmpty ? nil : note,
+                    date: date
+                )
             } else {
-                _ = try await addUseCase.execute(request: request)
+                _ = try await addUseCase.execute(
+                    amount: amount,
+                    type: type,
+                    categoryId: category.id,
+                    accountId: account.id,
+                    note: note.isEmpty ? nil : note,
+                    date: date
+                )
             }
             NotificationCenter.default.post(name: .transactionDidSave, object: nil)
             router.dismissSheet()

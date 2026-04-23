@@ -6,7 +6,6 @@
 //
 
 import FinFlowCore
-import Foundation
 import Observation
 
 @MainActor
@@ -14,10 +13,9 @@ import Observation
 public final class BudgetListViewModel {
     public var budgets: [BudgetWithSpending] = []
     public var isLoading = false
-    public var error: AppError?
     public var loadError: AppErrorAlert?
 
-    let router: any AppRouterProtocol
+    private let router: any AppRouterProtocol
     private let getBudgetsUseCase: GetBudgetsUseCase
     private let deleteBudgetUseCase: DeleteBudgetUseCase
     private let sessionManager: any SessionManagerProtocol

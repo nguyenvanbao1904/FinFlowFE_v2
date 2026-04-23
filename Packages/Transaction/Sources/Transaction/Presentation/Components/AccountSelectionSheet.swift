@@ -32,7 +32,7 @@ public struct AccountSelectionSheet: View {
             items: accounts,
             title: "Chọn tài khoản"
         ) { account, isSelected in
-            AnyView(AccountRow(account: account, isSelected: isSelected))
+            AccountRow(account: account, isSelected: isSelected)
         }
     }
 }

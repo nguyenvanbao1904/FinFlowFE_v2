@@ -110,6 +110,7 @@ public struct AddBudgetView: View {
             }
         }
         .foregroundStyle(.primary)
+        .accessibilityLabel("Chọn danh mục")
     }
 
     private var amountSection: some View {

@@ -38,19 +38,22 @@ public final class AddBudgetViewModel {
         return cal.date(byAdding: DateComponents(month: 1, day: -1), to: start) ?? start
     }
 
+    private nonisolated(unsafe) static let periodSummaryFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        f.timeZone = TimeZone.current
+        return f
+    }()
+
     /// Summary e.g. "10 ngày" or "Từ 1 thg 3 đến 10 thg 3, 2026".
     public var budgetPeriodSummary: String {
         let days = Calendar.current.dateComponents([.day], from: startDate, to: endDate).day ?? 0
         let dayCount = max(0, days) + 1
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeZone = TimeZone.current
-        return "\(dayCount) ngày · \(f.string(from: startDate)) – \(f.string(from: endDate))"
+        return "\(dayCount) ngày · \(Self.periodSummaryFormatter.string(from: startDate)) – \(Self.periodSummaryFormatter.string(from: endDate))"
     }
 
     public var isValid: Bool {
         selectedCategory != nil && !targetAmount.isEmpty
-            && (Double(targetAmount.replacingOccurrences(of: ".", with: "")) ?? 0) > 0
     }
 
     public init(
@@ -102,40 +105,31 @@ public final class AddBudgetViewModel {
 
     public func saveBudget() async {
         guard isValid,
-            let category = selectedCategory,
-            let amount = Double(targetAmount.replacingOccurrences(of: ".", with: "")),
-            amount > 0
+            let category = selectedCategory
         else { return }
 
         isLoading = true
         loadError = nil
         defer { isLoading = false }
 
-        let startStr = dateToIso(startDate)
-        let endStr = dateToIso(endDate)
-        let request = CreateBudgetRequest(
-            categoryId: category.id,
-            targetAmount: amount,
-            startDate: startStr,
-            endDate: endStr,
-            isRecurring: isRecurring,
-            recurringStartDate: isRecurring ? startStr : nil
-        )
-
         do {
             if let existing = budgetToEdit {
                 _ = try await updateBudgetUseCase.execute(
                     id: existing.id,
-                    request: UpdateBudgetRequest(
-                        categoryId: category.id,
-                        targetAmount: amount,
-                        startDate: startStr,
-                        endDate: endStr,
-                        isRecurring: isRecurring,
-                        recurringStartDate: isRecurring ? startStr : nil
-                    ))
+                    categoryId: category.id,
+                    targetAmountString: targetAmount,
+                    startDate: startDate,
+                    endDate: endDate,
+                    isRecurring: isRecurring
+                )
             } else {
-                _ = try await createBudgetUseCase.execute(request: request)
+                _ = try await createBudgetUseCase.execute(
+                    categoryId: category.id,
+                    targetAmountString: targetAmount,
+                    startDate: startDate,
+                    endDate: endDate,
+                    isRecurring: isRecurring
+                )
             }
             NotificationCenter.default.post(name: .budgetDidSave, object: nil)
             onSuccess()
@@ -143,20 +137,17 @@ public final class AddBudgetViewModel {
             loadError = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi lưu ngân sách")
         }
     }
-
-    private func dateToIso(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        return formatter.string(from: date)
-    }
 }
+
+private let _yyyyMMddFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "yyyy-MM-dd"
+    f.timeZone = TimeZone.current
+    return f
+}()
 
 extension String {
     fileprivate func asDateFromYYYYMMDD() -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        return formatter.date(from: self)
+        _yyyyMMddFormatter.date(from: self)
     }
 }

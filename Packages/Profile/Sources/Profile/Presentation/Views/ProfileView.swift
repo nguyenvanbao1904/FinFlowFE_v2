@@ -115,7 +115,7 @@ public struct ProfileView: View {
             )
         )
         .onAppear {
-            if case .authenticated(_, let isRestored) = accountVM.sessionManager.state, isRestored {
+            if accountVM.isSessionRestored {
                 activeSheet = .restorationAlert
             }
         }

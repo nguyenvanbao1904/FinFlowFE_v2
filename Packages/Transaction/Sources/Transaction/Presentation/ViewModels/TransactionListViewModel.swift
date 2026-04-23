@@ -1,10 +1,11 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 import Observation
+import SwiftUI
 
 @MainActor
 @Observable
-public class TransactionListViewModel {
+public final class TransactionListViewModel {
     // UI State
     public var transactions: [TransactionResponse] = []
     public var summary: TransactionSummaryResponse?
@@ -288,11 +289,9 @@ public class TransactionListViewModel {
     }
 
     public func generateDetailedReport() {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM/yyyy"
-        let currentMonth = dateFormatter.string(from: Date())
+        let currentMonth = Self.reportMonthFormatter.string(from: Date())
         let prompt = "Hãy tạo cho tôi một báo cáo phân tích chi tiết về tình hình thu chi, biến động các danh mục và gợi ý ngân sách cho tháng \(currentMonth)."
-        router.presentSheet(.finFlowBotChat(initialPrompt: prompt))
+        router.presentSheet(.finFlowBotChat(threadId: nil, initialPrompt: prompt))
     }
 
     // MARK: - Computed Summary
@@ -333,6 +332,25 @@ public class TransactionListViewModel {
         )
     }
 
+    private nonisolated(unsafe) static let weekdayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, dd/MM"
+        f.locale = Locale(identifier: "vi_VN")
+        return f
+    }()
+
+    private nonisolated(unsafe) static let absoluteDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd/MM/yyyy"
+        return f
+    }()
+
+    private nonisolated(unsafe) static let reportMonthFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MM/yyyy"
+        return f
+    }()
+
     // MARK: - Grouped Transactions
 
     /// Groups transactions by date with proper timezone conversion (UTC -> GMT+7)
@@ -341,7 +359,7 @@ public class TransactionListViewModel {
         let calendar = Calendar.current
         let now = Date()
         let today = calendar.startOfDay(for: now)
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today) ?? today
 
         // Group by date
         let grouped = Dictionary(grouping: transactions) { transaction -> Date in
@@ -366,15 +384,10 @@ public class TransactionListViewModel {
                     title = "Hôm qua"
                 } else if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
                     // Same week: "Thứ Ba, 04/03"
-                    let dayFormatter = DateFormatter()
-                    dayFormatter.dateFormat = "EEEE, dd/MM"
-                    dayFormatter.locale = Locale(identifier: "vi_VN")
-                    title = dayFormatter.string(from: date).capitalized
+                    title = Self.weekdayFormatter.string(from: date).capitalized
                 } else {
                     // Different week/year: "05/02/2026"
-                    let dayFormatter = DateFormatter()
-                    dayFormatter.dateFormat = "dd/MM/yyyy"
-                    title = dayFormatter.string(from: date)
+                    title = Self.absoluteDateFormatter.string(from: date)
                 }
                 return (
                     title: title, items: items.sorted { $0.transactionDate > $1.transactionDate }
@@ -407,6 +420,30 @@ public class TransactionListViewModel {
             Task {
                 await fetchChartData()
             }
+        }
+    }
+
+    // MARK: - Mapped Insights
+
+    public var mappedInsights: [TransactionAIInsight] {
+        aiInsights.map { item in
+            let icon: String
+            let color: Color
+            switch item.type {
+            case .warning:
+                icon = "exclamationmark.triangle.fill"
+                color = AppColors.primary
+            case .tip:
+                icon = "leaf.fill"
+                color = AppColors.success
+            }
+            return TransactionAIInsight(
+                id: item.id,
+                title: item.title,
+                message: item.message,
+                icon: icon,
+                color: color
+            )
         }
     }
 
