@@ -1,39 +1,25 @@
-//
-//  BotGlassOrb.swift
-//  FinFlow
-//
-//  Quả cầu kính tối giản — chỉ icon Bot, góc dưới-phải; chấm đỏ khi có gợi ý mới.
-//
-
 import FinFlowCore
 import SwiftUI
 
-/// Nút trợ lý dạng quả cầu kính (glassmorphism), không kèm bong bóng chữ.
-struct FinFlowBotGlassOrb: View {
+public struct FinFlowBotGlassOrb: View {
     private let mascotAssetName: String?
     private let mascotBundle: Bundle
     private let showsNotificationDot: Bool
     private let onTap: () -> Void
 
-    /// Đường kính ~46pt (trong khoảng 44–50).
     private static let diameter: CGFloat = Spacing.touchTarget + BorderWidth.medium * 2
     private static let innerInset: CGFloat = BorderWidth.medium
 
     private static let rimGradient = LinearGradient(
         colors: [
-            Color.white.opacity(OpacityLevel.high),
-            Color.white.opacity(OpacityLevel.ultraLight)
+            AppColors.glassRimHighlight,
+            AppColors.glassRimSubtle
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
-    /// - Parameters:
-    ///   - mascotAssetName: ảnh robot trong Asset Catalog; `nil` = gradient + SF Symbol.
-    ///   - mascotBundle: Bundle chứa asset.
-    ///   - showsNotificationDot: Chấm đỏ khi có gợi ý chưa xem (sau này gắn API).
-    ///   - onTap: Mở sheet / chat.
-    init(
+    public init(
         mascotAssetName: String? = nil,
         mascotBundle: Bundle = .main,
         showsNotificationDot: Bool = false,
@@ -45,7 +31,7 @@ struct FinFlowBotGlassOrb: View {
         self.onTap = onTap
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: onTap) {
             ZStack {
                 Circle()
@@ -54,8 +40,8 @@ struct FinFlowBotGlassOrb: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(OpacityLevel.ultraLight),
-                                Color.blue.opacity(OpacityLevel.ultraLight)
+                                AppColors.glassRimSubtle,
+                                AppColors.glassBlueTint
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -72,8 +58,8 @@ struct FinFlowBotGlassOrb: View {
                     .clipShape(Circle())
             }
             .frame(width: Self.diameter, height: Self.diameter)
-            .shadow(color: Color.black.opacity(OpacityLevel.ultraLight), radius: Spacing.xs, x: 0, y: BorderWidth.medium)
-            .shadow(color: Color.blue.opacity(0.12), radius: Spacing.sm, x: 0, y: Spacing.xs)
+            .shadow(color: AppColors.glassShadowDark, radius: Spacing.xs, x: 0, y: BorderWidth.medium)
+            .shadow(color: AppColors.glassShadowBlue, radius: Spacing.sm, x: 0, y: Spacing.xs)
             .overlay(alignment: .topTrailing) {
                 if showsNotificationDot {
                     Circle()
@@ -81,7 +67,7 @@ struct FinFlowBotGlassOrb: View {
                         .frame(width: BorderWidth.thick * 2, height: BorderWidth.thick * 2)
                         .overlay {
                             Circle()
-                                .strokeBorder(Color.white.opacity(OpacityLevel.high), lineWidth: BorderWidth.hairline)
+                                .strokeBorder(AppColors.glassRimHighlight, lineWidth: BorderWidth.hairline)
                         }
                         .offset(x: BorderWidth.medium, y: -BorderWidth.medium)
                 }
@@ -103,8 +89,8 @@ struct FinFlowBotGlassOrb: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.35, green: 0.65, blue: 0.98),
-                        Color(red: 0.12, green: 0.38, blue: 0.88)
+                        AppColors.botOrbGradientTop,
+                        AppColors.botOrbGradientBottom
                     ],
                     startPoint: .top,
                     endPoint: .bottom

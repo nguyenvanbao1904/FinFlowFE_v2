@@ -5,6 +5,7 @@
 //  Created by Nguyễn Văn Bảo on 26/12/25.
 //
 
+import BotChat
 import Dashboard
 import FinFlowCore
 import Foundation

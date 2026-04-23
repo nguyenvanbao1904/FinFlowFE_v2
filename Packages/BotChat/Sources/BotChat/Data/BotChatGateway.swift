@@ -1,30 +1,32 @@
-//
-//  BotChatGateway.swift
-//  FinFlowIos
-//
-
 import FinFlowCore
 import Foundation
 
-actor BotChatGateway {
+public actor BotChatGateway {
     private let chatRepository: any ChatRepositoryProtocol
-    private var activeThreadId: String?
 
-    init(chatRepository: any ChatRepositoryProtocol) {
+    public init(chatRepository: any ChatRepositoryProtocol) {
         self.chatRepository = chatRepository
     }
 
-    func loadMessages() async throws -> [FinFlowBotChatMessage] {
-        let threadId = try await resolveThreadIdForRead()
-        guard let threadId else { return [] }
+    public func loadThreads() async throws -> [ChatThreadResponse] {
+        try await chatRepository.listThreads()
+    }
+
+    public func createThread(title: String?) async throws -> ChatThreadResponse {
+        try await chatRepository.createThread(title: title)
+    }
+
+    public func deleteThread(threadId: String) async throws {
+        try await chatRepository.deleteThread(threadId: threadId)
+    }
+
+    public func loadMessages(threadId: String) async throws -> [FinFlowBotChatMessage] {
         let messages = try await chatRepository.listMessages(threadId: threadId)
         return messages.map(mapMessage)
     }
 
-    func sendMessage(_ content: String) async throws -> FinFlowBotSendResult {
-        let threadId = try await ensureThreadId()
+    public func sendMessage(_ content: String, threadId: String) async throws -> FinFlowBotSendResult {
         let response = try await chatRepository.sendMessage(threadId: threadId, content: content)
-        activeThreadId = response.threadId
 
         let assistant = response.assistantMessage
         let normalizedQuestion = response.clarificationQuestion?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -47,36 +49,6 @@ actor BotChatGateway {
             clarificationQuestion: response.clarificationQuestion,
             citations: assistant.sources.map(mapCitation)
         )
-    }
-
-    func startNewThread() async throws -> [FinFlowBotChatMessage] {
-        let thread = try await chatRepository.createThread(title: nil)
-        activeThreadId = thread.id
-        return []
-    }
-
-    private func ensureThreadId() async throws -> String {
-        if let activeThreadId, !activeThreadId.isEmpty {
-            return activeThreadId
-        }
-        let newThread = try await chatRepository.createThread(title: nil)
-        activeThreadId = newThread.id
-        return newThread.id
-    }
-
-    private func resolveThreadIdForRead() async throws -> String? {
-        if let activeThreadId, !activeThreadId.isEmpty {
-            return activeThreadId
-        }
-
-        let threads = try await chatRepository.listThreads()
-        guard let latest = threads.max(by: {
-            ($0.updatedAt ?? $0.createdAt ?? "") < ($1.updatedAt ?? $1.createdAt ?? "")
-        }) else {
-            return nil
-        }
-        activeThreadId = latest.id
-        return latest.id
     }
 
     private func mapMessage(_ message: ChatMessageResponse) -> FinFlowBotChatMessage {
@@ -112,13 +84,13 @@ actor BotChatGateway {
         return Date()
     }
 
-    private static let iso8601WithZone: ISO8601DateFormatter = {
+    private nonisolated(unsafe) static let iso8601WithZone: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
 
-    private static let localFormatterWithMillis: DateFormatter = {
+    private nonisolated(unsafe) static let localFormatterWithMillis: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current
@@ -126,7 +98,7 @@ actor BotChatGateway {
         return formatter
     }()
 
-    private static let localFormatter: DateFormatter = {
+    private nonisolated(unsafe) static let localFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current

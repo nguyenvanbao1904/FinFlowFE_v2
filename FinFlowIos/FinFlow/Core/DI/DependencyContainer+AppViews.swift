@@ -5,6 +5,7 @@
 //  Created by FinFlow AI.
 //
 
+import BotChat
 import Dashboard
 import FinFlowCore
 import Identity
@@ -57,7 +58,7 @@ extension DependencyContainer {
                 onSuccess: { username in 
                     router.popToRoot()
                     Task {
-                        try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                        try? await Task.sleep(for: AnimationTiming.navigationDelay)
                         await MainActor.run {
                             router.presentSheet(.createPIN(email: username))
                         }
@@ -167,31 +168,36 @@ extension DependencyContainer {
     }
 
     @MainActor
-    func makeFinFlowBotChatView(initialPrompt: String? = nil) -> some View {
+    func makeChatThreadListView() -> some View {
         let gateway = botChatGateway
-        return FinFlowBotChatView(
-            initialPrompt: initialPrompt,
-            loadMessagesHandler: {
-                try await gateway.loadMessages()
-            },
-            sendMessageHandler: { content in
-                try await gateway.sendMessage(content)
-            },
-            resetConversationHandler: {
-                try await gateway.startNewThread()
-            }
+        let vm = ChatThreadListViewModel(gateway: gateway)
+        return ChatThreadListView(viewModel: vm) { [weak self] threadId, initialPrompt in
+            guard let self else { return AnyView(EmptyView()) }
+            return AnyView(self.makeFinFlowBotChatView(threadId: threadId, initialPrompt: initialPrompt))
+        }
+    }
+
+    @MainActor
+    func makeFinFlowBotChatView(threadId: String?, initialPrompt: String? = nil) -> some View {
+        let gateway = botChatGateway
+        return BotChatCreatorView(
+            gateway: gateway,
+            threadId: threadId,
+            initialPrompt: initialPrompt
         )
     }
 
     @MainActor
     func makeWealthView(router: any AppRouterProtocol) -> some View {
         return WealthListView(
-            getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
-            getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase(repository: wealthAccountRepository),
-            createWealthAccountUseCase: CreateWealthAccountUseCase(repository: wealthAccountRepository),
-            updateWealthAccountUseCase: UpdateWealthAccountUseCase(repository: wealthAccountRepository),
-            deleteWealthAccountUseCase: DeleteWealthAccountUseCase(repository: wealthAccountRepository),
-            sessionManager: sessionManager
+            viewModel: WealthListViewModel(
+                getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
+                getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase(repository: wealthAccountRepository),
+                createWealthAccountUseCase: CreateWealthAccountUseCase(repository: wealthAccountRepository),
+                updateWealthAccountUseCase: UpdateWealthAccountUseCase(repository: wealthAccountRepository),
+                deleteWealthAccountUseCase: DeleteWealthAccountUseCase(repository: wealthAccountRepository),
+                sessionManager: sessionManager
+            )
         )
     }
 
@@ -236,7 +242,7 @@ extension DependencyContainer {
 
         let accountVM = AccountManagementViewModel(
             userEmail: email,
-            authRepository: authRepository,
+            accountManagementUseCase: AccountManagementUseCase(repository: authRepository),
             otpHandler: otpHandler,
             router: router,
             sessionManager: sessionManager,
@@ -254,7 +260,7 @@ extension DependencyContainer {
     func makeUpdateProfileView(profile: UserProfile, router: any AppRouterProtocol) -> some View {
         UpdateProfileView(
             viewModel: UpdateProfileViewModel(
-                authRepository: authRepository,
+                updateProfileUseCase: UpdateProfileUseCase(repository: authRepository),
                 sessionManager: sessionManager,
                 currentProfile: profile,
                 onSuccess: {
@@ -268,7 +274,7 @@ extension DependencyContainer {
     func makeChangePasswordView(hasPassword: Bool, router: any AppRouterProtocol) -> some View {
         ChangePasswordView(
             viewModel: ChangePasswordViewModel(
-                authRepository: authRepository,
+                changePasswordUseCase: ChangePasswordUseCase(repository: authRepository),
                 sessionManager: sessionManager,
                 isCreatingPassword: !hasPassword,
                 onSuccess: {
@@ -284,6 +290,7 @@ extension DependencyContainer {
             viewModel: CreatePINViewModel(
                 email: email,
                 pinManager: pinManager,
+                sessionManager: sessionManager,
                 onCompletion: {
                     if router.presentedSheet != nil {
                         router.dismissSheet()
@@ -352,7 +359,10 @@ extension DependencyContainer {
     @MainActor
     func makeCategoryListView(router: any AppRouterProtocol) -> some View {
         let viewModel = CategoryListViewModel(
-            repository: transactionRepository,
+            getCategoriesUseCase: GetCategoriesUseCase(repository: transactionRepository),
+            createCategoryUseCase: CreateCategoryUseCase(repository: transactionRepository),
+            updateCategoryUseCase: UpdateCategoryUseCase(repository: transactionRepository),
+            deleteCategoryUseCase: DeleteCategoryUseCase(repository: transactionRepository),
             router: router,
             sessionManager: sessionManager
         )

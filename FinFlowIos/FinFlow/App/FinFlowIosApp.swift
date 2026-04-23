@@ -5,6 +5,7 @@
 //  Created by Nguyễn Văn Bảo on 26/12/25.
 //
 
+import BotChat
 import Dashboard
 import FinFlowCore
 import Identity
@@ -89,17 +90,25 @@ struct AppRootView: View {
                     makeDestination(for: route)
                 }
                 .presentationDetents({
-                    if case .finFlowBotChat = route { return [.medium, .large] }
-                    return [.large]
+                    switch route {
+                    case .chatThreadList, .finFlowBotChat: return [.medium, .large]
+                    default: return [.large]
+                    }
                 }())
                 .presentationDragIndicator({
-                    if case .finFlowBotChat = route { return .visible }
-                    return .hidden
+                    switch route {
+                    case .chatThreadList, .finFlowBotChat: return .visible
+                    default: return .hidden
+                    }
                 }())
             }
             .onChange(of: observableRouter.presentedSheet) { oldValue, newValue in
-                if case .finFlowBotChat = oldValue, newValue == nil {
-                    NotificationCenter.default.post(name: .transactionDidSave, object: nil)
+                if newValue == nil {
+                    switch oldValue {
+                    case .finFlowBotChat, .chatThreadList:
+                        NotificationCenter.default.post(name: .transactionDidSave, object: nil)
+                    default: break
+                    }
                 }
             }
             if shouldShowGlobalBotOrb(root: observableRouter.root, presentedSheet: observableRouter.presentedSheet) {
@@ -116,7 +125,7 @@ struct AppRootView: View {
                         showsNotificationDot: hasUnreadBotSuggestion
                     ) {
                         hasUnreadBotSuggestion = false
-                        router.presentSheet(.finFlowBotChat())
+                        router.presentSheet(.chatThreadList)
                     }
                     .fixedSize(horizontal: true, vertical: true)
                     .padding(.trailing, Spacing.sm)
@@ -228,8 +237,10 @@ struct AppRootView: View {
             container.makeAddBudgetView(router: router)
         case .editBudget(let budget):
             container.makeAddBudgetView(router: router, budgetToEdit: budget)
-        case .finFlowBotChat(let initialPrompt):
-            container.makeFinFlowBotChatView(initialPrompt: initialPrompt)
+        case .chatThreadList:
+            container.makeChatThreadListView()
+        case .finFlowBotChat(let threadId, let initialPrompt):
+            container.makeFinFlowBotChatView(threadId: threadId, initialPrompt: initialPrompt)
         }
     }
 
@@ -246,7 +257,7 @@ struct AppRootView: View {
 struct PrivacyBlurView: View {
     var body: some View {
         ZStack {
-            Color.black.opacity(0.1)
+            AppColors.privacyBlurOverlay
             Rectangle()
                 .fill(.ultraThinMaterial)
             VStack(spacing: Spacing.sm) {

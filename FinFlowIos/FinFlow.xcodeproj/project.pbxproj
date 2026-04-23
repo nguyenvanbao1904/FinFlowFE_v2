@@ -17,6 +17,7 @@
 		A475D97A2EFDB200002AE968 /* Dashboard in Frameworks */ = {isa = PBXBuildFile; productRef = A475D9792EFDB200002AE968 /* Dashboard */; };
 		A47B6EBB2F608A5200272954 /* Planning in Frameworks */ = {isa = PBXBuildFile; productRef = A47B6EBA2F608A5200272954 /* Planning */; };
 		A47B6EBE2F608AC300272954 /* Planning in Frameworks */ = {isa = PBXBuildFile; productRef = A47B6EBD2F608AC300272954 /* Planning */; };
+		A4BC01012F680001005D0001 /* BotChat in Frameworks */ = {isa = PBXBuildFile; productRef = A4BC01002F680001005D0001 /* BotChat */; };
 		A4C4A6392F608958009AB2EB /* Planning in Frameworks */ = {isa = PBXBuildFile; productRef = A4C4A6382F608958009AB2EB /* Planning */; };
 		A4DA90042F61674500777712 /* Investment in Frameworks */ = {isa = PBXBuildFile; productRef = A4DA90032F61674500777712 /* Investment */; };
 		A4DA90072F61676000777712 /* Planning in Frameworks */ = {isa = PBXBuildFile; productRef = A4DA90062F61676000777712 /* Planning */; };
@@ -32,6 +33,7 @@
 		A475D9802EFDB300002AE968 /* Profile */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Profile; path = ../Packages/Profile; sourceTree = SOURCE_ROOT; };
 		A4AD53C42EFDA7CA0070A2E4 /* FinFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4AD53D22EFDA8B90070A2E4 /* FinFlowCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FinFlowCore; path = ../Packages/FinFlowCore; sourceTree = SOURCE_ROOT; };
+		A4BC01022F680001005D0002 /* BotChat */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = BotChat; path = ../Packages/BotChat; sourceTree = SOURCE_ROOT; };
 		A4DA90012F608B3D00777712 /* Planning */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = Planning; path = ../Packages/Planning; sourceTree = SOURCE_ROOT; };
 		A4DA90292F61822800777712 /* Investment */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Investment; path = ../Packages/Investment; sourceTree = "<group>"; };
 		A4DA902A2F61822800777712 /* Wealth */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Wealth; path = ../Packages/Wealth; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4BC01012F680001005D0001 /* BotChat in Frameworks */,
 				A46A5DE52F55D4A7005199DD /* Profile in Frameworks */,
 				A432B2142F60860B005D8684 /* Planning in Frameworks */,
 				A46A5DEA2F55DBD0005199DD /* Transaction in Frameworks */,
@@ -95,6 +98,7 @@
 		A4AD53BB2EFDA7CA0070A2E4 = {
 			isa = PBXGroup;
 			children = (
+				A4BC01022F680001005D0002 /* BotChat */,
 				A4DA90012F608B3D00777712 /* Planning */,
 				A42D54962F5898DE00EDD686 /* Transaction */,
 				A475D9732EFDB02A002AE968 /* Identity */,
@@ -138,6 +142,7 @@
 			);
 			name = FinFlow;
 			packageProductDependencies = (
+				A4BC01002F680001005D0001 /* BotChat */,
 				A475D9752EFDB0D7002AE968 /* Identity */,
 				A475D9772EFDB168002AE968 /* FinFlowCore */,
 				A475D9792EFDB200002AE968 /* Dashboard */,
@@ -184,6 +189,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A4358F0B2F263FAC00FA1D88 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				A4BC01032F680001005D0003 /* XCLocalSwiftPackageReference "../Packages/BotChat" */,
 				A4DA90022F61674500777712 /* XCLocalSwiftPackageReference "../Packages/Investment" */,
 				A4DA90082F61677A00777712 /* XCLocalSwiftPackageReference "../Packages/Wealth" */,
 				A4DA90212F616C3B00777712 /* XCLocalSwiftPackageReference "../Packages/Planning" */,
@@ -456,6 +462,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		A4BC01032F680001005D0003 /* XCLocalSwiftPackageReference "../Packages/BotChat" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/BotChat;
+		};
 		A4DA90022F61674500777712 /* XCLocalSwiftPackageReference "../Packages/Investment" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../Packages/Investment;
@@ -523,6 +533,10 @@
 		A47B6EBD2F608AC300272954 /* Planning */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Planning;
+		};
+		A4BC01002F680001005D0001 /* BotChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BotChat;
 		};
 		A4C4A6382F608958009AB2EB /* Planning */ = {
 			isa = XCSwiftPackageProductDependency;
