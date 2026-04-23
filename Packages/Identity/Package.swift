@@ -20,8 +20,16 @@ let package = Package(
                 .product(name: "FinFlowCore", package: "FinFlowCore"),
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS")
-                
+
             ]
+        ),
+        .testTarget(
+            name: "IdentityTests",
+            dependencies: [
+                "Identity",
+                .product(name: "FinFlowCore", package: "FinFlowCore")
+            ],
+            path: "Tests/IdentityTests"
         )
     ]
 )

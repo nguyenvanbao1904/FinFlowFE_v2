@@ -3,8 +3,8 @@
 //  Identity
 //
 
-import FinFlowCore
 import Foundation
+import FinFlowCore
 
 public final class AuthRepository: AuthRepositoryProtocol, Sendable {
     private let client: any HTTPClientProtocol

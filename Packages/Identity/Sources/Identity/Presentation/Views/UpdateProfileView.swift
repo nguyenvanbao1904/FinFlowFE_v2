@@ -60,13 +60,6 @@ public struct UpdateProfileView: View {
                     .padding(.horizontal)
                     .padding(.top, Spacing.lg)
 
-                    if let error = viewModel.error {
-                        Text(error.localizedDescription)
-                            .foregroundStyle(AppColors.google)
-                            .font(AppTypography.caption)
-                            .padding(.horizontal)
-                    }
-
                     Button("Cập nhật") {
                         Task {
                             await viewModel.updateProfile()
@@ -80,5 +73,6 @@ public struct UpdateProfileView: View {
         }
         .navigationTitle("Cập nhật hồ sơ")
         .navigationBarTitleDisplayMode(.large)
+        .alertHandler($vm.alert)
     }
 }

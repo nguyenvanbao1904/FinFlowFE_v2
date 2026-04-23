@@ -1,11 +1,10 @@
 import FinFlowCore
-import Foundation
 import Observation
 import SwiftUI
 
 @MainActor
 @Observable
-public class RegisterViewModel {
+public final class RegisterViewModel {
     // Form fields
     public var username = "" {
         didSet {
@@ -155,28 +154,22 @@ public class RegisterViewModel {
     public func validate(_ field: Field) {
         switch field {
         case .username:
-            if username.isEmpty {
-                usernameMessage = "Tên đăng nhập không được để trống"
-            } else if username.contains(where: { $0.isWhitespace }) {
-                usernameMessage = "Tên đăng nhập không được chứa khoảng trắng"
-            } else {
-                usernameMessage = nil
-            }
+            usernameMessage = Self.validateRequired(username, name: "Tên đăng nhập")
+                ?? (username.contains(where: { $0.isWhitespace }) ? "Tên đăng nhập không được chứa khoảng trắng" : nil)
         case .firstName:
-            firstNameMessage = firstName.isEmpty ? "Họ không được để trống" : nil
+            firstNameMessage = Self.validateRequired(firstName, name: "Họ")
         case .lastName:
-            lastNameMessage = lastName.isEmpty ? "Tên không được để trống" : nil
+            lastNameMessage = Self.validateRequired(lastName, name: "Tên")
         case .password:
-            passwordMessage = password.isEmpty ? "Mật khẩu không được để trống" : nil
+            passwordMessage = Self.validateRequired(password, name: "Mật khẩu")
         case .passwordConfirmation:
-            if passwordConfirmation.isEmpty {
-                passwordConfirmationMessage = "Vui lòng nhập lại mật khẩu"
-            } else if passwordConfirmation != password {
-                passwordConfirmationMessage = "Mật khẩu xác nhận không khớp"
-            } else {
-                passwordConfirmationMessage = nil
-            }
+            passwordConfirmationMessage = Self.validateRequired(passwordConfirmation, name: "Vui lòng nhập lại mật khẩu", emptyMessage: "Vui lòng nhập lại mật khẩu")
+                ?? (passwordConfirmation != password ? "Mật khẩu xác nhận không khớp" : nil)
         }
+    }
+
+    private static func validateRequired(_ value: String, name: String, emptyMessage: String? = nil) -> String? {
+        value.isEmpty ? (emptyMessage ?? "\(name) không được để trống") : nil
     }
 
     private func validateEmail(_ email: String) async {
@@ -277,7 +270,7 @@ public class RegisterViewModel {
             startOtpCooldown()
         } catch {
             Logger.error("Send OTP failed: \(error)", category: "Auth")
-            self.alert = .general(title: "Lỗi", message: error.localizedDescription)
+            self.alert = error.toAppAlert(defaultTitle: "Lỗi Gửi OTP")
         }
     }
 
@@ -300,7 +293,7 @@ public class RegisterViewModel {
             self.alert = .general(title: "Lỗi", message: error.localizedDescription)
         } catch {
             Logger.error("Verify OTP failed: \(error)", category: "Auth")
-            self.alert = .general(title: "Lỗi", message: "Mã OTP không đúng hoặc đã hết hạn")
+            self.alert = error.toAppAlert(defaultTitle: "Lỗi Xác Thực OTP")
         }
     }
 
@@ -311,7 +304,7 @@ public class RegisterViewModel {
 
         otpCooldownTask = Task { @MainActor in
             while otpCooldownRemaining > 0 {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(for: .seconds(1))
                 otpCooldownRemaining -= 1
             }
         }
@@ -336,32 +329,23 @@ public class RegisterViewModel {
             return
         }
 
-        // Email format validation could be added here or rely on Backend
-
         isLoading = true
         defer { isLoading = false }
 
-        // 2. Prepare Request
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let dobString = dateFormatter.string(from: dob)
-
-        let request = RegisterRequest(
-            username: username,
-            email: email,
-            password: password,
-            firstName: firstName.isEmpty ? nil : firstName,
-            lastName: lastName.isEmpty ? nil : lastName,
-            dob: dobString
-        )
-
-        // 3. Call UseCase
+        // 2. Call UseCase — UseCase tự format dob và build RegisterRequest
         do {
             try await registerUseCase.execute(
-                request: request, registrationToken: registrationToken)
+                username: username,
+                email: email,
+                password: password,
+                firstName: firstName.isEmpty ? nil : firstName,
+                lastName: lastName.isEmpty ? nil : lastName,
+                dob: dob,
+                registrationToken: registrationToken
+            )
             Logger.info("Registration API success, attempting auto-login...", category: "Auth")
 
-            // 4. Auto Login
+            // 3. Auto Login
             let loginResponse = try await loginUseCase.execute(
                 username: username, password: password)
             await sessionManager.login(response: loginResponse)
@@ -371,11 +355,7 @@ public class RegisterViewModel {
             onRegistrationSuccess(username)
         } catch {
             Logger.error("Register/Login failed: \(error)", category: "Auth")
-            if let appError = error as? AppError {
-                self.alert = .auth(message: appError.localizedDescription)
-            } else {
-                self.alert = .general(title: "Lỗi", message: error.localizedDescription)
-            }
+            alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Đăng Ký")
         }
     }
 

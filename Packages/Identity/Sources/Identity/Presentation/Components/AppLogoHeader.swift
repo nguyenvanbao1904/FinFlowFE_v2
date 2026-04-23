@@ -27,6 +27,7 @@ struct AppLogoHeader: View {
     }
 
     var body: some View {
+        let shadow = ShadowStyle.soft()
         VStack(spacing: Spacing.sm) {
             // App Logo - Try custom asset first, fallback to SF Symbol
             Group {
@@ -45,10 +46,10 @@ struct AppLogoHeader: View {
                 }
             }
             .shadow(
-                color: ShadowStyle.soft().color,
-                radius: ShadowStyle.soft().radius,
-                x: ShadowStyle.soft().x,
-                y: ShadowStyle.soft().y
+                color: shadow.color,
+                radius: shadow.radius,
+                x: shadow.x,
+                y: shadow.y
             )
 
             if let title = title {

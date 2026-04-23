@@ -149,6 +149,7 @@ public struct LoginView: View {
                         .shadow(color: AppColors.primary.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(viewModel.isLoading)
+                .accessibilityLabel(viewModel.biometricType == .touchID ? "Đăng nhập bằng Touch ID" : "Đăng nhập bằng Face ID")
             }
 
             // Social login section

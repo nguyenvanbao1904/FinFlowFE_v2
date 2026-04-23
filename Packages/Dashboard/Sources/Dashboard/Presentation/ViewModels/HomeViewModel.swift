@@ -4,7 +4,6 @@
 //
 
 import FinFlowCore
-import Foundation
 import Observation
 
 @MainActor
@@ -18,6 +17,7 @@ public final class HomeViewModel {
     public private(set) var snapshot: HomeDashboardSnapshot?
     public private(set) var isLoading = false
     public private(set) var loadError: AppErrorAlert?
+    @ObservationIgnored
     private var hasCompletedInitialLoad = false
 
     public init(

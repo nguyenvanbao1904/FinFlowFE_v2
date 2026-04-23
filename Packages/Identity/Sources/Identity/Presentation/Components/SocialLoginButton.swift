@@ -17,7 +17,7 @@ struct SocialLoginButton: View {
 
         var color: Color {
             switch self {
-            case .google: return AppColors.google
+            case .google: return AppColors.expense
             case .apple: return AppColors.apple
             }
         }

@@ -1,10 +1,20 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 
 // MARK: - Register Use Case
 
 public protocol RegisterUseCaseProtocol: Sendable {
     func execute(request: RegisterRequest, registrationToken: String) async throws
+    /// Overload nhận dob là Date — UseCase tự format thành "yyyy-MM-dd".
+    func execute(
+        username: String,
+        email: String,
+        password: String,
+        firstName: String?,
+        lastName: String?,
+        dob: Date,
+        registrationToken: String
+    ) async throws
     func sendOtp(email: String) async throws
     func verifyOtp(email: String, otp: String) async throws -> VerifyOtpResponse
     func checkEmailExists(email: String) async throws -> Bool
@@ -63,4 +73,29 @@ public struct RegisterUseCase: RegisterUseCaseProtocol {
         let response = try await repository.checkUserExistence(email: nil, username: username)
         return response.exists
     }
+
+    // MARK: - Overload nhận dob: Date
+
+    /// Overload tiện lợi: nhận dob là Date, UseCase tự format thành "yyyy-MM-dd".
+    public func execute(
+        username: String,
+        email: String,
+        password: String,
+        firstName: String?,
+        lastName: String?,
+        dob: Date,
+        registrationToken: String
+    ) async throws {
+        let dobString = DOBFormatter.format(dob)
+        let request = RegisterRequest(
+            username: username,
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            dob: dobString
+        )
+        try await execute(request: request, registrationToken: registrationToken)
+    }
+
 }

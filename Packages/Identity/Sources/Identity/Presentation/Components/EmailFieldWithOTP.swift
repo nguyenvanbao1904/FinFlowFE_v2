@@ -67,12 +67,10 @@ struct EmailFieldWithOTP: View {
                 HStack {
                     Text(message)
                         .font(AppTypography.caption)
-                        .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.expense)
+                        .foregroundStyle(AppColors.expense)
                     Spacer()
                 }
-                // swiftlint:disable:next no_hardcoded_padding
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Spacing.xs)
                 .transition(.opacity)
             }
 
@@ -169,7 +167,8 @@ private struct OTPFieldRow: View {
                 .textInputAutocapitalization(.never)
                 .focused($isFocused)
                 .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(50))
                         isFocused = true
                     }
                 }
@@ -183,7 +182,7 @@ private struct OTPFieldRow: View {
                     Text("Xác nhận")
                         .font(AppTypography.labelSmall)
                         .foregroundStyle(
-                            otpCode.count == 6 ? AppColors.primary : .gray)
+                            otpCode.count == 6 ? AppColors.primary : AppColors.disabled)
                 }
             }
             .disabled(isVerifying || otpCode.count != 6)
@@ -217,7 +216,7 @@ private struct SendOTPButton: View {
                 Text(cooldown > 0 ? "\(cooldown)s" : "Gửi mã")
                     .font(AppTypography.labelSmall)
                     .foregroundStyle(
-                        (canSend && cooldown == 0) ? AppColors.primary : .gray)
+                        (canSend && cooldown == 0) ? AppColors.primary : AppColors.disabled)
             }
         }
         .disabled(!canSend || isSending || cooldown > 0)

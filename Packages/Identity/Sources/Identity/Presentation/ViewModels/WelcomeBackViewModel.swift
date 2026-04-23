@@ -4,13 +4,12 @@
 //
 
 import FinFlowCore
-import Foundation
 import LocalAuthentication
 import Observation
 
 @MainActor
 @Observable
-public class WelcomeBackViewModel {
+public final class WelcomeBackViewModel {
     public var pin: String = ""
     public var isLoading = false
     public var alert: AppErrorAlert?
@@ -174,7 +173,7 @@ public class WelcomeBackViewModel {
             await MainActor.run {
                 self.showPINInput = false
             }
-            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+            try? await Task.sleep(for: AnimationTiming.navigationDelay)
 
             await MainActor.run {
                 if hasPassword {
@@ -201,13 +200,13 @@ public class WelcomeBackViewModel {
                 self.showPINInput = false
             }
             // Small delay to allow dismissal animation
-            try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+            try? await Task.sleep(for: AnimationTiming.navigationDelay)
 
             await MainActor.run {
                 self.showOtpInput = true
             }
         } catch {
-            alert = error.toAppAlert(defaultTitle: "Lỗi gửi mã OTP")
+            alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi gửi mã OTP")
         }
 
         isLoading = false
@@ -280,7 +279,7 @@ public class WelcomeBackViewModel {
                 resetPasswordInput = ""
 
             } catch {
-                alert = error.toAppAlert(defaultTitle: "Lỗi xác thực")
+                alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi xác thực")
             }
         }
     }

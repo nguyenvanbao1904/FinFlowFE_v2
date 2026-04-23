@@ -1,10 +1,9 @@
 //
-//  BiometricAuthHandler.swift
+//  BiometricAuthService.swift
 //  Identity
 //
 
 import FinFlowCore
-import Foundation
 
 // 1. Tách cấu hình ra thành một Public Struct độc lập
 public struct BiometricAuthOptions: Sendable {

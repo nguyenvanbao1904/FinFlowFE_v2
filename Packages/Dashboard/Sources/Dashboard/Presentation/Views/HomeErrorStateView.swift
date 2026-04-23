@@ -8,7 +8,7 @@ struct HomeErrorStateView: View {
     var body: some View {
         VStack(spacing: Spacing.lg) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.largeTitle)
+                .font(AppTypography.largeTitle)
                 .foregroundStyle(AppColors.error)
                 .accessibilityHidden(true)
             Text(error.title)

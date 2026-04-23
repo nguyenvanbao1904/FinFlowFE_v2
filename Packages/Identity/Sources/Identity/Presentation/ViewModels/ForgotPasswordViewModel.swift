@@ -1,11 +1,10 @@
 import FinFlowCore
-import Foundation
 import Observation
 import SwiftUI
 
 @MainActor
 @Observable
-public class ForgotPasswordViewModel {
+public final class ForgotPasswordViewModel {
     // Form Data
     public var email = "" {
         didSet {
@@ -163,7 +162,7 @@ public class ForgotPasswordViewModel {
             alert = .general(title: "Thành công", message: "Mã OTP đã được gửi đến email của bạn")
         } catch {
             Logger.error("Send OTP Failed: \(error)", category: "Auth")
-            alert = .general(title: "Lỗi", message: error.localizedDescription)
+            alert = error.toAppAlert(defaultTitle: "Lỗi Gửi OTP")
         }
     }
 
@@ -186,7 +185,7 @@ public class ForgotPasswordViewModel {
             alert = .general(title: "Lỗi", message: error.localizedDescription)
         } catch {
             Logger.error("Verify OTP Failed: \(error)", category: "Auth")
-            alert = .general(title: "Lỗi", message: "Mã OTP không đúng hoặc đã hết hạn")
+            alert = error.toAppAlert(defaultTitle: "Lỗi Xác Thực OTP")
         }
     }
 
@@ -212,7 +211,7 @@ public class ForgotPasswordViewModel {
             // onSuccess được gọi khi user bấm OK trên alert (trong handleSuccessAlertDismissed)
         } catch {
             Logger.error("Reset Password Failed: \(error)", category: "Auth")
-            alert = .general(title: "Lỗi", message: error.localizedDescription)
+            alert = error.toAppAlert(defaultTitle: "Lỗi Đặt Lại Mật Khẩu")
         }
     }
 

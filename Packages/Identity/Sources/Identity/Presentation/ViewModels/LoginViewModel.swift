@@ -10,7 +10,7 @@ import SwiftUI
 
 @MainActor
 @Observable
-public class LoginViewModel {
+public final class LoginViewModel {
     public var username = ""
     public var password = ""
     public var isLoading = false
@@ -106,14 +106,14 @@ public class LoginViewModel {
             
             if !hasPIN {
                 // Wait briefly for app state to transition to .dashboard
-                try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                try? await Task.sleep(for: AnimationTiming.navigationDelay)
                 await MainActor.run {
                     router.presentSheet(.createPIN(email: username))
                 }
             }
         } catch {
             Logger.error("Đăng nhập thất bại: \(error)", category: "Auth")
-            self.alert = error.toAppAlert(defaultTitle: "Lỗi")
+            self.alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi")
         }
 
         isLoading = false
@@ -131,14 +131,14 @@ public class LoginViewModel {
             Logger.info("Google Login success", category: "Auth")
             
             if !hasPIN {
-                try? await Task.sleep(nanoseconds: AnimationTiming.navigationDelay)
+                try? await Task.sleep(for: AnimationTiming.navigationDelay)
                 await MainActor.run {
                     router.presentSheet(.createPIN(email: response.username))
                 }
             }
         } catch {
             Logger.error("Google Login failed: \(error)", category: "Auth")
-            self.alert = error.toAppAlert(defaultTitle: "Lỗi Google Login")
+            self.alert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Google Login")
         }
     }
 

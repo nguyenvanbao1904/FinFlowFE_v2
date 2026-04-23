@@ -19,7 +19,7 @@ public struct HomeView: View {
 
     public var body: some View {
         Group {
-            if let error = viewModel.loadError, viewModel.snapshot == nil, !isAuthAlert(error) {
+            if let error = viewModel.loadError, viewModel.snapshot == nil, !error.isUnauthorized {
                 HomeErrorStateView(error: error) {
                     Task { await viewModel.load(force: true) }
                 }
@@ -52,7 +52,7 @@ public struct HomeView: View {
                     router.presentSheet(.profile)
                 } label: {
                     Image(systemName: "person.crop.circle")
-                        .font(.title2)
+                        .font(AppTypography.displaySmall)
                         .foregroundStyle(AppColors.primary)
                         .symbolRenderingMode(.hierarchical)
                 }
@@ -62,9 +62,4 @@ public struct HomeView: View {
         }
     }
 
-    private func isAuthAlert(_ alert: AppErrorAlert) -> Bool {
-        if case .auth = alert { return true }
-        if case .authWithAction = alert { return true }
-        return false
-    }
 }

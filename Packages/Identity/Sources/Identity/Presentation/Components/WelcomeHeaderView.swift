@@ -74,6 +74,7 @@ public struct WelcomeHeaderView: View {
                         .shadow(color: AppColors.primary.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(isLoading)
+                .accessibilityLabel(biometryType == .faceID ? "Đăng nhập bằng Face ID" : "Đăng nhập bằng Touch ID")
             }
             .padding(.top, Spacing.xl)
         }

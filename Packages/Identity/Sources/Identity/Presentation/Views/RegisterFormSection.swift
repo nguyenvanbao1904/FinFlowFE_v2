@@ -9,6 +9,10 @@ struct RegisterFormSection: View {
     let vm: RegisterViewModel
     let focusedField: FocusState<RegisterField?>.Binding
 
+    /// Validation messages are always errors (never success).
+    /// Use a single source of truth for color instead of string-sniffing.
+    private let validationColor = AppColors.expense
+
     var body: some View {
         VStack(spacing: Spacing.md) {
             usernameField
@@ -64,7 +68,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.expense)
+                            validationColor)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)
@@ -111,7 +115,7 @@ struct RegisterFormSection: View {
                         Text(message)
                             .font(AppTypography.caption)
                             .foregroundStyle(
-                                message.contains("✅") ? AppColors.success : AppColors.expense)
+                                validationColor)
                         Spacer()
                     }
                     .padding(.horizontal, Spacing.xs)
@@ -134,7 +138,7 @@ struct RegisterFormSection: View {
                         Text(message)
                             .font(AppTypography.caption)
                             .foregroundStyle(
-                                message.contains("✅") ? AppColors.success : AppColors.expense)
+                                validationColor)
                         Spacer()
                     }
                     .padding(.horizontal, Spacing.xs)
@@ -167,7 +171,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.expense)
+                            validationColor)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)
@@ -194,7 +198,7 @@ struct RegisterFormSection: View {
                     Text(message)
                         .font(AppTypography.caption)
                         .foregroundStyle(
-                            message.contains("✅") ? AppColors.success : AppColors.expense)
+                            validationColor)
                     Spacer()
                 }
                 .padding(.horizontal, Spacing.xs)
