@@ -74,8 +74,8 @@ public actor AuthTokenStore: TokenStoreProtocol {
         Logger.debug(
             """
             🔑 Token Status in Keychain:
-            - Access Token: \(accessToken != nil ? "✅ Exists (\(String(accessToken!.prefix(20)))...)" : "❌ Not Found")
-            - Refresh Token: \(refreshToken != nil ? "✅ Exists (\(String(refreshToken!.prefix(20)))...)" : "❌ Not Found")
+            - Access Token: \(accessToken.map { "✅ Exists (\(String($0.prefix(20)))...)" } ?? "❌ Not Found")
+            - Refresh Token: \(refreshToken.map { "✅ Exists (\(String($0.prefix(20)))...)" } ?? "❌ Not Found")
             - Access Token Length: \(accessToken?.count ?? 0) chars
             - Refresh Token Length: \(refreshToken?.count ?? 0) chars
             """, category: "Storage")

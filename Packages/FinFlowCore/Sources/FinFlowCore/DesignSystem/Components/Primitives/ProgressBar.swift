@@ -35,11 +35,11 @@ public struct ProgressBar: View {
     public var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background track
+                // Background track (pill shape: cornerRadius = height/2)
                 RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Color.primary.opacity(0.1))
+                    .fill(AppColors.primary.opacity(OpacityLevel.ultraLight))
 
-                // Progress fill
+                // Progress fill (pill shape)
                 RoundedRectangle(cornerRadius: height / 2)
                     .fill(color)
                     .frame(width: geometry.size.width * progress)

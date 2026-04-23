@@ -119,5 +119,6 @@ public struct GlassField: View {
                 .foregroundStyle(.secondary)
                 .contentTransition(.symbolEffect(.replace))
         }
+        .accessibilityLabel(isSecureVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu")
     }
 }

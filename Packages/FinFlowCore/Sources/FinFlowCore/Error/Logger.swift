@@ -78,7 +78,7 @@ public enum Logger {
 
 // MARK: - Helper Extensions
 private extension DateFormatter {
-    static let logTimestamp: DateFormatter = {
+    nonisolated(unsafe) static let logTimestamp: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
         return formatter

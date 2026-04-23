@@ -58,6 +58,53 @@ public enum UILayout {
     public static let socialButtonWidth: CGFloat = 80
     public static let socialButtonHeight: CGFloat = 55
 
+    /// Small toolbar/action button (chart zoom, reset)
+    public static let toolbarButton: CGFloat = 28
+
     /// Profile / account chip in navigation bar (inner circle behind SF Symbol)
     public static let navBarProfileIconChip: CGFloat = 36
+
+    // MARK: - Chart
+
+    /// Legend dot — standard size
+    public static let chartLegendDot: CGFloat = 12
+
+    /// Legend dot — medium variant (used in chart/donut legends)
+    public static let chartLegendDotMedium: CGFloat = 8
+
+    /// Legend dot — compact/small variant
+    public static let chartLegendDotSmall: CGFloat = 6
+
+    // MARK: - Chart Sizes
+
+    /// Compact chart height (dividend history, small inline charts)
+    public static let chartHeightCompact: CGFloat = 160
+
+    /// Donut/pie chart frame size (square)
+    public static let donutChartSize: CGFloat = 130
+
+    // MARK: - Picker Sizes
+
+    /// Segmented picker width (year/quarter toggle)
+    public static let segmentedPickerWidth: CGFloat = 140
+
+    /// Wheel picker — narrow column (quarter picker)
+    public static let wheelPickerNarrow: CGFloat = 52
+
+    /// Wheel picker — wide column (year picker)
+    public static let wheelPickerWide: CGFloat = 78
+
+    /// Wheel picker row height
+    public static let wheelPickerHeight: CGFloat = 92
+
+    /// Maximum height for suggestion/autocomplete dropdown lists
+    public static let suggestionListMaxHeight: CGFloat = 260
+
+    /// Symbol/ticker column width in suggestion lists
+    public static let symbolColumnWidth: CGFloat = 64
+
+    // MARK: - Layout Clearance
+
+    /// Bottom clearance for fixed action bars overlaying scroll content
+    public static let fixedBottomBarClearance: CGFloat = 80
 }

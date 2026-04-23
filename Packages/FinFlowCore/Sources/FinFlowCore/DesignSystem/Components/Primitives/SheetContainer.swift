@@ -67,26 +67,3 @@ public struct SheetContainer<Content: View>: View {
     }
 }
 
-// MARK: - View Extension
-
-extension View {
-    /// Present content in a standardized sheet container
-    public func sheetContainer<Content: View>(
-        isPresented: Binding<Bool>,
-        title: String,
-        detents: Set<PresentationDetent> = [.medium],
-        allowDismissal: Bool = true,
-        onDismiss: (() -> Void)? = nil,
-        @ViewBuilder content: @escaping () -> Content
-    ) -> some View {
-        self.sheet(isPresented: isPresented) {
-            SheetContainer(
-                title: title,
-                detents: detents,
-                allowDismissal: allowDismissal,
-                onDismiss: onDismiss,
-                content: content
-            )
-        }
-    }
-}

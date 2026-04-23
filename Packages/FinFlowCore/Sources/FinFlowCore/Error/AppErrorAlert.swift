@@ -89,30 +89,6 @@ public enum AppErrorAlert: AppAlert, Equatable, Sendable, Identifiable {
         }
     }
 
-    public var buttons: AnyView {
-        switch self {
-        case .network(let onRetry):
-            return AnyView(
-                Group {
-                    Button("Thử lại", action: onRetry)
-                    Button("Hủy", role: .cancel) {}
-                }
-            )
-        case .authWithAction(_, let onOK):
-            return AnyView(
-                Button("OK", role: .cancel, action: onOK)
-            )
-        case .success(_, let onOK):
-            return AnyView(
-                Button("OK", role: .cancel, action: onOK)
-            )
-        default:
-            return AnyView(
-                Button("OK", role: .cancel) {}
-            )
-        }
-    }
-
     // Equatable conformance
     public static func == (lhs: AppErrorAlert, rhs: AppErrorAlert) -> Bool {
         switch (lhs, rhs) {

@@ -120,5 +120,5 @@ private func accentBar(_ accent: Color) -> some View {
     Rectangle()
         .fill(accent.opacity(0.85))
         .frame(height: 4)
-        .clipShape(RoundedRectangle(cornerRadius: 2))
+        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.hairline))
 }

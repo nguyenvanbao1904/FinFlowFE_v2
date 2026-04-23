@@ -18,7 +18,7 @@ public struct LoadingOverlayModifier: ViewModifier {
                         AppColors.overlayBackground
                             .ignoresSafeArea()
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.textInverted))
                             .controlSize(.large)
                     }
                 }

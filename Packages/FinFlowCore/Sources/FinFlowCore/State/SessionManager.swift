@@ -71,15 +71,15 @@ public final class SessionManager: SessionManagerProtocol {
         state = .loading
 
         let email = await userDefaultsManager.getEmail()
-        let hasUserData = email != nil && !email!.isEmpty
+        let hasUserData = email != nil && !(email ?? "").isEmpty
         let isRefreshTokenValid = await userDefaultsManager.isRefreshTokenValid()
 
         if !isRefreshTokenValid {
             if hasUserData {
                 let firstName = await userDefaultsManager.getFirstName()
                 let lastName = await userDefaultsManager.getLastName()
-                Logger.info("Session expired for user: \(email!)", category: "Session")
-                state = .sessionExpired(email: email!, firstName: firstName, lastName: lastName)
+                Logger.info("Session expired for user: \(email ?? "")", category: "Session")
+                state = .sessionExpired(email: email ?? "", firstName: firstName, lastName: lastName)
             } else {
                 Logger.info("First launch - no previous session", category: "Session")
                 state = .unauthenticated

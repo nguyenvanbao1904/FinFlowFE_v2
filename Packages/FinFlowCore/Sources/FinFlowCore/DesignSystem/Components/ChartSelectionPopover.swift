@@ -46,7 +46,7 @@ public struct ChartSelectionPopover: View {
                 HStack(spacing: Spacing.xs) {
                     Circle()
                         .fill(metric.color)
-                        .frame(width: 8, height: 8)
+                        .frame(width: UILayout.chartLegendDotMedium, height: UILayout.chartLegendDotMedium)
 
                     Text(metric.label)
                         .font(AppTypography.caption)
@@ -67,9 +67,9 @@ public struct ChartSelectionPopover: View {
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: CornerRadius.medium))
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.medium)
-                .stroke(.white.opacity(0.22), lineWidth: BorderWidth.hairline)
+                .stroke(AppColors.glassPopoverBorder, lineWidth: BorderWidth.hairline)
         )
-        .shadow(color: .black.opacity(0.12), radius: 14, y: 6)
+        .shadow(color: AppColors.glassPopoverShadow, radius: 14, y: 6)
     }
 }
 

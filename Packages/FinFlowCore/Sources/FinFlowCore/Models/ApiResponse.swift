@@ -10,3 +10,13 @@ public struct ApiResponse<T: Codable & Sendable>: Codable, Sendable {
 public struct EmptyResponse: Codable, Sendable {
     public init() {}
 }
+
+public struct PageResponse<T: Codable & Sendable>: Codable, Sendable {
+    public let content: [T]
+    public let totalElements: Int
+    public let totalPages: Int
+    public let number: Int
+    public let size: Int
+    public let first: Bool
+    public let last: Bool
+}

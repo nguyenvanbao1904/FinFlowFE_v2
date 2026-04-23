@@ -113,7 +113,7 @@ private struct DateRangeFilterContent: View {
                     .padding(.horizontal)
                 }
                 // swiftlint:disable:next no_hardcoded_padding
-                .padding(.bottom, 80)  // Space for fixed action buttons
+                .padding(.bottom, UILayout.fixedBottomBarClearance)  // Space for fixed action buttons
             }
 
             // Action Buttons (Fixed at bottom)
@@ -187,14 +187,15 @@ private struct DateRangeFilterContent: View {
             endDate = now
 
         case .lastMonth:
-            let lastMonthDate = calendar.date(byAdding: .month, value: -1, to: now)!
+            guard let lastMonthDate = calendar.date(byAdding: .month, value: -1, to: now) else { return }
             let components = calendar.dateComponents([.year, .month], from: lastMonthDate)
             startDate = calendar.date(from: components)
 
             // End of last month
-            if let start = startDate {
-                endDate = calendar.date(byAdding: .month, value: 1, to: start)!
-                endDate = calendar.date(byAdding: .day, value: -1, to: endDate!)
+            if let start = startDate,
+               let nextMonth = calendar.date(byAdding: .month, value: 1, to: start),
+               let lastDay = calendar.date(byAdding: .day, value: -1, to: nextMonth) {
+                endDate = lastDay
             }
         }
 
@@ -243,10 +244,14 @@ private struct DateRangeFilterContent: View {
 
     // MARK: - Helpers
 
-    private func formatDateRange(start: Date, end: Date) -> String {
+    private nonisolated(unsafe) static let dateRangeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
-        return "\(formatter.string(from: start)) → \(formatter.string(from: end))"
+        return formatter
+    }()
+
+    private func formatDateRange(start: Date, end: Date) -> String {
+        "\(Self.dateRangeFormatter.string(from: start)) → \(Self.dateRangeFormatter.string(from: end))"
     }
 }
 

@@ -16,7 +16,9 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
     private let defaults: UserDefaults
     private let suiteName: String?
 
-    // Keys
+    private static func formatISO8601(_ date: Date) -> String {
+        date.formatted(.iso8601)
+    }
     private enum Keys {
         static let firstName = "user_firstName"
         static let lastName = "user_lastName"
@@ -30,7 +32,7 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
 
     public init(suiteName: String? = nil) {
         self.suiteName = suiteName
-        self.defaults = suiteName != nil ? UserDefaults(suiteName: suiteName)! : .standard
+        self.defaults = suiteName.flatMap { UserDefaults(suiteName: $0) } ?? .standard
         Logger.info("💾 UserDefaultsManager initialized", category: "Storage")
     }
 
@@ -122,9 +124,8 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
         defaults.set(expiryDate.timeIntervalSince1970, forKey: Keys.refreshTokenExpiryTime)
         defaults.synchronize()
 
-        let formatter = ISO8601DateFormatter()
         Logger.info(
-            "✅ Saved refresh token expiry: \(formatter.string(from: expiryDate))",
+            "✅ Saved refresh token expiry: \(Self.formatISO8601(expiryDate))",
             category: "Storage")
     }
 
@@ -148,9 +149,8 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
         let now = Date()
         let isValid = expiryDate > now
 
-        let formatter = ISO8601DateFormatter()
-        Logger.info("📅 Current time: \(formatter.string(from: now))", category: "Storage")
-        Logger.info("⏰ Expiry time: \(formatter.string(from: expiryDate))", category: "Storage")
+        Logger.info("📅 Current time: \(Self.formatISO8601(now))", category: "Storage")
+        Logger.info("⏰ Expiry time: \(Self.formatISO8601(expiryDate))", category: "Storage")
         Logger.info(
             "✅ Is valid: \(isValid) (time remaining: \(expiryDate.timeIntervalSince(now)) seconds)",
             category: "Storage")
@@ -196,8 +196,7 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
 
         let expiryString: String
         if let expiry = refreshTokenExpiry {
-            let formatter = ISO8601DateFormatter()
-            expiryString = "\(formatter.string(from: expiry)) (Valid: \(isValid ? "✅" : "❌"))"
+            expiryString = "\(Self.formatISO8601(expiry)) (Valid: \(isValid ? "✅" : "❌"))"
         } else {
             expiryString = "nil"
         }

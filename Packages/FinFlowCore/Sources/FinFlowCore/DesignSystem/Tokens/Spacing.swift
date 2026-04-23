@@ -31,6 +31,8 @@ public typealias AppSpacing = Spacing
 // MARK: - Corner Radius
 
 public enum CornerRadius {
+    /// Tiny decorative radius for chart legend dots, cursors, accent bars (2–3 pt)
+    public static let hairline: CGFloat = 2
     public static let micro: CGFloat = 6
     public static let small: CGFloat = 12
     public static let medium: CGFloat = 16
@@ -57,6 +59,11 @@ public enum OpacityLevel {
     public static let medium: Double = 0.4  // Borders, moderate disabled
     public static let strong: Double = 0.5  // Selected/active states
     public static let high: Double = 0.8  // Prominent highlights
+
+    // Specialized tokens
+    public static let chartGrid: Double = 0.35  // Chart axis grid lines
+    public static let cardSubtle: Double = 0.08  // Subtle card/badge background
+    public static let cardSubtleMedium: Double = 0.12  // Medium subtle background (badges, tags)
 }
 
 // MARK: - Layout Constants

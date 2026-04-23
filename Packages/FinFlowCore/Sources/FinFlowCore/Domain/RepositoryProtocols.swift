@@ -120,6 +120,7 @@ public protocol ChatRepositoryProtocol: Sendable {
     func listThreads() async throws -> [ChatThreadResponse]
     func listMessages(threadId: String) async throws -> [ChatMessageResponse]
     func sendMessage(threadId: String, content: String) async throws -> SendChatMessageResponse
+    func deleteThread(threadId: String) async throws
 }
 
 // MARK: - Composite Protocol (Backward Compatibility)

@@ -11,7 +11,7 @@ public enum CurrencyFormatter {
 
     // MARK: - Shared Formatter
 
-    private static let sharedFormatter: NumberFormatter = {
+    private nonisolated(unsafe) static let sharedFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = "."
@@ -98,7 +98,7 @@ public enum CurrencyFormatter {
         return Double(normalized)
     }
 
-    /// Format large numbers for axis labels (e.g., 1500000 → "1.5M")
+    /// Format axis large numbers (e.g., 1500000 → "1.5M")
     public static func formatAxisValue(_ value: Int) -> String {
         let doubleVal = Double(value)
         if doubleVal >= 1_000_000 {
@@ -108,5 +108,11 @@ public enum CurrencyFormatter {
         } else {
             return "\(value)"
         }
+    }
+
+    /// Format a quantity (stock count, unit count) as a grouped decimal integer without fraction digits.
+    /// Example: 12345.0 → "12.345"
+    public static func formatQuantity(_ value: Double) -> String {
+        sharedFormatter.string(from: NSNumber(value: value)) ?? String(Int(value))
     }
 }

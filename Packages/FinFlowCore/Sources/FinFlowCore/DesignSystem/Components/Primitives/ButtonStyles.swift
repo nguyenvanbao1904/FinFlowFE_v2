@@ -46,32 +46,6 @@ public struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
-// MARK: - Secondary Button Style
-
-/// Secondary action button style
-public struct SecondaryButtonStyle: ButtonStyle {
-    @Environment(\.isEnabled) private var isEnabled
-    
-    public init() {}
-    
-    public func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(AppTypography.headline)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.sm)
-            .background(AppColors.cardBackground)
-            .foregroundStyle(AppColors.primary)
-            .clipShape(.rect(cornerRadius: CornerRadius.medium))
-            .overlay(
-                RoundedRectangle(cornerRadius: CornerRadius.medium)
-                    .stroke(AppColors.primary, lineWidth: BorderWidth.thin)
-            )
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .opacity(isEnabled ? 1.0 : 0.5)
-            .animation(.spring(response: 0.2), value: configuration.isPressed)
-    }
-}
-
 // MARK: - Text Button Style
 
 /// Minimal text-only button style
@@ -92,11 +66,6 @@ extension View {
     /// Apply primary button style
     public func primaryButton(isLoading: Bool = false) -> some View {
         self.buttonStyle(PrimaryButtonStyle(isLoading: isLoading))
-    }
-    
-    /// Apply secondary button style
-    public func secondaryButton() -> some View {
-        self.buttonStyle(SecondaryButtonStyle())
     }
     
     /// Apply text button style

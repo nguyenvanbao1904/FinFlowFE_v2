@@ -271,7 +271,7 @@ private struct PINDigitBox: View {
             }
 
             if isFocused, !isFilled {
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: CornerRadius.hairline)
                     .fill(AppColors.primary)
                     .frame(width: UILayout.pinCursorWidth, height: UILayout.pinCursorHeight)
                     .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: isFocused)

@@ -175,7 +175,10 @@ public actor APIClient: HTTPClientProtocol {
                 if data.isEmpty || httpResponse.statusCode == 204 {
                     // 1. If T is explicitly EmptyResponse, return it
                     if T.self == EmptyResponse.self {
-                        return EmptyResponse() as! T // swiftlint:disable:this force_cast
+                        guard let result = EmptyResponse() as? T else {
+                            throw AppError.decodingError
+                        }
+                        return result
                     }
                     // 2. If T is Optional, return nil (safe)
                     if let optionalType = T.self as? any AnyOptional.Type {

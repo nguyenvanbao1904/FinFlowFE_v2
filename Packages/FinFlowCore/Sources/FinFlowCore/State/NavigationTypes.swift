@@ -80,8 +80,11 @@ public enum AppRoute: Hashable, Sendable {
     case addBudget
     case editBudget(BudgetResponse)
 
-    /// Chat với FinFlow Bot.
-    case finFlowBotChat(initialPrompt: String? = nil)
+    /// Danh sách phiên chat.
+    case chatThreadList
+
+    /// Chat với FinFlow Bot. threadId nil = tạo thread mới.
+    case finFlowBotChat(threadId: String? = nil, initialPrompt: String? = nil)
 }
 
 extension AppRoute: Identifiable {
@@ -103,7 +106,8 @@ extension AppRoute: Identifiable {
         case .categoryList:                   return "categoryList"
         case .addBudget:                      return "addBudget"
         case .editBudget(let b):              return "editBudget-\(b.id)"
-        case .finFlowBotChat(let prompt):     return "finFlowBotChat-\(prompt ?? "")"
+        case .chatThreadList:                  return "chatThreadList"
+        case .finFlowBotChat(let tid, let p):  return "finFlowBotChat-\(tid ?? "new")-\(p ?? "")"
         }
     }
 }
