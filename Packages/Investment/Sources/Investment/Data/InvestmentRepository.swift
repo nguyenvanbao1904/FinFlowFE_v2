@@ -1,17 +1,19 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 
 public actor InvestmentRepository: InvestmentRepositoryProtocol {
     private let client: any HTTPClientProtocol
-    private let dateFormatter: DateFormatter
 
-    public init(client: any HTTPClientProtocol) {
-        self.client = client
+    private nonisolated(unsafe) static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         formatter.dateFormat = "yyyy-MM-dd"
-        self.dateFormatter = formatter
+        return formatter
+    }()
+
+    public init(client: any HTTPClientProtocol) {
+        self.client = client
     }
 
     public func getAnalysis(
@@ -84,8 +86,8 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
 
     public func getDailyValuations(symbol: String, startDate: Date, endDate: Date) async throws -> [DailyValuationDataPoint] {
         let normalized = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        let s = dateFormatter.string(from: startDate)
-        let e = dateFormatter.string(from: endDate)
+        let s = Self.dateFormatter.string(from: startDate)
+        let e = Self.dateFormatter.string(from: endDate)
         let endpoint =
             "/investments/companies/\(normalized)/analysis/valuations/daily?startDate=\(s)&endDate=\(e)"
         let response: [DailyValuationDTO] = try await client.request(
@@ -332,10 +334,10 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
             queryItems.append("quarterlyLimit=\(max(quarterlyLimit, 0))")
         }
         if let startDate {
-            queryItems.append("startDate=\(dateFormatter.string(from: startDate))")
+            queryItems.append("startDate=\(Self.dateFormatter.string(from: startDate))")
         }
         if let endDate {
-            queryItems.append("endDate=\(dateFormatter.string(from: endDate))")
+            queryItems.append("endDate=\(Self.dateFormatter.string(from: endDate))")
         }
         if let showQuarterly {
             queryItems.append("showQuarterly=\(showQuarterly ? "true" : "false")")
@@ -350,7 +352,7 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
 
     private func parseDate(_ value: String?) -> Date? {
         guard let value, !value.isEmpty else { return nil }
-        return dateFormatter.date(from: value)
+        return Self.dateFormatter.date(from: value)
     }
 
     private func normalizePercent(_ value: Double?) -> Double? {

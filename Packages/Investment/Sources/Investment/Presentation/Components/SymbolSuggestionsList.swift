@@ -28,7 +28,7 @@ public struct SymbolSuggestionsList: View {
                             .font(AppTypography.subheadline)
                             .fontWeight(.semibold)
                             .foregroundStyle(.primary)
-                            .frame(width: 64, alignment: .leading)
+                            .frame(width: UILayout.symbolColumnWidth, alignment: .leading)
 
                         Text(suggestion.companyName ?? "")
                             .font(AppTypography.caption)

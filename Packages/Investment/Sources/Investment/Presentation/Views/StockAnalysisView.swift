@@ -115,7 +115,7 @@ public struct StockAnalysisView: View {
                 Text("Quý").tag(true)
             }
             .pickerStyle(.segmented)
-            .frame(width: 140)
+            .frame(width: UILayout.segmentedPickerWidth)
             .accessibilityHint("Đổi chu kỳ dữ liệu giữa năm và quý")
         }
         .padding(.horizontal, Spacing.lg)

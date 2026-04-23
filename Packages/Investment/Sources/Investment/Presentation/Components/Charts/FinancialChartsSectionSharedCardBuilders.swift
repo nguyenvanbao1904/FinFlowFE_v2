@@ -1,4 +1,3 @@
-import Foundation
 import FinFlowCore
 import SwiftUI
 
@@ -13,8 +12,8 @@ extension FinancialChartsSection {
         var subtitle: String?
         if let last = sorted.last {
             // Backend/iOS already normalized to percent (e.g. 0.18 -> 18.0), so no need *100.
-            let roeStr = last.roe != nil ? String(format: "ROE: %.1f%%", last.roe!) : nil
-            let roaStr = last.roa != nil ? String(format: "ROA: %.1f%%", last.roa!) : nil
+            let roeStr = last.roe.map { String(format: "ROE: %.1f%%", $0) }
+            let roaStr = last.roa.map { String(format: "ROA: %.1f%%", $0) }
             subtitle = [roeStr, roaStr].compactMap { $0 }.joined(separator: " • ")
         }
         let sub = subtitle?.isEmpty == false ? subtitle : nil

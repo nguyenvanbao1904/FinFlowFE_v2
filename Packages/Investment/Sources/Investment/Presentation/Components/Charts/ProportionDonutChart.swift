@@ -44,7 +44,7 @@ public struct ProportionDonutChart: View {
                 HStack(spacing: Spacing.xs) {
                     Circle()
                         .fill(activeSlice.color)
-                        .frame(width: 8, height: 8)
+                        .frame(width: UILayout.chartLegendDotMedium, height: UILayout.chartLegendDotMedium)
                     Text("\(activeSlice.name): \(String(format: "%.2f%%", activeSlice.percentage))")
                         .font(AppTypography.caption2)
                         .foregroundStyle(.secondary)
@@ -73,14 +73,14 @@ public struct ProportionDonutChart: View {
                     displayedSliceKey = newKey
                 }
                 .chartLegend(.hidden)
-                .frame(width: 130, height: 130)
+                .frame(width: UILayout.donutChartSize, height: UILayout.donutChartSize)
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     ForEach(slices) { slice in
                         HStack(spacing: Spacing.xs) {
                             Circle()
                                 .fill(slice.color)
-                                .frame(width: 8, height: 8)
+                                .frame(width: UILayout.chartLegendDotMedium, height: UILayout.chartLegendDotMedium)
                             Text(slice.name)
                                 .font(AppTypography.caption2)
                                 .lineLimit(1)

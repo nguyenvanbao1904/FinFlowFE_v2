@@ -29,11 +29,6 @@ struct InteractiveBankCapitalLeverageChart: View {
         self.fullScreen = fullScreen
     }
 
-    @State private var selectedLabel: String?
-    @State private var displayedLabel: String?
-    @State private var hidePopoverTask: Task<Void, Never>?
-    @State private var scrollLabel: String = ""
-
     private let leverageLineColor: Color = Color.primary
     private let leverageTicks: [Double] = [5, 8, 11, 14, 17, 20]
     private let leverageMin: Double = 5
@@ -49,19 +44,12 @@ struct InteractiveBankCapitalLeverageChart: View {
             return "\(y)"
         }
     }
-    private var visibleLength: Int { fullScreen ? min(8, max(1, items.count)) : min(4, max(1, items.count)) }
 
     private var legendReserved: CGFloat {
         let count = series.count + 1
         if count <= 3 { return 26 }
         if count <= 6 { return 52 }
         return 78
-    }
-    private var chartHeight: CGFloat {
-        if fullScreen {
-            return max(110, height - legendReserved - 20)
-        }
-        return max(140, height - legendReserved)
     }
 
     private var barDomain: ClosedRange<Double> {
@@ -100,6 +88,61 @@ struct InteractiveBankCapitalLeverageChart: View {
 
     private var leverageTickYs: [Double] { leverageTicks.map(leverageToY) }
 
+    var body: some View {
+        InteractiveChartScaffold(
+            labels: labels,
+            height: height,
+            fullScreen: fullScreen,
+            legendReserved: legendReserved,
+            popoverBuilder: { _, idx in selectionMetrics(at: idx) },
+            popoverSubtitle: "Chi tiết thành phần",
+            legend: {
+                let legendItems: [(String, Color)] = series.map { ($0.name, $0.color) } + [("TS/VCSH", leverageLineColor)]
+                let columnsCount = min(legendItems.count, 3)
+                let columns = Array(repeating: GridItem(.flexible(), spacing: Spacing.xs), count: columnsCount)
+                LazyVGrid(columns: columns, spacing: Spacing.xs) {
+                    ForEach(Array(legendItems.enumerated()), id: \.offset) { _, it in
+                        chartLegendItem(it.0, color: it.1)
+                    }
+                }
+            }
+        ) { scrollLabel, selectedLabel, chartHeight in
+            capitalLeverageChartMarks
+                .chartYScale(domain: barDomain, range: .plotDimension(padding: 0.1))
+                .chartYAxis {
+                    AxisMarks(position: .trailing) { value in
+                        AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(OpacityLevel.chartGrid))
+                        AxisValueLabel {
+                            if let v = value.as(Double.self) {
+                                Text(formatVndCompact(v))
+                                    .font(AppTypography.caption2)
+                                    .offset(x: Spacing.xs)
+                            }
+                        }
+                    }
+
+                    AxisMarks(position: .leading, values: leverageTickYs) { value in
+                        AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(OpacityLevel.chartGrid))
+                        AxisValueLabel {
+                            if let y = value.as(Double.self) {
+                                let r = yToLeverage(y)
+                                Text("\(Int(round(r)))x")
+                                    .font(AppTypography.caption2)
+                                    .offset(x: -Spacing.xs)
+                            }
+                        }
+                    }
+                }
+                .interactiveChartModifiers(
+                    scrollLabel: scrollLabel,
+                    selectedLabel: selectedLabel,
+                    visibleLength: fullScreen ? min(8, max(1, items.count)) : min(4, max(1, items.count)),
+                    fullScreen: fullScreen,
+                    chartHeight: chartHeight
+                )
+        }
+    }
+
     private var capitalLeverageChartMarks: some View {
         Chart {
             ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
@@ -114,115 +157,25 @@ struct InteractiveBankCapitalLeverageChart: View {
             ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
                 if let r = leverageRatio(for: item) {
                     let label = labels[idx]
-                    LineMark(
-                        x: .value("Kỳ", label),
-                        y: .value("TS/VCSH", leverageToY(r))
-                    )
-                    .foregroundStyle(leverageLineColor)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                    .interpolationMethod(.monotone)
-                    PointMark(
-                        x: .value("Kỳ", label),
-                        y: .value("TS/VCSH", leverageToY(r))
-                    )
-                    .foregroundStyle(leverageLineColor)
-                    .symbolSize(30)
+                    LineMark(x: .value("Kỳ", label), y: .value("TS/VCSH", leverageToY(r)))
+                        .foregroundStyle(leverageLineColor)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                        .interpolationMethod(.monotone)
+                    PointMark(x: .value("Kỳ", label), y: .value("TS/VCSH", leverageToY(r)))
+                        .foregroundStyle(leverageLineColor)
+                        .symbolSize(30)
                 }
             }
         }
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            capitalLeverageChartMarks
-                .chartYScale(domain: barDomain, range: .plotDimension(padding: 0.1))
-                .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: fullScreen ? 6 : 4)) {
-                        AxisGridLine().foregroundStyle(AppColors.chartGridLine)
-                        AxisValueLabel().font(AppTypography.caption2)
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(position: .trailing) { value in
-                        AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(0.35))
-                        AxisValueLabel {
-                            if let v = value.as(Double.self) {
-                                Text(formatVndCompact(v))
-                                    .font(AppTypography.caption2)
-                                    .offset(x: Spacing.xs)
-                            }
-                        }
-                    }
-
-                    AxisMarks(position: .leading, values: leverageTickYs) { value in
-                        AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(0.35))
-                        AxisValueLabel {
-                            if let y = value.as(Double.self) {
-                                let r = yToLeverage(y)
-                                Text("\(Int(round(r)))x")
-                                    .font(AppTypography.caption2)
-                                    .offset(x: -Spacing.xs)
-                            }
-                        }
-                    }
-                }
-                .chartScrollableAxes(.horizontal)
-                .chartXVisibleDomain(length: visibleLength)
-                .chartScrollPosition(x: $scrollLabel)
-                .onAppear {
-                    if scrollLabel.isEmpty {
-                        scrollLabel = recentScrollStartLabel(labels: labels, visibleLength: visibleLength)
-                    }
-                }
-                .chartXSelection(value: $selectedLabel)
-                .onChange(of: selectedLabel) { _, newValue in
-                    displayedLabel = newValue
-                }
-                .padding(.top, fullScreen ? -Spacing.sm : 0)
-                .frame(height: chartHeight)
-
-            let legendItems: [(String, Color)] = series.map { ($0.name, $0.color) } + [("TS/VCSH", leverageLineColor)]
-            let columnsCount = min(legendItems.count, 3)
-            let columns = Array(repeating: GridItem(.flexible(), spacing: Spacing.xs), count: columnsCount)
-            LazyVGrid(columns: columns, spacing: Spacing.xs) {
-                ForEach(Array(legendItems.enumerated()), id: \.offset) { _, it in
-                    chartLegendItem(it.0, color: it.1)
-                }
-            }
-            .frame(height: legendReserved, alignment: .top)
-        }
-        .overlay(alignment: .topTrailing) {
-            if fullScreen, let label = displayedLabel, let metrics = selectionMetrics(for: label) {
-                nativeSelectionDetails(
-                    title: label,
-                    subtitle: "Chi tiết thành phần",
-                    metrics: metrics
-                )
-                .frame(maxWidth: 280)
-                .padding(.top, Spacing.sm)
-                .padding(.trailing, Spacing.sm)
-            }
-        }
-        .zIndex(displayedLabel == nil ? 0 : 1)
-        .frame(height: height, alignment: .top)
-        .onDisappear {
-            hidePopoverTask?.cancel()
-            hidePopoverTask = nil
-        }
-    }
-
-    private func selectionMetrics(for label: String) -> [ChartPopoverMetric]? {
-        guard let idx = labels.firstIndex(of: label), items.indices.contains(idx) else { return nil }
+    private func selectionMetrics(at idx: Int) -> [ChartPopoverMetric]? {
+        guard items.indices.contains(idx) else { return nil }
         let item = items[idx]
 
         let baseMetrics = series.compactMap { s -> ChartPopoverMetric? in
             guard let v = s.value(item) else { return nil }
-            return ChartPopoverMetric(
-                id: s.name,
-                label: s.name,
-                value: formatVndCompact(v),
-                color: s.color
-            )
+            return ChartPopoverMetric(id: s.name, label: s.name, value: formatVndCompact(v), color: s.color)
         }
 
         let leverageMetrics: [ChartPopoverMetric] = leverageRatio(for: item).map { r in
@@ -237,7 +190,7 @@ struct InteractiveBankCapitalLeverageChart: View {
         }.map { [$0] } ?? []
 
         let totalLiabMetrics: [ChartPopoverMetric] = item.totalLiabilities.map { v in
-            [ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(v), color: Color.red)]
+            [ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(v), color: AppColors.error)]
         } ?? []
 
         return baseMetrics + totalLiabMetrics + leverageMetrics

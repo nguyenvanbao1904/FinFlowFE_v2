@@ -26,7 +26,7 @@ struct FinancialChartCard<Content: View>: View {
                         .font(AppTypography.caption)
                         .fontWeight(.semibold)
                         .foregroundStyle(AppColors.primary)
-                        .frame(width: 28, height: 28)
+                        .frame(width: UILayout.toolbarButton, height: UILayout.toolbarButton)
                         .background(AppColors.primary.opacity(0.1))
                         .clipShape(Circle())
                         .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)

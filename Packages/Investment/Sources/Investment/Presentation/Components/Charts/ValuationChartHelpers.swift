@@ -1,4 +1,3 @@
-import Foundation
 import FinFlowCore
 import SwiftUI
 
@@ -111,6 +110,39 @@ func valuationDailyRangeStats(_ points: [DailyValuationDataPoint]) -> ValuationR
         psMedian: medianInRangeDaily(points, metric: \.ps),
         psMean: meanInRangeDaily(points, metric: \.ps)
     )
+}
+
+// MARK: - Shared date parsing
+
+func parseDailyChartDate(_ isoDay: String) -> Date? {
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .current
+    let parts = isoDay.split(separator: "-").compactMap { Int($0) }
+    guard parts.count == 3 else { return nil }
+    return cal.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+}
+
+// MARK: - Shared chart axis & scroll helpers
+
+/// Compute evenly-spaced x-axis label indices for index-based charts.
+func valuationXAxisValues(pointCount: Int, fullScreen: Bool) -> [Int] {
+    guard pointCount > 0 else { return [] }
+    let targetLabelCount = fullScreen ? 8 : 5
+    if pointCount <= targetLabelCount {
+        return Array(0..<pointCount)
+    }
+    let stride = max(1, Int(ceil(Double(pointCount - 1) / Double(max(targetLabelCount - 1, 1)))))
+    var values = Array(Swift.stride(from: 0, to: pointCount, by: stride))
+    if values.last != pointCount - 1 {
+        values.append(pointCount - 1)
+    }
+    return values
+}
+
+/// Compute initial scroll position so the chart shows the latest data.
+func valuationInitialScrollPosition(pointCount: Int, visibleLength: Int) -> Int {
+    guard pointCount > 0 else { return 0 }
+    return max(pointCount - visibleLength, 0)
 }
 
 // MARK: - Pinch and axis zoom helpers

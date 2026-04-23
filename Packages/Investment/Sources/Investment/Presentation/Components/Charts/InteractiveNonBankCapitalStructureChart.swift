@@ -9,11 +9,6 @@ struct InteractiveNonBankCapitalStructureChart: View {
     let height: CGFloat
     let fullScreen: Bool
 
-    @State private var selectedLabel: String?
-    @State private var displayedLabel: String?
-    @State private var hidePopoverTask: Task<Void, Never>?
-    @State private var scrollLabel: String = ""
-
     private struct CapitalStructurePoint {
         let periodLabel: String
         let year: Int
@@ -46,9 +41,6 @@ struct InteractiveNonBankCapitalStructureChart: View {
 
     private var labels: [String] { points.map(\.periodLabel) }
 
-    private var visibleLength: Int { fullScreen ? min(8, max(1, points.count)) : min(4, max(1, points.count)) }
-
-    /// Cùng bậc với `InteractiveStackedBarChart` / `InteractiveBankCapitalLeverageChart`, cộng thêm chú thích 1–2 dòng.
     private var legendGridReserved: CGFloat {
         let legendItemCount = 6
         if legendItemCount <= 3 { return 26 }
@@ -57,15 +49,8 @@ struct InteractiveNonBankCapitalStructureChart: View {
     }
 
     private var footnoteReserved: CGFloat { Spacing.xs + 36 }
-
     private var legendReserved: CGFloat { legendGridReserved + footnoteReserved }
 
-    private var chartHeight: CGFloat {
-        if fullScreen {
-            return max(110, height - legendReserved - 20)
-        }
-        return max(140, height - legendReserved)
-    }
     private var barDomain: ClosedRange<Double> {
         unifiedBarDomain(values: points.map(\.stackedTotal))
     }
@@ -82,40 +67,36 @@ struct InteractiveNonBankCapitalStructureChart: View {
         return bMin + ((pctClamped - yMin) / ySpan) * bSpan
     }
 
-    private var shouldEnableSelection: Bool { fullScreen }
-    private var selectedCapitalPoint: CapitalStructurePoint? {
-        guard shouldEnableSelection,
-            let label = displayedLabel,
-            let idx = labels.firstIndex(of: label),
-            points.indices.contains(idx)
-        else { return nil }
-        return points[idx]
-    }
-
     var body: some View {
-        chartBody
-            .frame(height: height, alignment: .top)
-            .overlay(alignment: .topTrailing) {
-                if fullScreen, let label = displayedLabel, let point = selectedCapitalPoint {
-                    nativeSelectionDetails(
-                        title: label,
-                        subtitle: "Chi tiết nguồn vốn",
-                        metrics: metrics(for: point)
-                    )
-                    .frame(maxWidth: 280)
-                    .padding(.top, Spacing.sm)
-                    .padding(.trailing, Spacing.sm)
+        InteractiveChartScaffold(
+            labels: labels,
+            height: height,
+            fullScreen: fullScreen,
+            legendReserved: legendReserved,
+            popoverBuilder: { _, idx in
+                guard points.indices.contains(idx) else { return nil }
+                return metrics(for: points[idx])
+            },
+            popoverSubtitle: "Chi tiết nguồn vốn",
+            legend: {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    LazyVGrid(columns: legendGridColumns, spacing: Spacing.xs) {
+                        chartLegendItem("Vốn CSH", color: AppColors.chartCapitalEquity)
+                        chartLegendItem("Vay NH", color: AppColors.chartCapitalDeposits)
+                        chartLegendItem("Vay DH", color: AppColors.chartCapitalLongTermLoan)
+                        chartLegendItem("Trả trước KH", color: AppColors.chartCapitalCustomerAdvances)
+                        chartLegendItem("Nguồn vốn khác", color: AppColors.chartAssetLoans)
+                        chartLegendItem("Nợ vay ròng / VCSH", color: AppColors.chartRatioLine)
+                    }
+                    .frame(height: legendGridReserved, alignment: .top)
+                    Text("Đường cam: Nợ vay ròng / VCSH · Trục trái −100% … 100%.")
+                        .font(AppTypography.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
                 }
             }
-            .zIndex(displayedLabel == nil ? 0 : 1)
-            .onDisappear {
-                hidePopoverTask?.cancel()
-                hidePopoverTask = nil
-            }
-    }
-
-    private var chartBody: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+        ) { scrollLabel, selectedLabel, chartHeight in
             Chart(Array(points.enumerated()), id: \.offset) { idx, d in
                 let label = labels[idx]
 
@@ -130,26 +111,20 @@ struct InteractiveNonBankCapitalStructureChart: View {
                 BarMark(x: .value("Kỳ", label), y: .value("Nguồn vốn khác", d.otherCapitalValue))
                     .foregroundStyle(AppColors.chartAssetLoans)
 
-                LineMark(
-                    x: .value("Kỳ", label),
-                    y: .value("Nợ vay ròng/VCSH", lineYValue(for: d))
-                )
-                .foregroundStyle(Color.orange)
-                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                .interpolationMethod(.monotone)
-                PointMark(
-                    x: .value("Kỳ", label),
-                    y: .value("Nợ vay ròng/VCSH", lineYValue(for: d))
-                )
-                .foregroundStyle(Color.orange)
-                .symbolSize(30)
+                LineMark(x: .value("Kỳ", label), y: .value("Nợ vay ròng/VCSH", lineYValue(for: d)))
+                    .foregroundStyle(AppColors.chartRatioLine)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .interpolationMethod(.monotone)
+                PointMark(x: .value("Kỳ", label), y: .value("Nợ vay ròng/VCSH", lineYValue(for: d)))
+                    .foregroundStyle(AppColors.chartRatioLine)
+                    .symbolSize(30)
             }
             .chartYAxis {
                 AxisMarks(position: .trailing, values: .automatic(desiredCount: 5)) { value in
-                    AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(0.35))
+                    AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(OpacityLevel.chartGrid))
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(formatValueAxisCapital(v))
+                            Text(formatVndCompact(v))
                                 .font(AppTypography.caption2)
                                 .offset(x: Spacing.xs)
                         }
@@ -160,7 +135,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
                     position: .leading,
                     values: [-100.0, -50.0, 0.0, 50.0, 100.0].map { scalePctToBarDomain($0) }
                 ) { value in
-                    AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(0.35))
+                    AxisGridLine().foregroundStyle(AppColors.chartGridLine.opacity(OpacityLevel.chartGrid))
                     AxisValueLabel {
                         if let mappedV = value.as(Double.self) {
                             let ySpan = leftAxisPctDomain.upperBound - leftAxisPctDomain.lowerBound
@@ -174,45 +149,14 @@ struct InteractiveNonBankCapitalStructureChart: View {
                     }
                 }
             }
-            .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: fullScreen ? 6 : 4)) {
-                    AxisGridLine().foregroundStyle(AppColors.chartGridLine)
-                    AxisValueLabel().font(AppTypography.caption2)
-                }
-            }
             .chartYScale(domain: barDomain, range: .plotDimension(padding: 0.1))
-            .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: visibleLength)
-            .chartScrollPosition(x: $scrollLabel)
-            .onAppear {
-                if scrollLabel.isEmpty {
-                    scrollLabel = recentScrollStartLabel(labels: labels, visibleLength: visibleLength)
-                }
-            }
-            .chartXSelection(value: $selectedLabel)
-            .onChange(of: selectedLabel) { _, newValue in
-                displayedLabel = newValue
-            }
-            .padding(.top, fullScreen ? -Spacing.sm : 0)
-            .frame(height: chartHeight)
-
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                LazyVGrid(columns: legendGridColumns, spacing: Spacing.xs) {
-                    chartLegendItem("Vốn CSH", color: AppColors.chartCapitalEquity)
-                    chartLegendItem("Vay NH", color: AppColors.chartCapitalDeposits)
-                    chartLegendItem("Vay DH", color: AppColors.chartCapitalLongTermLoan)
-                    chartLegendItem("Trả trước KH", color: AppColors.chartCapitalCustomerAdvances)
-                    chartLegendItem("Nguồn vốn khác", color: AppColors.chartAssetLoans)
-                    chartLegendItem("Nợ vay ròng / VCSH", color: .orange)
-                }
-                .frame(height: legendGridReserved, alignment: .top)
-                Text("Đường cam: Nợ vay ròng / VCSH · Trục trái −100% … 100%.")
-                    .font(AppTypography.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-            }
-            .frame(height: legendReserved, alignment: .top)
+            .interactiveChartModifiers(
+                scrollLabel: scrollLabel,
+                selectedLabel: selectedLabel,
+                visibleLength: fullScreen ? min(8, max(1, points.count)) : min(4, max(1, points.count)),
+                fullScreen: fullScreen,
+                chartHeight: chartHeight
+            )
         }
     }
 
@@ -259,14 +203,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
     private func metrics(for point: CapitalStructurePoint) -> [ChartPopoverMetric] {
         var rows: [ChartPopoverMetric] = []
         if let totalAssets = point.totalAssetsDisplay {
-            rows.append(
-                ChartPopoverMetric(
-                    id: "total-assets",
-                    label: "Tổng tài sản",
-                    value: formatVndCompact(totalAssets),
-                    color: AppColors.chartAssetLoans
-                )
-            )
+            rows.append(ChartPopoverMetric(id: "total-assets", label: "Tổng tài sản", value: formatVndCompact(totalAssets), color: AppColors.chartAssetLoans))
         }
         rows.append(contentsOf: [
             ChartPopoverMetric(id: "eq", label: "Vốn CSH", value: formatVndCompact(point.equityValue), color: AppColors.chartCapitalEquity),
@@ -274,32 +211,14 @@ struct InteractiveNonBankCapitalStructureChart: View {
             ChartPopoverMetric(id: "vay-dh", label: "Vay DH", value: formatVndCompact(point.longBorrowValue), color: AppColors.chartCapitalLongTermLoan),
             ChartPopoverMetric(id: "adv", label: "Trả trước KH", value: formatVndCompact(point.advancesValue), color: AppColors.chartCapitalCustomerAdvances),
             ChartPopoverMetric(id: "other-cap", label: "Nguồn vốn khác", value: formatVndCompact(point.otherCapitalValue), color: AppColors.chartAssetLoans),
-            ChartPopoverMetric(id: "net-debt", label: "Nợ vay ròng", value: formatVndCompact(point.netDebtValue), color: .orange),
-            ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(point.totalLiabilities), color: .orange),
+            ChartPopoverMetric(id: "net-debt", label: "Nợ vay ròng", value: formatVndCompact(point.netDebtValue), color: AppColors.chartRatioLine),
+            ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(point.totalLiabilities), color: AppColors.chartRatioLine),
         ])
         if let r = point.netDebtToEquityRatio {
-            rows.append(
-                ChartPopoverMetric(
-                    id: "net-de",
-                    label: "Nợ vay ròng / VCSH",
-                    value: formatRatioVi(r),
-                    color: .orange
-                )
-            )
+            rows.append(ChartPopoverMetric(id: "net-de", label: "Nợ vay ròng / VCSH", value: formatRatioVi(r), color: AppColors.chartRatioLine))
         } else {
-            rows.append(
-                ChartPopoverMetric(
-                    id: "net-de",
-                    label: "Nợ vay ròng / VCSH",
-                    value: "— (VCSH ≤ 0)",
-                    color: .orange
-                )
-            )
+            rows.append(ChartPopoverMetric(id: "net-de", label: "Nợ vay ròng / VCSH", value: "— (VCSH ≤ 0)", color: AppColors.chartRatioLine))
         }
         return rows
-    }
-
-    private func formatValueAxisCapital(_ value: Double) -> String {
-        formatVndCompact(value)
     }
 }

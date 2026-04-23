@@ -26,20 +26,35 @@ struct InteractiveDualLineChart<Item: Identifiable>: View {
         case auto      // default AxisValueLabel
     }
 
-    @State private var selectedLabel: String?
-    @State private var displayedLabel: String?
-    @State private var hidePopoverTask: Task<Void, Never>?
-    @State private var scrollLabel: String = ""
-
     private var labels: [String] { items.map(labelKey) }
-    private var visibleLength: Int { fullScreen ? min(8, max(1, items.count)) : min(4, max(1, items.count)) }
     private let legendReserved: CGFloat = 52
-    private var chartHeight: CGFloat {
-        fullScreen ? max(110, height - legendReserved - 20) : max(140, height - legendReserved)
-    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+        InteractiveChartScaffold(
+            labels: labels,
+            height: height,
+            fullScreen: fullScreen,
+            legendReserved: legendReserved,
+            popoverBuilder: { label, idx in
+                guard items.indices.contains(idx) else { return nil }
+                let item = items[idx]
+                return [
+                    line1.value(item).map { v in
+                        ChartPopoverMetric(id: line1.name, label: line1.name, value: String(format: "%.2f%%", v), color: line1.color)
+                    },
+                    line2.value(item).map { v in
+                        ChartPopoverMetric(id: line2.name, label: line2.name, value: String(format: "%.2f%%", v), color: line2.color)
+                    },
+                ].compactMap { $0 }
+            },
+            popoverSubtitle: popoverSubtitle,
+            legend: {
+                HStack(spacing: Spacing.md) {
+                    chartLegendItem(line1.name, color: line1.color)
+                    chartLegendItem(line2.name, color: line2.color)
+                }
+            }
+        ) { scrollLabel, selectedLabel, chartHeight in
             Chart {
                 ForEach(items) { item in
                     let label = labelKey(item)
@@ -74,53 +89,13 @@ struct InteractiveDualLineChart<Item: Identifiable>: View {
                     }
                 }
             }
-            .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: fullScreen ? 6 : 4)) {
-                    AxisGridLine().foregroundStyle(AppColors.chartGridLine)
-                    AxisValueLabel().font(AppTypography.caption2)
-                }
-            }
-            .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: visibleLength)
-            .chartScrollPosition(x: $scrollLabel)
-            .onAppear {
-                if scrollLabel.isEmpty {
-                    scrollLabel = recentScrollStartLabel(labels: labels, visibleLength: visibleLength)
-                }
-            }
-            .chartXSelection(value: $selectedLabel)
-            .onChange(of: selectedLabel) { _, newValue in displayedLabel = newValue }
-            .padding(.top, fullScreen ? -Spacing.sm : 0)
-            .frame(height: chartHeight)
-
-            HStack(spacing: Spacing.md) {
-                chartLegendItem(line1.name, color: line1.color)
-                chartLegendItem(line2.name, color: line2.color)
-            }
-            .frame(height: legendReserved, alignment: .leading)
-        }
-        .overlay(alignment: .topTrailing) {
-            if fullScreen, let label = displayedLabel, let idx = labels.firstIndex(of: label), items.indices.contains(idx) {
-                let item = items[idx]
-                let metrics = [
-                    line1.value(item).map { v in
-                        ChartPopoverMetric(id: line1.name, label: line1.name, value: String(format: "%.2f%%", v), color: line1.color)
-                    },
-                    line2.value(item).map { v in
-                        ChartPopoverMetric(id: line2.name, label: line2.name, value: String(format: "%.2f%%", v), color: line2.color)
-                    },
-                ].compactMap { $0 }
-                nativeSelectionDetails(title: label, subtitle: popoverSubtitle, metrics: metrics)
-                    .frame(maxWidth: 280)
-                    .padding(.top, Spacing.sm)
-                    .padding(.trailing, Spacing.sm)
-            }
-        }
-        .zIndex(displayedLabel == nil ? 0 : 1)
-        .frame(height: height, alignment: .top)
-        .onDisappear {
-            hidePopoverTask?.cancel()
-            hidePopoverTask = nil
+            .interactiveChartModifiers(
+                scrollLabel: scrollLabel,
+                selectedLabel: selectedLabel,
+                visibleLength: fullScreen ? min(8, max(1, items.count)) : min(4, max(1, items.count)),
+                fullScreen: fullScreen,
+                chartHeight: chartHeight
+            )
         }
     }
 }

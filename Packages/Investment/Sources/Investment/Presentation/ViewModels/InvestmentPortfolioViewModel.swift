@@ -1,5 +1,5 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 import Observation
 
 @MainActor
@@ -214,16 +214,11 @@ public final class InvestmentPortfolioViewModel {
 
     public func createCashTransaction(tradeType: TradeType, amount: Double, transactionDate: Date) async throws {
         guard let selectedPortfolio else { return }
-        let iso = ISO8601DateFormatter().string(from: transactionDate)
-        _ = try await createTradeTransactionUseCase.execute(
+        try await createTradeTransactionUseCase.executeCash(
             portfolioId: selectedPortfolio.id,
-            request: CreateTradeTransactionRequest(
-                tradeType: tradeType,
-                amount: amount,
-                feePercent: nil,
-                taxPercent: nil,
-                transactionDate: iso
-            )
+            tradeType: tradeType,
+            amount: amount,
+            transactionDate: transactionDate
         )
         await loadAll(force: true)
     }
@@ -237,18 +232,15 @@ public final class InvestmentPortfolioViewModel {
         transactionDate: Date
     ) async throws {
         guard let selectedPortfolio else { return }
-        let iso = ISO8601DateFormatter().string(from: transactionDate)
-        _ = try await createTradeTransactionUseCase.execute(
+        try await createTradeTransactionUseCase.executeStock(
             portfolioId: selectedPortfolio.id,
-            request: CreateTradeTransactionRequest(
-                tradeType: tradeType,
-                symbol: symbol,
-                quantity: quantity,
-                price: price,
-                feePercent: feePercent,
-                taxPercent: tradeType == .SELL ? 0.1 : nil,
-                transactionDate: iso
-            )
+            tradeType: tradeType,
+            symbol: symbol,
+            quantity: quantity,
+            price: price,
+            feePercent: feePercent,
+            taxPercent: tradeType == .SELL ? 0.1 : nil,
+            transactionDate: transactionDate
         )
         await loadAll(force: true)
     }

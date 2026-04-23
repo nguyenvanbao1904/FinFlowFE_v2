@@ -119,7 +119,7 @@ struct InvestmentPortfolioTabContent: View {
                                         color: colorForSymbol(asset.symbol),
                                         title: asset.symbol,
                                         subtitle:
-                                            "KL \(asset.totalQuantity.formattedQuantity) • Giá vốn \(CurrencyFormatter.format(asset.averagePrice)) • Giá hiện tại \(CurrencyFormatter.format(asset.closePrice ?? 0))"
+                                            "KL \(CurrencyFormatter.formatQuantity(asset.totalQuantity)) • Giá vốn \(CurrencyFormatter.format(asset.averagePrice)) • Giá hiện tại \(CurrencyFormatter.format(asset.closePrice ?? 0))"
                                     ) {
                                         VStack(alignment: .trailing, spacing: Spacing.xs) {
                                             Text(CurrencyFormatter.format(marketValue))
@@ -212,8 +212,8 @@ struct InvestmentPortfolioTabContent: View {
                 name: alloc.name,
                 percentage: alloc.weight,
                 color: {
-                    if alloc.name == "Khác" { return Color.gray.opacity(0.7) }
-                    let palette: [Color] = [.teal, .purple, .orange, .pink, .indigo, .mint, .brown, .cyan, .red, .gray]
+                    if alloc.name == "Khác" { return AppColors.chartOther }
+                    let palette = AppColors.chartPalette
                     return palette[idx % palette.count]
                 }()
             )

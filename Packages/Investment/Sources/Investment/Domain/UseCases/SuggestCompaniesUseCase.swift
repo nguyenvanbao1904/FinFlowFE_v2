@@ -1,5 +1,4 @@
 import FinFlowCore
-import Foundation
 
 public struct SuggestCompaniesUseCase: Sendable {
     private let repository: any InvestmentRepositoryProtocol

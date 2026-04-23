@@ -74,8 +74,8 @@ func computeRecentCAGR(_ yearlyValues: [(year: Int, value: Double)], targetYears
 
 func growthSubtitleColor(for rate: Double?) -> Color {
     guard let rate else { return .secondary }
-    if rate < 0 { return .red }
-    if rate < 7 { return .orange }
+    if rate < 0 { return AppColors.expense }
+    if rate < 7 { return AppColors.chartGrowthStable }
     return AppColors.success
 }
 

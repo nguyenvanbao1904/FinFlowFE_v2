@@ -1,5 +1,4 @@
 import FinFlowCore
-import Charts
 import SwiftUI
 
 /// Groups the use-cases and session dependency for `InvestmentView`.

@@ -150,7 +150,7 @@ public struct CompanyInfoCard: View {
                     id: "others",
                     name: "Cổ đông khác",
                     percentage: others,
-                    color: Color.gray.opacity(0.7)
+                    color: AppColors.chartOther
                 )
             )
         }
@@ -158,7 +158,7 @@ public struct CompanyInfoCard: View {
     }
 
     private func colorForIndex(_ index: Int) -> Color {
-        let palette: [Color] = [.teal, .purple, .orange, .pink, .indigo, .mint, .brown, .cyan, .red, .gray]
+        let palette = AppColors.chartPalette
         return palette[index % palette.count]
     }
 
@@ -186,8 +186,8 @@ public struct CompanyInfoCard: View {
         let assessment: (text: String, color: Color) = {
             if median <= 0 { return ("Chưa có trung vị", .secondary) }
             if pct < 5 { return ("Gần trung vị", .secondary) }
-            if diff < 0 { return (String(format: "Thấp hơn trung vị %.0f%%", pct), .green) }
-            return (String(format: "Cao hơn trung vị %.0f%%", pct), .orange)
+            if diff < 0 { return (String(format: "Thấp hơn trung vị %.0f%%", pct), AppColors.success) }
+            return (String(format: "Cao hơn trung vị %.0f%%", pct), AppColors.chartGrowthStable)
         }()
         let benchmarkLine: String? = {
             var parts: [String] = []
@@ -208,7 +208,7 @@ public struct CompanyInfoCard: View {
             Spacer()
             VStack(alignment: .trailing, spacing: Spacing.xs) {
                 HStack(spacing: Spacing.xs) {
-                    Circle().fill(assessment.color).frame(width: 8, height: 8)
+                    Circle().fill(assessment.color).frame(width: UILayout.chartLegendDotMedium, height: UILayout.chartLegendDotMedium)
                     Text(assessment.text)
                         .font(AppTypography.caption)
                         .foregroundStyle(assessment.color)

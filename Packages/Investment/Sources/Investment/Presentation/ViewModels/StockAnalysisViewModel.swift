@@ -1,5 +1,5 @@
-import FinFlowCore
 import Foundation
+import FinFlowCore
 import Observation
 
 @MainActor
@@ -88,8 +88,7 @@ public final class StockAnalysisViewModel {
             didLoadFullFinancials = true
             error = nil
         } catch {
-            if error is CancellationError { return }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Tài Chính")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu Tài Chính")
         }
     }
 
@@ -106,8 +105,7 @@ public final class StockAnalysisViewModel {
             didLoadFullValuations = true
             error = nil
         } catch {
-            if error is CancellationError { return }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Định Giá")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu Định Giá")
         }
     }
 
@@ -137,9 +135,8 @@ public final class StockAnalysisViewModel {
             valuations = points
             error = nil
         } catch {
-            if error is CancellationError { return }
             guard symbol == currentSymbol, requestId == valuationsRangeRequestId else { return }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Định Giá Theo Khoảng")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu Định Giá Theo Khoảng")
         }
     }
 
@@ -163,9 +160,8 @@ public final class StockAnalysisViewModel {
             dailyValuations = points
             error = nil
         } catch {
-            if error is CancellationError { return }
             guard symbol == currentSymbol, requestId == dailyValuationsRangeRequestId else { return }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Định Giá Theo Ngày")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Định Giá Theo Ngày")
         }
     }
 
@@ -182,8 +178,7 @@ public final class StockAnalysisViewModel {
             didLoadFullDividends = true
             error = nil
         } catch {
-            if error is CancellationError { return }
-            self.error = error.toAppAlert(defaultTitle: "Lỗi Tải Dữ Liệu Cổ Tức")
+            self.error = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi Tải Dữ Liệu Cổ Tức")
         }
     }
 }

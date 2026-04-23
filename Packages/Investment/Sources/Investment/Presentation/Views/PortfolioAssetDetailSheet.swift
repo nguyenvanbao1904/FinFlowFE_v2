@@ -29,7 +29,7 @@ public struct PortfolioAssetDetailSheet: View {
                     VStack(spacing: .zero) {
                         detailRow(label: "Tỷ trọng danh mục", value: formatWeight(asset: asset, total: portfolioStockValue))
                         Divider().padding(.vertical, Spacing.sm)
-                        detailRow(label: "Khối lượng", value: asset.totalQuantity.formattedQuantity)
+                        detailRow(label: "Khối lượng", value: CurrencyFormatter.formatQuantity(asset.totalQuantity))
                         Divider().padding(.vertical, Spacing.sm)
                         detailRow(label: "Giá vốn", value: CurrencyFormatter.format(asset.averagePrice))
                         Divider().padding(.vertical, Spacing.sm)
