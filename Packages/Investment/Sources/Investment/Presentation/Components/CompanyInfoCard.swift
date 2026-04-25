@@ -231,4 +231,3 @@ public struct CompanyInfoCard: View {
         return String(format: "%.2f", value)
     }
 }
-

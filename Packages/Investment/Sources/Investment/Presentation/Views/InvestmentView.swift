@@ -59,7 +59,7 @@ public struct InvestmentView: View {
     @State private var portfolioVM: InvestmentPortfolioViewModel
 
     @State private var activeSheet: ActiveSheet?
-    @State private var selectedAssetForDetail: PortfolioAssetResponse? = nil
+    @State private var selectedAssetForDetail: PortfolioAssetResponse?
 
     private let suggestCompaniesUseCase: SuggestCompaniesUseCase
 
@@ -173,7 +173,7 @@ public struct InvestmentView: View {
         case .createPortfolio:
             CreatePortfolioSheet { name in
                 await portfolioVM.createPortfolio(name: name)
-                activeSheet = nil
+                await MainActor.run { activeSheet = nil }
             }
         case .addInvestmentAction:
             AddInvestmentActionSheet(

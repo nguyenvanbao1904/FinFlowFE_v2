@@ -160,178 +160,224 @@ public struct ValuationDataPoint: Identifiable, Equatable, Sendable {
     }
 }
 
-// Chuyên biệt cho Ngân Hàng (Áp dụng cho ACB)
 public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
     public let quarter: Int
 
-    /// Human-readable period label used as the X-axis value in charts.
     public var periodLabel: String {
         quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
     }
-    
-    // Cơ cấu tài sản
+
+    // Balance sheet — assets
     public let cashAndEquivalents: Double?
     public let depositsAtSBV: Double?
     public let interbankPlacements: Double?
     public let tradingSecurities: Double?
     public let investmentSecurities: Double?
     public let customerLoans: Double?
-    
-    // Phân rã cho vay
     public let shortTermLoans: Double?
     public let mediumLongTermLoans: Double?
     public let personalLoans: Double?
     public let corporateLoans: Double?
-    
-    // Cơ cấu nguồn vốn
+
+    // Balance sheet — liabilities & equity
     public let sbvBorrowings: Double?
     public let customerDeposits: Double?
-    public let valuablePapers: Double? // Giấy tờ có giá
-    public let equity: Double? // Vốn chủ sở hữu
-    
-    // Hiệu quả hoạt động / Ngân hàng chuyên sâu
+    public let valuablePapers: Double?
+    public let equity: Double?
+    public let depositsBorrowingsOthers: Double?
+    public let totalLiabilities: Double?
+    public let totalEquity: Double?
+    public let issuingValuablePaper: Double?
+
+    // Balance sheet — loan quality
+    public let customerLoan: Double?
+    public let standardDebt: Double?
+    public let watchlistDebt: Double?
+    public let substandardDebt: Double?
+    public let doubtfulDebt: Double?
+    public let badDebt: Double?
+    public let provisionForCustomerLoanLoss: Double?
+
+    // Indicators
     public let roe: Double?
     public let roa: Double?
-    
-    // Thu nhập
-    public let netInterestIncome: Double? // Thu nhập lãi thuần
-    public let feeAndCommissionIncome: Double? // Lãi thuần hoạt động dịch vụ
-    public let otherIncome: Double? // Thu nhập khác
-    public let profitAfterTax: Double? // Lợi nhuận sau thuế
-    public let depositsBorrowingsOthers: Double? // Tiền gửi và vay TCTD khác
-    public let totalLiabilities: Double? // Tổng nợ phải trả
-    public let interestExpense: Double? // Chi phí lãi
-    
-    // Computed Total Asset
+    public let nim: Double?
+    public let yoea: Double?
+    public let cof: Double?
+    public let cir: Double?
+    public let ldr: Double?
+    public let nplToLoan: Double?
+    public let loanlossReservesToNPL: Double?
+    public let pe: Double?
+    public let pb: Double?
+    public let eps: Double?
+    public let bvps: Double?
+    public let saleGrowth: Double?
+    public let profitGrowth: Double?
+    public let payoutRatio: Double?
+    public let cashDividend: Double?
+    public let shareAtPeriodEnd: Double?
+
+    // Income statement
+    public let netInterestIncome: Double?
+    public let feeAndCommissionIncome: Double?
+    public let otherIncome: Double?
+    public let profitAfterTax: Double?
+    public let interestExpense: Double?
+    public let totalOperatingIncome: Double?
+    public let totalOperatingExpense: Double?
+    public let creditRiskProvisionsExpense: Double?
+    public let interestAndSimilarIncome: Double?
+
     public var totalAssets: Double? {
         let parts = [cashAndEquivalents, depositsAtSBV, interbankPlacements, tradingSecurities, investmentSecurities, customerLoans].compactMap { $0 }
         guard !parts.isEmpty else { return nil }
         return parts.reduce(0, +)
     }
-    
-    // Computed Total Capital
+
     public var totalCapital: Double? {
         let parts = [sbvBorrowings, customerDeposits, valuablePapers, depositsBorrowingsOthers, equity].compactMap { $0 }
         guard !parts.isEmpty else { return nil }
         return parts.reduce(0, +)
     }
-    
+
+    public var npl: Double? {
+        let parts = [substandardDebt, doubtfulDebt, badDebt].compactMap { $0 }
+        guard !parts.isEmpty else { return nil }
+        return parts.reduce(0, +)
+    }
+
     public init(
-        year: Int,
-        quarter: Int = 0,
-        cashAndEquivalents: Double?,
-        depositsAtSBV: Double?,
-        interbankPlacements: Double?,
-        tradingSecurities: Double?,
-        investmentSecurities: Double?,
-        customerLoans: Double?,
-        shortTermLoans: Double?,
-        mediumLongTermLoans: Double?,
-        personalLoans: Double?,
-        corporateLoans: Double?,
-        sbvBorrowings: Double?,
-        customerDeposits: Double?,
-        valuablePapers: Double?,
-        equity: Double?,
-        roe: Double?,
-        roa: Double?,
-        netInterestIncome: Double?,
-        feeAndCommissionIncome: Double?,
-        otherIncome: Double?,
-        profitAfterTax: Double?,
-        depositsBorrowingsOthers: Double?,
-        totalLiabilities: Double?,
-        interestExpense: Double?
+        year: Int, quarter: Int = 0,
+        cashAndEquivalents: Double? = nil, depositsAtSBV: Double? = nil,
+        interbankPlacements: Double? = nil, tradingSecurities: Double? = nil,
+        investmentSecurities: Double? = nil, customerLoans: Double? = nil,
+        shortTermLoans: Double? = nil, mediumLongTermLoans: Double? = nil,
+        personalLoans: Double? = nil, corporateLoans: Double? = nil,
+        sbvBorrowings: Double? = nil, customerDeposits: Double? = nil,
+        valuablePapers: Double? = nil, equity: Double? = nil,
+        depositsBorrowingsOthers: Double? = nil, totalLiabilities: Double? = nil,
+        totalEquity: Double? = nil, issuingValuablePaper: Double? = nil,
+        customerLoan: Double? = nil, standardDebt: Double? = nil,
+        watchlistDebt: Double? = nil, substandardDebt: Double? = nil,
+        doubtfulDebt: Double? = nil, badDebt: Double? = nil,
+        provisionForCustomerLoanLoss: Double? = nil,
+        roe: Double? = nil, roa: Double? = nil,
+        nim: Double? = nil, yoea: Double? = nil, cof: Double? = nil,
+        cir: Double? = nil, ldr: Double? = nil,
+        nplToLoan: Double? = nil, loanlossReservesToNPL: Double? = nil,
+        pe: Double? = nil, pb: Double? = nil,
+        eps: Double? = nil, bvps: Double? = nil,
+        saleGrowth: Double? = nil, profitGrowth: Double? = nil,
+        payoutRatio: Double? = nil, cashDividend: Double? = nil,
+        shareAtPeriodEnd: Double? = nil,
+        netInterestIncome: Double? = nil, feeAndCommissionIncome: Double? = nil,
+        otherIncome: Double? = nil, profitAfterTax: Double? = nil,
+        interestExpense: Double? = nil,
+        totalOperatingIncome: Double? = nil, totalOperatingExpense: Double? = nil,
+        creditRiskProvisionsExpense: Double? = nil, interestAndSimilarIncome: Double? = nil
     ) {
-        self.year = year
-        self.quarter = quarter
-        self.cashAndEquivalents = cashAndEquivalents
-        self.depositsAtSBV = depositsAtSBV
-        self.interbankPlacements = interbankPlacements
-        self.tradingSecurities = tradingSecurities
-        self.investmentSecurities = investmentSecurities
-        self.customerLoans = customerLoans
-        self.shortTermLoans = shortTermLoans
-        self.mediumLongTermLoans = mediumLongTermLoans
-        self.personalLoans = personalLoans
-        self.corporateLoans = corporateLoans
-        self.sbvBorrowings = sbvBorrowings
-        self.customerDeposits = customerDeposits
-        self.valuablePapers = valuablePapers
-        self.equity = equity
-        self.roe = roe
-        self.roa = roa
-        self.netInterestIncome = netInterestIncome
-        self.feeAndCommissionIncome = feeAndCommissionIncome
-        self.otherIncome = otherIncome
-        self.profitAfterTax = profitAfterTax
-        self.depositsBorrowingsOthers = depositsBorrowingsOthers
-        self.totalLiabilities = totalLiabilities
+        self.year = year; self.quarter = quarter
+        self.cashAndEquivalents = cashAndEquivalents; self.depositsAtSBV = depositsAtSBV
+        self.interbankPlacements = interbankPlacements; self.tradingSecurities = tradingSecurities
+        self.investmentSecurities = investmentSecurities; self.customerLoans = customerLoans
+        self.shortTermLoans = shortTermLoans; self.mediumLongTermLoans = mediumLongTermLoans
+        self.personalLoans = personalLoans; self.corporateLoans = corporateLoans
+        self.sbvBorrowings = sbvBorrowings; self.customerDeposits = customerDeposits
+        self.valuablePapers = valuablePapers; self.equity = equity
+        self.depositsBorrowingsOthers = depositsBorrowingsOthers; self.totalLiabilities = totalLiabilities
+        self.totalEquity = totalEquity; self.issuingValuablePaper = issuingValuablePaper
+        self.customerLoan = customerLoan; self.standardDebt = standardDebt
+        self.watchlistDebt = watchlistDebt; self.substandardDebt = substandardDebt
+        self.doubtfulDebt = doubtfulDebt; self.badDebt = badDebt
+        self.provisionForCustomerLoanLoss = provisionForCustomerLoanLoss
+        self.roe = roe; self.roa = roa
+        self.nim = nim; self.yoea = yoea; self.cof = cof
+        self.cir = cir; self.ldr = ldr
+        self.nplToLoan = nplToLoan; self.loanlossReservesToNPL = loanlossReservesToNPL
+        self.pe = pe; self.pb = pb; self.eps = eps; self.bvps = bvps
+        self.saleGrowth = saleGrowth; self.profitGrowth = profitGrowth
+        self.payoutRatio = payoutRatio; self.cashDividend = cashDividend
+        self.shareAtPeriodEnd = shareAtPeriodEnd
+        self.netInterestIncome = netInterestIncome; self.feeAndCommissionIncome = feeAndCommissionIncome
+        self.otherIncome = otherIncome; self.profitAfterTax = profitAfterTax
         self.interestExpense = interestExpense
+        self.totalOperatingIncome = totalOperatingIncome; self.totalOperatingExpense = totalOperatingExpense
+        self.creditRiskProvisionsExpense = creditRiskProvisionsExpense
+        self.interestAndSimilarIncome = interestAndSimilarIncome
     }
 }
 
-// Chuyên biệt cho Công ty thường (Áp dụng cho AAA và các non-bank)
 public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
+    public let quarter: Int
 
-    /// Human-readable period label used as the X-axis value in charts.
     public var periodLabel: String {
         quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
     }
-    public let quarter: Int
-    
-    // Cơ cấu tài sản
+
+    // Balance sheet — assets
     public let cashAndEquivalents: Double?
     public let shortTermInvestments: Double?
     public let shortTermReceivables: Double?
     public let inventories: Double?
     public let fixedAssets: Double?
     public let longTermReceivables: Double?
-    /// Tổng tài sản theo BCTC (`total_assets`); dùng để bổ sung khoản "khác" khi các chỉ tiêu chi tiết không gộp hết.
     public let totalAssetsReported: Double?
-    
-    // Cơ cấu nguồn vốn
+    public let inProgressLongTermAsset: Double?
+
+    // Balance sheet — liabilities & equity
     public let equity: Double?
     public let shortTermBorrowings: Double?
     public let longTermBorrowings: Double?
     public let advancesFromCustomers: Double?
-    /// Tổng nguồn vốn theo BCTC (`total_capital`).
     public let totalCapitalReported: Double?
-    
-    // Hiệu quả hoạt động
+    public let totalLiabilities: Double?
+    public let convertibleBond: Double?
+
+    // Indicators
     public let roe: Double?
     public let roa: Double?
-    
-    // Thu nhập
+    public let grossMargin: Double?
+    public let netMargin: Double?
+    public let pe: Double?
+    public let pb: Double?
+    public let eps: Double?
+    public let bvps: Double?
+    public let saleGrowth: Double?
+    public let profitGrowth: Double?
+    public let currentRatio: Double?
+    public let totalDebtOverEquity: Double?
+    public let evOverEbitda: Double?
+    public let inventoryTurnover: Double?
+    public let payoutRatio: Double?
+    public let cashDividend: Double?
+    public let shareAtPeriodEnd: Double?
+
+    // Income statement
     public let netRevenue: Double?
     public let profitAfterTax: Double?
-    /// Biên LN gộp (%) — từ API `grossMargin` (lng); không suy từ LNST/DT.
-    public let grossMargin: Double?
-    /// Biên LN ròng (%) — từ API `netMargin` (lnr); backend có thể suy từ LNST/DT khi thiếu.
-    public let netMargin: Double?
-    
-    public let totalLiabilities: Double? // Tổng nợ phải trả
-    public let totalRevenue: Double? // Tổng doanh thu
-    
-    /// Tổng các khoản chi tiết đã có trong API (không gồm "khác").
+    public let totalRevenue: Double?
+    public let grossProfit: Double?
+    public let costOfGoodsSold: Double?
+    public let sellingExpense: Double?
+    public let managingExpense: Double?
+
     public var knownAssetComponentsSum: Double? {
-        let parts = [cashAndEquivalents, shortTermInvestments, shortTermReceivables, inventories, fixedAssets, longTermReceivables].compactMap { $0 }
+        let parts = [cashAndEquivalents, shortTermInvestments, shortTermReceivables, inventories, fixedAssets, longTermReceivables, inProgressLongTermAsset].compactMap { $0 }
         guard !parts.isEmpty else { return nil }
         return parts.reduce(0, +)
     }
 
-    /// Tổng tài sản hiển thị: ưu tiên số liệu BCTC, không thì cộng các khoản đã biết.
     public var totalAssets: Double? {
         let known = knownAssetComponentsSum ?? 0
         if let reported = totalAssetsReported, reported > 0 { return reported }
         return known > 0 ? known : nil
     }
 
-    /// Phần chưa phân loại vào 6 khoản trên (BĐS đầu tư, XDCB dở dang, v.v.).
     public var otherAssets: Double {
         guard let reported = totalAssetsReported, reported > 0 else { return 0 }
         let known = knownAssetComponentsSum ?? 0
@@ -339,77 +385,93 @@ public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
     }
 
     public var knownCapitalComponentsSum: Double? {
-        let parts = [equity, shortTermBorrowings, longTermBorrowings, advancesFromCustomers].compactMap { $0 }
+        let parts = [equity, shortTermBorrowings, longTermBorrowings, advancesFromCustomers, convertibleBond].compactMap { $0 }
         guard !parts.isEmpty else { return nil }
         return parts.reduce(0, +)
     }
 
-    /// Tổng nguồn vốn hiển thị: ưu tiên BCTC, không thì cộng 4 khoản đã biết.
     public var totalCapitalDisplay: Double? {
         let known = knownCapitalComponentsSum ?? 0
         if let reported = totalCapitalReported, reported > 0 { return reported }
         return known > 0 ? known : nil
     }
 
-    /// Nợ phải trả / nguồn khác chưa tách riêng trong API (so với `total_capital`).
     public var otherCapital: Double {
         guard let reported = totalCapitalReported, reported > 0 else { return 0 }
         let known = knownCapitalComponentsSum ?? 0
         return max(0, reported - known)
     }
-    
+
     public init(
-        year: Int,
-        quarter: Int = 0,
-        cashAndEquivalents: Double?,
-        shortTermInvestments: Double?,
-        shortTermReceivables: Double?,
-        inventories: Double?,
-        fixedAssets: Double?,
-        longTermReceivables: Double?,
-        totalAssetsReported: Double?,
-        equity: Double?,
-        shortTermBorrowings: Double?,
-        longTermBorrowings: Double?,
-        advancesFromCustomers: Double?,
-        totalCapitalReported: Double?,
-        roe: Double?,
-        roa: Double?,
-        netRevenue: Double?,
-        profitAfterTax: Double?,
-        grossMargin: Double? = nil,
-        netMargin: Double? = nil,
-        totalLiabilities: Double? = nil,
-        totalRevenue: Double? = nil
+        year: Int, quarter: Int = 0,
+        cashAndEquivalents: Double? = nil, shortTermInvestments: Double? = nil,
+        shortTermReceivables: Double? = nil, inventories: Double? = nil,
+        fixedAssets: Double? = nil, longTermReceivables: Double? = nil,
+        totalAssetsReported: Double? = nil, inProgressLongTermAsset: Double? = nil,
+        equity: Double? = nil, shortTermBorrowings: Double? = nil,
+        longTermBorrowings: Double? = nil, advancesFromCustomers: Double? = nil,
+        totalCapitalReported: Double? = nil, totalLiabilities: Double? = nil,
+        convertibleBond: Double? = nil,
+        roe: Double? = nil, roa: Double? = nil,
+        grossMargin: Double? = nil, netMargin: Double? = nil,
+        pe: Double? = nil, pb: Double? = nil,
+        eps: Double? = nil, bvps: Double? = nil,
+        saleGrowth: Double? = nil, profitGrowth: Double? = nil,
+        currentRatio: Double? = nil, totalDebtOverEquity: Double? = nil,
+        evOverEbitda: Double? = nil, inventoryTurnover: Double? = nil,
+        payoutRatio: Double? = nil, cashDividend: Double? = nil,
+        shareAtPeriodEnd: Double? = nil,
+        netRevenue: Double? = nil, profitAfterTax: Double? = nil,
+        totalRevenue: Double? = nil,
+        grossProfit: Double? = nil, costOfGoodsSold: Double? = nil,
+        sellingExpense: Double? = nil, managingExpense: Double? = nil
     ) {
-        self.year = year
-        self.quarter = quarter
-        self.cashAndEquivalents = cashAndEquivalents
-        self.shortTermInvestments = shortTermInvestments
-        self.shortTermReceivables = shortTermReceivables
-        self.inventories = inventories
-        self.fixedAssets = fixedAssets
-        self.longTermReceivables = longTermReceivables
-        self.totalAssetsReported = totalAssetsReported
-        self.equity = equity
-        self.shortTermBorrowings = shortTermBorrowings
-        self.longTermBorrowings = longTermBorrowings
-        self.advancesFromCustomers = advancesFromCustomers
-        self.totalCapitalReported = totalCapitalReported
-        self.roe = roe
-        self.roa = roa
-        self.netRevenue = netRevenue
-        self.profitAfterTax = profitAfterTax
-        self.grossMargin = grossMargin
-        self.netMargin = netMargin
-        self.totalLiabilities = totalLiabilities
+        self.year = year; self.quarter = quarter
+        self.cashAndEquivalents = cashAndEquivalents; self.shortTermInvestments = shortTermInvestments
+        self.shortTermReceivables = shortTermReceivables; self.inventories = inventories
+        self.fixedAssets = fixedAssets; self.longTermReceivables = longTermReceivables
+        self.totalAssetsReported = totalAssetsReported; self.inProgressLongTermAsset = inProgressLongTermAsset
+        self.equity = equity; self.shortTermBorrowings = shortTermBorrowings
+        self.longTermBorrowings = longTermBorrowings; self.advancesFromCustomers = advancesFromCustomers
+        self.totalCapitalReported = totalCapitalReported; self.totalLiabilities = totalLiabilities
+        self.convertibleBond = convertibleBond
+        self.roe = roe; self.roa = roa
+        self.grossMargin = grossMargin; self.netMargin = netMargin
+        self.pe = pe; self.pb = pb; self.eps = eps; self.bvps = bvps
+        self.saleGrowth = saleGrowth; self.profitGrowth = profitGrowth
+        self.currentRatio = currentRatio; self.totalDebtOverEquity = totalDebtOverEquity
+        self.evOverEbitda = evOverEbitda; self.inventoryTurnover = inventoryTurnover
+        self.payoutRatio = payoutRatio; self.cashDividend = cashDividend
+        self.shareAtPeriodEnd = shareAtPeriodEnd
+        self.netRevenue = netRevenue; self.profitAfterTax = profitAfterTax
         self.totalRevenue = totalRevenue
+        self.grossProfit = grossProfit; self.costOfGoodsSold = costOfGoodsSold
+        self.sellingExpense = sellingExpense; self.managingExpense = managingExpense
+    }
+}
+
+public struct CashFlowDataPoint: Identifiable, Equatable, Sendable {
+    public var id: String { "\(year)-\(quarter)" }
+    public let year: Int
+    public let quarter: Int
+    public let operatingCashflow: Double?
+    public let investingCashflow: Double?
+    public let financingCashflow: Double?
+
+    public var periodLabel: String {
+        quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
+    }
+
+    public init(year: Int, quarter: Int = 0, operatingCashflow: Double? = nil, investingCashflow: Double? = nil, financingCashflow: Double? = nil) {
+        self.year = year; self.quarter = quarter
+        self.operatingCashflow = operatingCashflow; self.investingCashflow = investingCashflow
+        self.financingCashflow = financingCashflow
     }
 }
 
 public enum FinancialDataSeries: Equatable, Sendable {
-    case bank([BankFinancialDataPoint])
-    case nonBank([NonBankFinancialDataPoint])
+    case bank([BankFinancialDataPoint], cashFlows: [CashFlowDataPoint])
+    case nonBank([NonBankFinancialDataPoint], cashFlows: [CashFlowDataPoint])
 }
 
 // MARK: - Dividends

@@ -36,12 +36,7 @@ struct InteractiveNonBankAssetQualityChart: View {
 
     private var labels: [String] { points.map(\.periodLabel) }
 
-    private var legendGridReserved: CGFloat {
-        let legendItemCount = 8
-        if legendItemCount <= 3 { return 26 }
-        if legendItemCount <= 6 { return 52 }
-        return 78
-    }
+    private var legendGridReserved: CGFloat { 78 }
 
     private var footnoteReserved: CGFloat { Spacing.xs + 36 }
     private var legendReserved: CGFloat { legendGridReserved + footnoteReserved }
@@ -197,7 +192,7 @@ struct InteractiveNonBankAssetQualityChart: View {
             ChartPopoverMetric(id: "fixed", label: "Tài sản cố định", value: formatVndCompact(point.fixedAssetValue), color: AppColors.chartGrowthStrong),
             ChartPopoverMetric(id: "long-rec", label: "Phải thu dài hạn", value: formatVndCompact(point.longReceivableValue), color: AppColors.chartIncomeOther),
             ChartPopoverMetric(id: "other-assets", label: "Tài sản khác", value: formatVndCompact(point.otherAssetsValue), color: AppColors.chartAssetLoans),
-            ChartPopoverMetric(id: "rec-ratio", label: "Tỷ lệ phải thu trên tổng tài sản", value: String(format: "%.1f%%", point.receivableRatioPct), color: AppColors.chartRatioLine),
+            ChartPopoverMetric(id: "rec-ratio", label: "Tỷ lệ phải thu trên tổng tài sản", value: String(format: "%.1f%%", point.receivableRatioPct), color: AppColors.chartRatioLine)
         ]
     }
 

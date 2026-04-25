@@ -89,7 +89,7 @@ struct InteractiveBankNimChart: View {
                 return [
                     ChartPopoverMetric(id: "gross", label: "Tổng thu lãi", value: formatVndCompact(gross), color: bgBarColor),
                     ChartPopoverMetric(id: "exp", label: "Chi phí lãi", value: formatVndCompact(exp), color: fgBarColor),
-                    ChartPopoverMetric(id: "net", label: "Lãi thuần", value: formatVndCompact(net), color: AppColors.chartIncomeInterest),
+                    ChartPopoverMetric(id: "net", label: "Lãi thuần", value: formatVndCompact(net), color: AppColors.chartIncomeInterest)
                 ] + (nimMetric.map { [$0] } ?? [])
             },
             popoverSubtitle: "Biên lãi thuần",

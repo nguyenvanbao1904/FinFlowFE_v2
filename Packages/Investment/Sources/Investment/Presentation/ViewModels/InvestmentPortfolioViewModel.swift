@@ -12,7 +12,6 @@ public final class InvestmentPortfolioViewModel {
     public var portfolioHealth: PortfolioHealthResponse?
     public var portfolioBenchmark: PortfolioMarketBenchmarkResponse?
 
-
     /// True while the initial (or empty-list) portfolio fetch is in flight — avoids showing empty state before the first response.
     public var isLoadingPortfolios = true
     public var isLoadingSelectedPortfolioDetails = false
@@ -210,8 +209,6 @@ public final class InvestmentPortfolioViewModel {
         }
     }
 
-
-
     public func createCashTransaction(tradeType: TradeType, amount: Double, transactionDate: Date) async throws {
         guard let selectedPortfolio else { return }
         try await createTradeTransactionUseCase.executeCash(
@@ -257,8 +254,6 @@ public final class InvestmentPortfolioViewModel {
         )
         await loadAll(force: true)
     }
-
-
 
     public var sortedAssets: [PortfolioAssetResponse] {
         guard loadedPortfolioDetailsID == selectedPortfolio?.id else { return [] }

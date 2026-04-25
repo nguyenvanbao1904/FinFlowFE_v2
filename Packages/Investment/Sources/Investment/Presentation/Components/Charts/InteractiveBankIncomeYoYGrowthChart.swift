@@ -128,7 +128,7 @@ struct InteractiveBankIncomeYoYGrowthChart: View {
             height: height,
             fullScreen: fullScreen,
             legendReserved: legendReserved,
-            popoverBuilder: { label, idx in
+            popoverBuilder: { _, idx in
                 guard rows.indices.contains(idx), sortedItems.indices.contains(idx) else { return nil }
                 let item = sortedItems[idx]
                 let yoy = yoyRows.indices.contains(idx) ? yoyRows[idx].yoy : nil

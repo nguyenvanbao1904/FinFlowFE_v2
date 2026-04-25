@@ -106,4 +106,3 @@ public struct AddCashTransactionSheet: View {
         }
     }
 }
-

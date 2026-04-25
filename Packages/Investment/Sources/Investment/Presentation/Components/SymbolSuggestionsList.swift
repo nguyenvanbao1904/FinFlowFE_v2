@@ -49,4 +49,3 @@ public struct SymbolSuggestionsList: View {
         .clipShape(.rect(cornerRadius: CornerRadius.medium))
     }
 }
-

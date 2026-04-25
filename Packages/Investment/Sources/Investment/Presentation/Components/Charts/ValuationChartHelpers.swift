@@ -200,8 +200,7 @@ func valuationChartYDomain(
     let currentExpand = max(seriesSpan * 2.8, 5.0)
     if current.isFinite,
         current >= dataLo - currentExpand,
-        current <= dataHi + currentExpand
-    {
+        current <= dataHi + currentExpand {
         lo = min(lo, current)
         hi = max(hi, current)
     }

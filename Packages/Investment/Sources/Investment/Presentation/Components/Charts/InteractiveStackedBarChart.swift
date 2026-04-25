@@ -10,6 +10,7 @@ struct InteractiveStackedBarChart<Item>: View {
     let showQuarterly: Bool
     let height: CGFloat
     let fullScreen: Bool
+    let groupedLayout: Bool
     /// Thêm dòng vào popover fullscreen (vd: tổng tài sản).
     let extraPopoverMetrics: ((Item) -> [ChartPopoverMetric])?
 
@@ -21,6 +22,7 @@ struct InteractiveStackedBarChart<Item>: View {
         showQuarterly: Bool = false,
         height: CGFloat,
         fullScreen: Bool,
+        groupedLayout: Bool = false,
         extraPopoverMetrics: ((Item) -> [ChartPopoverMetric])? = nil
     ) {
         self.items = items
@@ -30,6 +32,7 @@ struct InteractiveStackedBarChart<Item>: View {
         self.showQuarterly = showQuarterly
         self.height = height
         self.fullScreen = fullScreen
+        self.groupedLayout = groupedLayout
         self.extraPopoverMetrics = extraPopoverMetrics
     }
 
@@ -51,12 +54,29 @@ struct InteractiveStackedBarChart<Item>: View {
     }
 
     private var barDomain: ClosedRange<Double> {
-        let stackedTotals = items.map { item in
-            series.reduce(0) { acc, s in
-                acc + max(0, s.value(item) ?? 0)
+        var bounds: [Double] = [0]
+        if groupedLayout {
+            // Side-by-side bars: domain only needs to cover individual values.
+            for item in items {
+                for s in series {
+                    if let v = s.value(item) { bounds.append(v) }
+                }
+            }
+        } else {
+            // Stack positive and negative contributions separately so that columns
+            // with negative values (e.g. negative cash flow) get accurate domain.
+            for item in items {
+                var positiveSum: Double = 0
+                var negativeSum: Double = 0
+                for s in series {
+                    guard let v = s.value(item) else { continue }
+                    if v >= 0 { positiveSum += v } else { negativeSum += v }
+                }
+                bounds.append(positiveSum)
+                bounds.append(negativeSum)
             }
         }
-        return unifiedBarDomain(values: stackedTotals)
+        return unifiedBarDomain(values: bounds)
     }
 
     var body: some View {
@@ -65,7 +85,7 @@ struct InteractiveStackedBarChart<Item>: View {
             height: height,
             fullScreen: fullScreen,
             legendReserved: legendReserved,
-            popoverBuilder: { label, idx in
+            popoverBuilder: { _, idx in
                 guard items.indices.contains(idx) else { return nil }
                 let item = items[idx]
                 let baseMetrics = series.compactMap { s -> ChartPopoverMetric? in
@@ -113,8 +133,14 @@ struct InteractiveStackedBarChart<Item>: View {
                 let label = labels[idx]
                 ForEach(indexedSeries, id: \.offset) { _, s in
                     if let v = s.value(item) {
-                        BarMark(x: .value("Kỳ", label), y: .value(s.name, v))
-                            .foregroundStyle(s.color)
+                        if groupedLayout {
+                            BarMark(x: .value("Kỳ", label), y: .value(s.name, v))
+                                .foregroundStyle(s.color)
+                                .position(by: .value("Series", s.name))
+                        } else {
+                            BarMark(x: .value("Kỳ", label), y: .value(s.name, v))
+                                .foregroundStyle(s.color)
+                        }
                     }
                 }
             }

@@ -134,16 +134,6 @@ public struct StockAnalysisView: View {
         )
         .padding(.horizontal, Spacing.lg)
 
-        DividendHistoryTable(
-            dividends: viewModel.dividends,
-            onRequestFullHistory: {
-                Task {
-                    await viewModel.loadFullDividendsIfNeeded()
-                }
-            }
-        )
-            .padding(.horizontal, Spacing.lg)
-
         // Section 3: Valuation Charts
         HStack(spacing: Spacing.md) {
             Text("Khu vực định giá")

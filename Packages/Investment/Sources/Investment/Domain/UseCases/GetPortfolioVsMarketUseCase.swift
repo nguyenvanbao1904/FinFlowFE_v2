@@ -14,4 +14,3 @@ public struct GetPortfolioVsMarketUseCase: Sendable {
         try await repository.getPortfolioBenchmark(portfolioId: portfolioId, code: code)
     }
 }
-

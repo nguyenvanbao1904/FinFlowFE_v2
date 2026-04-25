@@ -52,5 +52,39 @@ extension FinancialChartsSection {
             bankProfitYoYGrowthChart(data, height: 200, fullScreen: false)
         }
     }
-}
 
+    func cashFlowCard(_ data: [CashFlowDataPoint]) -> some View {
+        let filtered = data.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+        guard !filtered.isEmpty else { return AnyView(EmptyView()) }
+        let sorted = filtered.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
+        var subtitle: String?
+        if let last = sorted.last {
+            let op = last.operatingCashflow ?? 0
+            subtitle = String(format: "CF kinh doanh gần nhất: %@", formatVndCompact(op))
+        }
+        return AnyView(chartCard(
+            title: "Lưu chuyển tiền tệ",
+            subtitle: subtitle,
+            expandKind: .cashFlow
+        ) {
+            cashFlowChart(filtered, height: 200, fullScreen: false)
+        })
+    }
+
+    func dividendCard(_ rows: [DividendChartRow]) -> some View {
+        let filtered = rows.filter { $0.quarter == 0 }
+        guard !filtered.isEmpty else { return AnyView(EmptyView()) }
+        let sorted = filtered.sorted { $0.year < $1.year }
+        var subtitle: String?
+        if let recent = sorted.last(where: { ($0.payoutRatio ?? 0) > 0 }), let pr = recent.payoutRatio {
+            subtitle = String(format: "Tỷ lệ chi trả %d: %.1f%%", recent.year, pr)
+        }
+        return AnyView(chartCard(
+            title: "Cổ tức",
+            subtitle: subtitle,
+            expandKind: .dividend
+        ) {
+            dividendChart(sorted, height: 200, fullScreen: false)
+        })
+    }
+}

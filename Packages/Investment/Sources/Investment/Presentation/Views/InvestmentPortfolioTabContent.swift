@@ -165,14 +165,11 @@ struct InvestmentPortfolioTabContent: View {
                     }
                 }
 
-
             }
         }
         .padding(.horizontal, Spacing.md)
         .background(AppColors.appBackground)
     }
-
-
 
     @ViewBuilder
     private func portfolioSummaryStats(viewModel: InvestmentPortfolioViewModel) -> some View {
@@ -237,7 +234,7 @@ struct InvestmentPortfolioTabContent: View {
             AppColors.chartAssetInterbank,
             AppColors.chartAssetReceivables,
             AppColors.chartAssetCash,
-            AppColors.chartAssetShortTermInvestments,
+            AppColors.chartAssetShortTermInvestments
         ]
         let hash = abs(symbol.hashValue)
         return palette[hash % palette.count]

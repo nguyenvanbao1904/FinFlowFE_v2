@@ -94,4 +94,3 @@ public struct AddInvestmentActionSheet: View {
         .buttonStyle(.plain)
     }
 }
-

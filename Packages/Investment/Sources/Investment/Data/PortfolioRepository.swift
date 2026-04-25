@@ -87,8 +87,7 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
     }
 
     public func getPortfolioBenchmark(portfolioId: String, code: String = "VNINDEX") async throws
-        -> PortfolioMarketBenchmarkResponse
-    {
+        -> PortfolioMarketBenchmarkResponse {
         try await client.request(
             endpoint: "/investments/portfolios/\(portfolioId)/benchmark?code=\(code)",
             method: "GET",
@@ -98,6 +97,4 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         )
     }
 
-
 }
-

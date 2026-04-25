@@ -23,6 +23,14 @@ enum ChartKind: String, Identifiable, Equatable {
     case nimBank
     case assetNonBank
     case capitalNonBank
+    case cashFlow
+    case nplBank
+    case customerLoanBank
+    case inventoryTurnoverNonBank
+    case dividend
+    case debtGroup2to5Bank
+    case nplStructureBank
+    case profitabilityBank
 
     var id: String { rawValue }
 
@@ -37,6 +45,14 @@ enum ChartKind: String, Identifiable, Equatable {
         case .profit: return "Lợi nhuận hàng năm"
         case .incomeBank: return "Cơ cấu TOI"
         case .nimBank: return "Bức tranh biên lãi"
+        case .cashFlow: return "Lưu chuyển tiền tệ"
+        case .nplBank: return "Nợ xấu & dự phòng"
+        case .customerLoanBank: return "Cho vay khách hàng"
+        case .inventoryTurnoverNonBank: return "Vòng quay hàng tồn kho"
+        case .dividend: return "Cổ tức"
+        case .debtGroup2to5Bank: return "Nợ nhóm 2→5"
+        case .nplStructureBank: return "Cơ cấu nợ xấu"
+        case .profitabilityBank: return "Chỉ số sinh lợi"
         }
     }
 }
@@ -77,6 +93,17 @@ func growthSubtitleColor(for rate: Double?) -> Color {
     if rate < 0 { return AppColors.expense }
     if rate < 7 { return AppColors.chartGrowthStable }
     return AppColors.success
+}
+
+struct DividendChartRow: Identifiable, Equatable {
+    let year: Int
+    let quarter: Int
+    let profitAfterTax: Double?
+    let dividendPaid: Double?
+    let payoutRatio: Double?
+
+    var id: String { "\(year)-\(quarter)" }
+    var periodLabel: String { quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)" }
 }
 
 func aggregateYearlyFlow(_ values: [(year: Int, value: Double)]) -> [(year: Int, value: Double)] {

@@ -41,12 +41,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
 
     private var labels: [String] { points.map(\.periodLabel) }
 
-    private var legendGridReserved: CGFloat {
-        let legendItemCount = 6
-        if legendItemCount <= 3 { return 26 }
-        if legendItemCount <= 6 { return 52 }
-        return 78
-    }
+    private var legendGridReserved: CGFloat { 52 }
 
     private var footnoteReserved: CGFloat { Spacing.xs + 36 }
     private var legendReserved: CGFloat { legendGridReserved + footnoteReserved }
@@ -212,7 +207,7 @@ struct InteractiveNonBankCapitalStructureChart: View {
             ChartPopoverMetric(id: "adv", label: "Trả trước KH", value: formatVndCompact(point.advancesValue), color: AppColors.chartCapitalCustomerAdvances),
             ChartPopoverMetric(id: "other-cap", label: "Nguồn vốn khác", value: formatVndCompact(point.otherCapitalValue), color: AppColors.chartAssetLoans),
             ChartPopoverMetric(id: "net-debt", label: "Nợ vay ròng", value: formatVndCompact(point.netDebtValue), color: AppColors.chartRatioLine),
-            ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(point.totalLiabilities), color: AppColors.chartRatioLine),
+            ChartPopoverMetric(id: "liab", label: "Tổng nợ phải trả", value: formatVndCompact(point.totalLiabilities), color: AppColors.chartRatioLine)
         ])
         if let r = point.netDebtToEquityRatio {
             rows.append(ChartPopoverMetric(id: "net-de", label: "Nợ vay ròng / VCSH", value: formatRatioVi(r), color: AppColors.chartRatioLine))

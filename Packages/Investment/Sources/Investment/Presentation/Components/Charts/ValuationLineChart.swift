@@ -166,9 +166,9 @@ struct ValuationLineChart<DataElement: Equatable>: View {
         /// Size of point mark symbols.
         var symbolSize: CGFloat = 18
         /// Max rendered points (stride-sample when exceeded). `nil` = no sampling.
-        var maxRenderedPoints: Int? = nil
+        var maxRenderedPoints: Int?
         /// Footer text shown below the chart.
-        var footerNote: String? = nil
+        var footerNote: String?
         /// Message when chart data is empty.
         var emptyMessage: String = "Không có điểm dữ liệu trong khoảng thời gian đã chọn."
 

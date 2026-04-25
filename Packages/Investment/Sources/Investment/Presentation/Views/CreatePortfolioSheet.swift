@@ -72,4 +72,3 @@ public struct CreatePortfolioSheet: View {
         dismiss()
     }
 }
-

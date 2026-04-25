@@ -204,8 +204,7 @@ struct InteractiveChartScaffold<ChartContent: View, Legend: View>: View {
         .overlay(alignment: .topTrailing) {
             if fullScreen, let label = displayedLabel,
                let idx = labels.firstIndex(of: label),
-               let metrics = popoverBuilder(label, idx), !metrics.isEmpty
-            {
+               let metrics = popoverBuilder(label, idx), !metrics.isEmpty {
                 nativeSelectionDetails(title: label, subtitle: popoverSubtitle, metrics: metrics)
                     .frame(maxWidth: 280)
                     .padding(.top, Spacing.sm)

@@ -11,8 +11,6 @@ public struct FinancialChartsSection: View {
 
     @State private var fullscreenChart: ChartKind?
 
-    // Called by chart card wrappers living in separate files.
-    // Keeps `fullscreenChart` itself `private` (SwiftUI ownership), while still allowing expansion.
     func expandChartFullscreen(_ kind: ChartKind) {
         fullscreenChart = kind
     }
@@ -31,10 +29,10 @@ public struct FinancialChartsSection: View {
         if let financials {
             VStack(spacing: Spacing.md) {
                 switch financials {
-                case .bank(let items):
-                    bankCharts(items)
-                case .nonBank(let items):
-                    nonBankCharts(items)
+                case .bank(let items, let cashFlows):
+                    bankCharts(items, cashFlows: cashFlows)
+                case .nonBank(let items, let cashFlows):
+                    nonBankCharts(items, cashFlows: cashFlows)
                 }
             }
             .fullScreenCover(item: $fullscreenChart) { kind in
@@ -52,21 +50,28 @@ public struct FinancialChartsSection: View {
     }
 
     @ViewBuilder
-    private func bankCharts(_ items: [BankFinancialDataPoint]) -> some View {
+    private func bankCharts(_ items: [BankFinancialDataPoint], cashFlows: [CashFlowDataPoint]) -> some View {
         let series = items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
         assetStructureBankCard(series)
         capitalStructureBankCard(series)
         roeRoaCard(series.map { RoeRoaPoint(year: $0.year, quarter: $0.quarter, roe: $0.roe, roa: $0.roa) })
         toiStructureBankCard(series)
+        profitabilityBankCard(series)
         nimBankCard(series)
         let profitData = series.compactMap { item in
             item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0) }
         }
         profitGrowthCard(profitData)
+        nplBankCard(series)
+        debtGroup2to5BankCard(series)
+        nplStructureBankCard(series)
+        customerLoanBankCard(series)
+        dividendCard(bankDividendRows(items))
+        cashFlowCard(cashFlows)
     }
 
     @ViewBuilder
-    private func nonBankCharts(_ items: [NonBankFinancialDataPoint]) -> some View {
+    private func nonBankCharts(_ items: [NonBankFinancialDataPoint], cashFlows: [CashFlowDataPoint]) -> some View {
         let series = items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
         assetStructureNonBankCard(series)
         capitalStructureNonBankCard(series)
@@ -74,6 +79,9 @@ public struct FinancialChartsSection: View {
         revenueYoYGrowthNonBankCard(series)
         profitYoYGrowthNonBankCard(series)
         nonBankMarginsCard(series)
+        cashFlowCard(cashFlows)
+        inventoryTurnoverNonBankCard(series)
+        dividendCard(nonBankDividendRows(items))
     }
 
     @ViewBuilder
@@ -102,22 +110,92 @@ public struct FinancialChartsSection: View {
             nonBankAssetChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
         case .capitalNonBank:
             nonBankCapitalChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
+        case .cashFlow:
+            cashFlowChart(filteredCashFlows(), height: height, fullScreen: true)
+        case .nplBank:
+            nplBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
+        case .customerLoanBank:
+            customerLoanBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
+        case .inventoryTurnoverNonBank:
+            inventoryTurnoverChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
+        case .dividend:
+            dividendFullscreenChart(height: height)
+        case .debtGroup2to5Bank:
+            debtGroup2to5BankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
+        case .nplStructureBank:
+            nplStructureBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
+        case .profitabilityBank:
+            profitabilityBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         }
     }
 
     private func filteredSortedBankSeries() -> [BankFinancialDataPoint] {
-        guard case .bank(let items) = financials else { return [] }
+        guard case .bank(let items, _) = financials else { return [] }
         return items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
     }
 
     private func filteredSortedNonBankSeries() -> [NonBankFinancialDataPoint] {
-        guard case .nonBank(let items) = financials else { return [] }
+        guard case .nonBank(let items, _) = financials else { return [] }
         return items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+    }
+
+    private func filteredCashFlows() -> [CashFlowDataPoint] {
+        let cfs: [CashFlowDataPoint]
+        switch financials {
+        case .bank(_, let cashFlows): cfs = cashFlows
+        case .nonBank(_, let cashFlows): cfs = cashFlows
+        case nil: return []
+        }
+        return cfs.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
     }
 
     private func bankProfitSeries() -> [(year: Int, quarter: Int, value: Double)] {
         filteredSortedBankSeries().compactMap { item in
             item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0) }
+        }
+    }
+
+    private func bankDividendRows(_ items: [BankFinancialDataPoint]) -> [DividendChartRow] {
+        items.map { item in
+            let divPaid: Double? = {
+                guard let cd = item.cashDividend, let sh = item.shareAtPeriodEnd else { return nil }
+                return cd * sh
+            }()
+            return DividendChartRow(
+                year: item.year, quarter: item.quarter,
+                profitAfterTax: item.profitAfterTax,
+                dividendPaid: divPaid,
+                payoutRatio: item.payoutRatio
+            )
+        }
+    }
+
+    private func nonBankDividendRows(_ items: [NonBankFinancialDataPoint]) -> [DividendChartRow] {
+        items.map { item in
+            let divPaid: Double? = {
+                guard let cd = item.cashDividend, let sh = item.shareAtPeriodEnd else { return nil }
+                return cd * sh
+            }()
+            return DividendChartRow(
+                year: item.year, quarter: item.quarter,
+                profitAfterTax: item.profitAfterTax,
+                dividendPaid: divPaid,
+                payoutRatio: item.payoutRatio
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func dividendFullscreenChart(height: CGFloat) -> some View {
+        switch financials {
+        case .bank(let items, _):
+            let series = items.filter { $0.quarter == 0 }
+            dividendChart(bankDividendRows(series), height: height, fullScreen: true)
+        case .nonBank(let items, _):
+            let series = items.filter { $0.quarter == 0 }
+            dividendChart(nonBankDividendRows(series), height: height, fullScreen: true)
+        case nil:
+            EmptyView()
         }
     }
 

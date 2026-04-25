@@ -11,4 +11,3 @@ public struct SuggestCompaniesUseCase: Sendable {
         try await repository.suggestCompanies(query: query, limit: limit)
     }
 }
-

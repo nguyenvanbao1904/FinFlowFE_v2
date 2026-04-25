@@ -95,8 +95,7 @@ public struct ImportPortfolioSnapshotSheet: View {
 
                 if viewModel.activeSuggestionRowId == row.wrappedValue.id,
                    let suggestions = viewModel.suggestionsByRowId[row.wrappedValue.id],
-                   !suggestions.isEmpty
-                {
+                   !suggestions.isEmpty {
                     SymbolSuggestionsList(suggestions: suggestions, maxItems: 5) { suggestion in
                         viewModel.selectSuggestion(suggestion, forRow: row.wrappedValue.id)
                     }

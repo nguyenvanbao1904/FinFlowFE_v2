@@ -217,6 +217,16 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
     }
 
     private func mapFinancialSeries(dto: FinancialSeriesDTO) -> FinancialDataSeries? {
+        let cashFlows = (dto.cashFlows ?? []).map { cf in
+            CashFlowDataPoint(
+                year: cf.year ?? 0,
+                quarter: cf.quarter ?? 0,
+                operatingCashflow: cf.operatingCashflow,
+                investingCashflow: cf.investingCashflow,
+                financingCashflow: cf.financingCashflow
+            )
+        }
+
         if dto.companyType.uppercased() == "BANK" {
             let bank = dto.bank.map { item in
                 BankFinancialDataPoint(
@@ -236,18 +246,47 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
                     customerDeposits: item.customerDeposits,
                     valuablePapers: item.valuablePapers,
                     equity: item.equity,
+                    depositsBorrowingsOthers: item.depositsBorrowingsOthers,
+                    totalLiabilities: item.totalLiabilities,
+                    totalEquity: item.totalEquity,
+                    issuingValuablePaper: item.issuingValuablePaper,
+                    customerLoan: item.customerLoan,
+                    standardDebt: item.standardDebt,
+                    watchlistDebt: item.watchlistDebt,
+                    substandardDebt: item.substandardDebt,
+                    doubtfulDebt: item.doubtfulDebt,
+                    badDebt: item.badDebt,
+                    provisionForCustomerLoanLoss: item.provisionForCustomerLoanLoss,
                     roe: normalizePercent(item.roe),
                     roa: normalizePercent(item.roa),
+                    nim: normalizePercent(item.nim),
+                    yoea: normalizePercent(item.yoea),
+                    cof: normalizePercent(item.cof),
+                    cir: normalizePercent(item.cir),
+                    ldr: normalizePercent(item.ldr),
+                    nplToLoan: normalizePercent(item.nplToLoan),
+                    loanlossReservesToNPL: normalizePercent(item.loanlossReservesToNPL),
+                    pe: item.pe,
+                    pb: item.pb,
+                    eps: item.eps,
+                    bvps: item.bvps,
+                    saleGrowth: normalizePercent(item.saleGrowth),
+                    profitGrowth: normalizePercent(item.profitGrowth),
+                    payoutRatio: normalizePercent(item.payoutRatio),
+                    cashDividend: item.cashDividend,
+                    shareAtPeriodEnd: item.shareAtPeriodEnd,
                     netInterestIncome: item.netInterestIncome,
                     feeAndCommissionIncome: item.feeAndCommissionIncome,
                     otherIncome: item.otherIncome,
                     profitAfterTax: item.profitAfterTax,
-                    depositsBorrowingsOthers: item.depositsBorrowingsOthers,
-                    totalLiabilities: item.totalLiabilities,
-                    interestExpense: item.interestExpense
+                    interestExpense: item.interestExpense,
+                    totalOperatingIncome: item.totalOperatingIncome,
+                    totalOperatingExpense: item.totalOperatingExpense,
+                    creditRiskProvisionsExpense: item.creditRiskProvisionsExpense,
+                    interestAndSimilarIncome: item.interestAndSimilarIncome
                 )
             }
-            return .bank(bank)
+            return .bank(bank, cashFlows: cashFlows)
         } else {
             let nonBank = dto.nonBank.map { item in
                 NonBankFinancialDataPoint(
@@ -260,22 +299,41 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
                     fixedAssets: item.fixedAssets,
                     longTermReceivables: item.longTermReceivables,
                     totalAssetsReported: item.totalAssets,
+                    inProgressLongTermAsset: item.inProgressLongTermAsset,
                     equity: item.equity,
                     shortTermBorrowings: item.shortTermBorrowings,
                     longTermBorrowings: item.longTermBorrowings,
                     advancesFromCustomers: item.advancesFromCustomers,
                     totalCapitalReported: item.totalCapital,
+                    totalLiabilities: item.totalLiabilities,
+                    convertibleBond: item.convertibleBond,
                     roe: normalizePercent(item.roe),
                     roa: normalizePercent(item.roa),
-                    netRevenue: item.netRevenue,
-                    profitAfterTax: item.profitAfterTax,
                     grossMargin: normalizePercent(item.grossMargin),
                     netMargin: normalizePercent(item.netMargin),
-                    totalLiabilities: item.totalLiabilities,
-                    totalRevenue: item.totalRevenue
+                    pe: item.pe,
+                    pb: item.pb,
+                    eps: item.eps,
+                    bvps: item.bvps,
+                    saleGrowth: normalizePercent(item.saleGrowth),
+                    profitGrowth: normalizePercent(item.profitGrowth),
+                    currentRatio: item.currentRatio,
+                    totalDebtOverEquity: item.totalDebtOverEquity,
+                    evOverEbitda: item.evOverEbitda,
+                    inventoryTurnover: item.inventoryTurnover,
+                    payoutRatio: normalizePercent(item.payoutRatio),
+                    cashDividend: item.cashDividend,
+                    shareAtPeriodEnd: item.shareAtPeriodEnd,
+                    netRevenue: item.netRevenue,
+                    profitAfterTax: item.profitAfterTax,
+                    totalRevenue: item.totalRevenue,
+                    grossProfit: item.grossProfit,
+                    costOfGoodsSold: item.costOfGoodsSold,
+                    sellingExpense: item.sellingExpense,
+                    managingExpense: item.managingExpense
                 )
             }
-            return .nonBank(nonBank)
+            return .nonBank(nonBank, cashFlows: cashFlows)
         }
     }
 
@@ -434,6 +492,7 @@ private struct FinancialSeriesDTO: Codable, Sendable {
     let companyType: String
     let bank: [BankPointDTO]
     let nonBank: [NonBankPointDTO]
+    let cashFlows: [CashFlowPointDTO]?
 }
 
 private struct BankPointDTO: Codable, Sendable {
@@ -453,15 +512,44 @@ private struct BankPointDTO: Codable, Sendable {
     let customerDeposits: Double?
     let valuablePapers: Double?
     let equity: Double?
+    let depositsBorrowingsOthers: Double?
+    let totalLiabilities: Double?
+    let totalEquity: Double?
+    let issuingValuablePaper: Double?
+    let customerLoan: Double?
+    let standardDebt: Double?
+    let watchlistDebt: Double?
+    let substandardDebt: Double?
+    let doubtfulDebt: Double?
+    let badDebt: Double?
+    let provisionForCustomerLoanLoss: Double?
     let roe: Double?
     let roa: Double?
+    let nim: Double?
+    let yoea: Double?
+    let cof: Double?
+    let cir: Double?
+    let ldr: Double?
+    let nplToLoan: Double?
+    let loanlossReservesToNPL: Double?
+    let pe: Double?
+    let pb: Double?
+    let eps: Double?
+    let bvps: Double?
+    let saleGrowth: Double?
+    let profitGrowth: Double?
+    let payoutRatio: Double?
+    let cashDividend: Double?
+    let shareAtPeriodEnd: Double?
     let netInterestIncome: Double?
     let feeAndCommissionIncome: Double?
     let otherIncome: Double?
     let profitAfterTax: Double?
-    let depositsBorrowingsOthers: Double?
-    let totalLiabilities: Double?
     let interestExpense: Double?
+    let totalOperatingIncome: Double?
+    let totalOperatingExpense: Double?
+    let creditRiskProvisionsExpense: Double?
+    let interestAndSimilarIncome: Double?
 }
 
 private struct NonBankPointDTO: Codable, Sendable {
@@ -474,19 +562,46 @@ private struct NonBankPointDTO: Codable, Sendable {
     let fixedAssets: Double?
     let longTermReceivables: Double?
     let totalAssets: Double?
+    let inProgressLongTermAsset: Double?
     let equity: Double?
     let shortTermBorrowings: Double?
     let longTermBorrowings: Double?
     let advancesFromCustomers: Double?
     let totalCapital: Double?
+    let totalLiabilities: Double?
+    let convertibleBond: Double?
     let roe: Double?
     let roa: Double?
-    let netRevenue: Double?
-    let profitAfterTax: Double?
     let grossMargin: Double?
     let netMargin: Double?
-    let totalLiabilities: Double?
+    let pe: Double?
+    let pb: Double?
+    let eps: Double?
+    let bvps: Double?
+    let saleGrowth: Double?
+    let profitGrowth: Double?
+    let currentRatio: Double?
+    let totalDebtOverEquity: Double?
+    let evOverEbitda: Double?
+    let inventoryTurnover: Double?
+    let payoutRatio: Double?
+    let cashDividend: Double?
+    let shareAtPeriodEnd: Double?
+    let netRevenue: Double?
+    let profitAfterTax: Double?
     let totalRevenue: Double?
+    let grossProfit: Double?
+    let costOfGoodsSold: Double?
+    let sellingExpense: Double?
+    let managingExpense: Double?
+}
+
+private struct CashFlowPointDTO: Codable, Sendable {
+    let year: Int?
+    let quarter: Int?
+    let operatingCashflow: Double?
+    let investingCashflow: Double?
+    let financingCashflow: Double?
 }
 
 private struct DividendDTO: Codable, Sendable {

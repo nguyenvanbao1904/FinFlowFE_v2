@@ -114,5 +114,19 @@ extension FinancialChartsSection {
             nonBankMarginsLineChart(items, height: 200, fullScreen: false)
         }
     }
-}
 
+    func inventoryTurnoverNonBankCard(_ items: [NonBankFinancialDataPoint]) -> some View {
+        let sorted = items.sorted { $0.year < $1.year }
+        var subtitle: String?
+        if let last = sorted.last, let turnover = last.inventoryTurnover {
+            subtitle = String(format: "Vòng quay HTK: %.1f lần", turnover)
+        }
+        return chartCard(
+            title: "Vòng quay hàng tồn kho",
+            subtitle: subtitle,
+            expandKind: .inventoryTurnoverNonBank
+        ) {
+            inventoryTurnoverChart(items, height: 200, fullScreen: false)
+        }
+    }
+}

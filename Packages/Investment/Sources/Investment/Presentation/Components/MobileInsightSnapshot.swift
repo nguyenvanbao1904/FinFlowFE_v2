@@ -73,4 +73,3 @@ public struct MobileInsightSnapshot: View {
         return lines.joined(separator: "\n")
     }
 }
-
