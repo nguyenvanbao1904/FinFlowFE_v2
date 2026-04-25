@@ -226,10 +226,10 @@ struct TransactionBarChartSection: View {
                 title: dataPoint.label,
                 subtitle: "Giữ và kéo để xem kỳ khác",
                 metrics: [
-                    ChartPopoverMetric(id: "income",   label: "Thu",       value: CurrencyFormatter.format(dataPoint.income),  color: AppColors.success),
-                    ChartPopoverMetric(id: "expense",  label: "Chi",       value: CurrencyFormatter.format(dataPoint.expense), color: AppColors.expense),
-                    ChartPopoverMetric(id: "balance",  label: "Chênh lệch",value: CurrencyFormatter.format(dataPoint.income - dataPoint.expense),
-                                       color: dataPoint.income >= dataPoint.expense ? AppColors.success : AppColors.expense),
+                    ChartPopoverMetric(id: "income", label: "Thu", value: CurrencyFormatter.format(dataPoint.income), color: AppColors.success),
+                    ChartPopoverMetric(id: "expense", label: "Chi", value: CurrencyFormatter.format(dataPoint.expense), color: AppColors.expense),
+                    ChartPopoverMetric(id: "balance", label: "Chênh lệch", value: CurrencyFormatter.format(dataPoint.income - dataPoint.expense),
+                                       color: dataPoint.income >= dataPoint.expense ? AppColors.success : AppColors.expense)
                 ]
             )
             .frame(maxWidth: 290)
@@ -262,8 +262,8 @@ struct TransactionBarChartSection: View {
         return data.dataPoints.enumerated().flatMap { index, point in
             let slot = plotSlot(forIndex: index, label: point.label)
             return [
-                ChartBarRow(id: "\(slot)-thu-\(index)",  plotSlot: slot, series: "Thu nhập", amount: point.income),
-                ChartBarRow(id: "\(slot)-chi-\(index)",  plotSlot: slot, series: "Chi tiêu", amount: -point.expense),
+                ChartBarRow(id: "\(slot)-thu-\(index)", plotSlot: slot, series: "Thu nhập", amount: point.income),
+                ChartBarRow(id: "\(slot)-chi-\(index)", plotSlot: slot, series: "Chi tiêu", amount: -point.expense)
             ]
         }
     }
@@ -274,7 +274,7 @@ struct TransactionBarChartSection: View {
             let day = Self.weekdayCategories[min(index, Self.weekdayCategories.count - 1)]
             return [
                 WeekChartBarRow(id: "\(day)-thu-\(index)", weekday: day, series: "Thu nhập", amount: point.income),
-                WeekChartBarRow(id: "\(day)-chi-\(index)", weekday: day, series: "Chi tiêu", amount: -point.expense),
+                WeekChartBarRow(id: "\(day)-chi-\(index)", weekday: day, series: "Chi tiêu", amount: -point.expense)
             ]
         }
     }
@@ -339,7 +339,7 @@ struct TransactionBarChartSection: View {
         return points.indices.first { plotSlot(forIndex: $0, label: points[$0].label) == slot }
     }
 
-    private nonisolated(unsafe) static let axisDateFormatter: DateFormatter = {
+    private static let axisDateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_GB")

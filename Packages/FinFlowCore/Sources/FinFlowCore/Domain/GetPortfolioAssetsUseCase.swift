@@ -12,4 +12,3 @@ public struct GetPortfolioAssetsUseCase: Sendable {
         try await repository.getPortfolioAssets(portfolioId: portfolioId)
     }
 }
-

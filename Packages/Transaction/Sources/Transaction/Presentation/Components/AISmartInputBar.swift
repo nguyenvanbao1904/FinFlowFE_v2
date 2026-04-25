@@ -127,7 +127,7 @@ struct AISmartInputBar: View {
                         : LinearGradient(
                             colors: [
                                 AppColors.disabled.opacity(OpacityLevel.medium),
-                                AppColors.disabled.opacity(OpacityLevel.medium),
+                                AppColors.disabled.opacity(OpacityLevel.medium)
                             ],
                             startPoint: .top, endPoint: .bottom
                         ),

@@ -4,7 +4,7 @@ import FinFlowCore
 public actor TransactionRepository: TransactionRepositoryProtocol {
     private let client: any HTTPClientProtocol
 
-    private nonisolated(unsafe) static let queryDateFormatter: DateFormatter = {
+    private static let queryDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current

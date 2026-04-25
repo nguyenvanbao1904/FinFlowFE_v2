@@ -112,8 +112,7 @@ private struct DateRangeFilterContent: View {
                     }
                     .padding(.horizontal)
                 }
-                // swiftlint:disable:next no_hardcoded_padding
-                .padding(.bottom, UILayout.fixedBottomBarClearance)  // Space for fixed action buttons
+                .padding(.bottom, UILayout.fixedBottomBarClearance)
             }
 
             // Action Buttons (Fixed at bottom)
@@ -244,7 +243,7 @@ private struct DateRangeFilterContent: View {
 
     // MARK: - Helpers
 
-    private nonisolated(unsafe) static let dateRangeFormatter: DateFormatter = {
+    private static let dateRangeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
         return formatter

@@ -49,4 +49,3 @@ public struct TypeOptionButton: View {
         .buttonStyle(.borderless)
     }
 }
-

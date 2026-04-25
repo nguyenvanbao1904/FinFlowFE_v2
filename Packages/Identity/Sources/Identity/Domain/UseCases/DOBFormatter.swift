@@ -3,7 +3,7 @@ import Foundation
 /// Shared "yyyy-MM-dd" formatter for date-of-birth fields.
 /// Reused by RegisterUseCase and UpdateProfileUseCase to avoid duplication.
 enum DOBFormatter {
-    private nonisolated(unsafe) static let formatter: DateFormatter = {
+    private static let formatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         return f

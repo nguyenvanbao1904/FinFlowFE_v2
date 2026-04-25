@@ -177,4 +177,3 @@ public struct AddBudgetView: View {
         }
     }
 }
-

@@ -66,4 +66,3 @@ public struct SheetContainer<Content: View>: View {
         }
     }
 }
-

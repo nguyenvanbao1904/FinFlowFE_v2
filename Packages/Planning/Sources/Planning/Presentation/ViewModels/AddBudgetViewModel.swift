@@ -38,7 +38,7 @@ public final class AddBudgetViewModel {
         return cal.date(byAdding: DateComponents(month: 1, day: -1), to: start) ?? start
     }
 
-    private nonisolated(unsafe) static let periodSummaryFormatter: DateFormatter = {
+    private static let periodSummaryFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
         f.timeZone = TimeZone.current

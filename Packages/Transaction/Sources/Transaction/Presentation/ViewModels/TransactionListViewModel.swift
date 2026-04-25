@@ -332,20 +332,20 @@ public final class TransactionListViewModel {
         )
     }
 
-    private nonisolated(unsafe) static let weekdayFormatter: DateFormatter = {
+    private static let weekdayFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "EEEE, dd/MM"
         f.locale = Locale(identifier: "vi_VN")
         return f
     }()
 
-    private nonisolated(unsafe) static let absoluteDateFormatter: DateFormatter = {
+    private static let absoluteDateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "dd/MM/yyyy"
         return f
     }()
 
-    private nonisolated(unsafe) static let reportMonthFormatter: DateFormatter = {
+    private static let reportMonthFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "MM/yyyy"
         return f
@@ -461,6 +461,6 @@ public final class TransactionListViewModel {
             title: "Mẹo tài chính",
             message: "Duy trì ghi nhận giao dịch đều đặn để hệ thống đưa ra gợi ý chính xác hơn.",
             confidence: 0.5
-        ),
+        )
     ]
 }

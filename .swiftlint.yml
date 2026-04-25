@@ -6,6 +6,8 @@ disabled_rules:
   - type_body_length
   - identifier_name
   - closure_parameter_position
+  - large_tuple
+  - multiple_closures_with_trailing_closure
 
 # Trỏ đúng tọa độ code của bạn
 included:

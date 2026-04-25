@@ -90,7 +90,7 @@ public actor BotChatGateway {
         return formatter
     }()
 
-    private nonisolated(unsafe) static let localFormatterWithMillis: DateFormatter = {
+    private static let localFormatterWithMillis: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current
@@ -98,7 +98,7 @@ public actor BotChatGateway {
         return formatter
     }()
 
-    private nonisolated(unsafe) static let localFormatter: DateFormatter = {
+    private static let localFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.current

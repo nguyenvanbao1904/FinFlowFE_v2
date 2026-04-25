@@ -72,7 +72,7 @@ public struct ChatThreadListView: View {
     private var emptyState: some View {
         VStack(spacing: Spacing.md) {
             Image(systemName: "bubble.left.and.bubble.right")
-                .font(.system(size: 48))
+                .font(AppTypography.displayXL)
                 .foregroundStyle(AppColors.disabled)
 
             Text("Chưa có hội thoại nào")
@@ -178,21 +178,21 @@ public struct ChatThreadListView: View {
         return ""
     }
 
-    private nonisolated(unsafe) static let isoWithMillis: DateFormatter = {
+    private static let isoWithMillis: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         return f
     }()
 
-    private nonisolated(unsafe) static let isoWithout: DateFormatter = {
+    private static let isoWithout: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         return f
     }()
 
-    private nonisolated(unsafe) static let displayFormatter: DateFormatter = {
+    private static let displayFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "vi_VN")
         f.dateStyle = .medium

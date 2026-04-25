@@ -73,6 +73,7 @@ public struct ChartSelectionPopover: View {
     }
 }
 
+@MainActor
 public enum ChartSelectionHaptics {
     public static func selectionChanged() {
         #if canImport(UIKit)
@@ -106,7 +107,7 @@ public enum ChartSelectionLifecycle {
         hideTask = Task {
             try? await Task.sleep(for: hideDelay)
             guard !Task.isCancelled else { return }
-            await onDelayedClear()
+            onDelayedClear()
         }
     }
 

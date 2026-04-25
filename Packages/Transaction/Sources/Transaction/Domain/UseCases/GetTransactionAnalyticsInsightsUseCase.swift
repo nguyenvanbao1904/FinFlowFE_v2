@@ -11,4 +11,3 @@ public struct GetTransactionAnalyticsInsightsUseCase: Sendable {
         try await repository.getAnalyticsInsights()
     }
 }
-

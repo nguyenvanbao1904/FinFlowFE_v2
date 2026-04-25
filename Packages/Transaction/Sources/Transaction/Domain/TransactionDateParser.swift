@@ -6,7 +6,7 @@ enum TransactionDateParser {
         "yyyy-MM-dd'T'HH:mm:ss.SSS"
     ]
 
-    private nonisolated(unsafe) static let posixFormatter: DateFormatter = {
+    private static let posixFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.timeZone = TimeZone.current

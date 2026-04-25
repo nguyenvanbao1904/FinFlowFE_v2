@@ -274,5 +274,3 @@ public struct PortfolioMetricComparison: Codable, Sendable {
         self.deltaPct = deltaPct
     }
 }
-
-

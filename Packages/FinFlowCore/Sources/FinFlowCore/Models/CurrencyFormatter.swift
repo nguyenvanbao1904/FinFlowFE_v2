@@ -11,7 +11,7 @@ public enum CurrencyFormatter {
 
     // MARK: - Shared Formatter
 
-    private nonisolated(unsafe) static let sharedFormatter: NumberFormatter = {
+    private static let sharedFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = "."

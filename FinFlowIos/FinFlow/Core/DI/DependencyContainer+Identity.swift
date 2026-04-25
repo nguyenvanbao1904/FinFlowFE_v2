@@ -37,8 +37,7 @@ extension DependencyContainer {
     }
 
     func makeForgotPasswordViewModel(onSuccess: @escaping (String) -> Void)
-        -> ForgotPasswordViewModel
-    {
+        -> ForgotPasswordViewModel {
         return ForgotPasswordViewModel(
             useCase: ForgotPasswordUseCase(repository: authRepository),
             otpHandler: otpHandler,
@@ -63,8 +62,7 @@ extension DependencyContainer {
         )
     }
 
-    func makeLockScreenViewModel(user: UserProfile, biometricAvailable: Bool) -> LockScreenViewModel
-    {
+    func makeLockScreenViewModel(user: UserProfile, biometricAvailable: Bool) -> LockScreenViewModel {
         return LockScreenViewModel(
             sessionManager: sessionManager,
             pinManager: pinManager,

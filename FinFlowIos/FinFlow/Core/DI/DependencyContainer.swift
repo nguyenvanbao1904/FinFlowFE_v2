@@ -139,4 +139,3 @@ public class DependencyContainer {
         return sessionManager.state.isAuthenticated
     }
 }
-

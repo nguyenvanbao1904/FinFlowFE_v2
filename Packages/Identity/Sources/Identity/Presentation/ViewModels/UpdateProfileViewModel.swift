@@ -12,7 +12,7 @@ public final class UpdateProfileViewModel {
     public var alert: AppErrorAlert?
     public var isSuccess: Bool = false
 
-    private nonisolated(unsafe) static let dobParser: DateFormatter = {
+    private static let dobParser: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         return f

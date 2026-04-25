@@ -13,4 +13,3 @@ public protocol TokenStoreProtocol: Sendable {
     // Debug helper (no-op by default)
     func logTokenStatus() async
 }
-

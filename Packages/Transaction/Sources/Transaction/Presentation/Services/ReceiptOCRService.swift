@@ -74,4 +74,3 @@ private extension UIImage {
         return rendered.cgImage
     }
 }
-

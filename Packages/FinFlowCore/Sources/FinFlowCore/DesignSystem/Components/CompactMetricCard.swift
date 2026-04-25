@@ -15,14 +15,14 @@ public enum SnapshotGridLayout {
     public static var twoColumns: [GridItem] {
         [
             GridItem(.flexible(), spacing: Spacing.sm),
-            GridItem(.flexible(), spacing: Spacing.sm),
+            GridItem(.flexible(), spacing: Spacing.sm)
         ]
     }
 }
 
 // MARK: - Shell
 
-fileprivate struct SnapshotGridCell<Content: View>: View {
+private struct SnapshotGridCell<Content: View>: View {
     private let content: Content
 
     init(@ViewBuilder content: () -> Content) {
