@@ -22,6 +22,8 @@ public final class InvestmentPortfolioViewModel {
     private let getPortfoliosUseCase: GetPortfoliosUseCase
     private let getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase
     private let createPortfolioUseCase: CreatePortfolioUseCase
+    private let updatePortfolioUseCase: UpdatePortfolioUseCase
+    private let deletePortfolioUseCase: DeletePortfolioUseCase
     private let createTradeTransactionUseCase: CreateTradeTransactionUseCase
     private let importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase
     private let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
@@ -36,6 +38,8 @@ public final class InvestmentPortfolioViewModel {
         getPortfoliosUseCase: GetPortfoliosUseCase,
         getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase,
         createPortfolioUseCase: CreatePortfolioUseCase,
+        updatePortfolioUseCase: UpdatePortfolioUseCase,
+        deletePortfolioUseCase: DeletePortfolioUseCase,
         createTradeTransactionUseCase: CreateTradeTransactionUseCase,
         importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase,
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
@@ -46,6 +50,8 @@ public final class InvestmentPortfolioViewModel {
         self.getPortfoliosUseCase = getPortfoliosUseCase
         self.getPortfolioAssetsUseCase = getPortfolioAssetsUseCase
         self.createPortfolioUseCase = createPortfolioUseCase
+        self.updatePortfolioUseCase = updatePortfolioUseCase
+        self.deletePortfolioUseCase = deletePortfolioUseCase
         self.createTradeTransactionUseCase = createTradeTransactionUseCase
         self.importPortfolioSnapshotUseCase = importPortfolioSnapshotUseCase
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
@@ -103,6 +109,30 @@ public final class InvestmentPortfolioViewModel {
             await loadAll(force: true)
         } catch {
             errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tạo danh mục")
+        }
+    }
+
+    public func updatePortfolio(name: String) async {
+        guard let selectedPortfolio else { return }
+        do {
+            _ = try await updatePortfolioUseCase.execute(
+                portfolioId: selectedPortfolio.id,
+                request: UpdatePortfolioRequest(name: name)
+            )
+            await loadAll(force: true)
+        } catch {
+            errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi đổi tên danh mục")
+        }
+    }
+
+    public func deletePortfolio() async {
+        guard let selectedPortfolio else { return }
+        do {
+            _ = try await deletePortfolioUseCase.execute(portfolioId: selectedPortfolio.id)
+            self.selectedPortfolio = nil
+            await loadAll(force: true)
+        } catch {
+            errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi xóa danh mục")
         }
     }
 

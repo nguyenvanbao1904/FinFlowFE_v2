@@ -7,6 +7,8 @@ struct InvestmentPortfolioTabContent: View {
     @Binding var showCreatePortfolio: Bool
     @Binding var showAddInvestmentActionSheet: Bool
     @Binding var selectedAssetForDetail: PortfolioAssetResponse?
+    var onRenamePortfolio: () -> Void = {}
+    var onDeletePortfolio: () -> Void = {}
 
     var body: some View {
         @Bindable var viewModel = viewModel
@@ -33,6 +35,20 @@ struct InvestmentPortfolioTabContent: View {
                         showCreatePortfolio = true
                     } label: {
                         Label("Tạo danh mục mới", systemImage: "plus")
+                    }
+
+                    if viewModel.selectedPortfolio != nil {
+                        Button {
+                            onRenamePortfolio()
+                        } label: {
+                            Label("Đổi tên danh mục", systemImage: "pencil")
+                        }
+
+                        Button(role: .destructive) {
+                            onDeletePortfolio()
+                        } label: {
+                            Label("Xóa danh mục", systemImage: "trash")
+                        }
                     }
                 } label: {
                     HStack(spacing: Spacing.sm) {

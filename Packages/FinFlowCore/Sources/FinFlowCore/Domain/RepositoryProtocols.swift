@@ -84,13 +84,14 @@ public protocol BudgetRepositoryProtocol: Sendable {
 public protocol PortfolioRepositoryProtocol: Sendable {
     func getPortfolios() async throws -> [PortfolioResponse]
     func createPortfolio(request: CreatePortfolioRequest) async throws -> PortfolioResponse
+    func updatePortfolio(portfolioId: String, request: UpdatePortfolioRequest) async throws -> PortfolioResponse
+    func deletePortfolio(portfolioId: String) async throws -> EmptyResponse
 
     func getPortfolioAssets(portfolioId: String) async throws -> [PortfolioAssetResponse]
     func createPortfolioAsset(
         portfolioId: String,
         request: CreatePortfolioAssetRequest
     ) async throws -> PortfolioAssetResponse
-
     func createTradeTransaction(
         portfolioId: String,
         request: CreateTradeTransactionRequest

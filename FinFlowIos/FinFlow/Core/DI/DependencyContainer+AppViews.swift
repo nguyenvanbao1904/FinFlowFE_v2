@@ -211,6 +211,8 @@ extension DependencyContainer {
                 getPortfoliosUseCase: GetPortfoliosUseCase(repository: portfolioRepository),
                 getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase(repository: portfolioRepository),
                 createPortfolioUseCase: CreatePortfolioUseCase(repository: portfolioRepository),
+                updatePortfolioUseCase: UpdatePortfolioUseCase(repository: portfolioRepository),
+                deletePortfolioUseCase: DeletePortfolioUseCase(repository: portfolioRepository),
                 createTradeTransactionUseCase: CreateTradeTransactionUseCase(repository: portfolioRepository),
                 importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase(repository: portfolioRepository),
                 getPortfolioHealthUseCase: GetPortfolioHealthUseCase(repository: portfolioRepository),

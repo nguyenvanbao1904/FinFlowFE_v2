@@ -6,7 +6,10 @@ public struct PortfolioAssetDetailSheet: View {
     public let asset: PortfolioAssetResponse
     public let portfolioStockValue: Double
 
-    public init(asset: PortfolioAssetResponse, portfolioStockValue: Double) {
+    public init(
+        asset: PortfolioAssetResponse,
+        portfolioStockValue: Double
+    ) {
         self.asset = asset
         self.portfolioStockValue = portfolioStockValue
     }

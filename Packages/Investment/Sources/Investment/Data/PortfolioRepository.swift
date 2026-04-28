@@ -27,6 +27,26 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         )
     }
 
+    public func updatePortfolio(portfolioId: String, request: UpdatePortfolioRequest) async throws -> PortfolioResponse {
+        try await client.request(
+            endpoint: "/investments/portfolios/\(portfolioId)",
+            method: "PUT",
+            body: request,
+            headers: nil,
+            version: nil
+        )
+    }
+
+    public func deletePortfolio(portfolioId: String) async throws -> EmptyResponse {
+        try await client.request(
+            endpoint: "/investments/portfolios/\(portfolioId)",
+            method: "DELETE",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
     public func getPortfolioAssets(portfolioId: String) async throws -> [PortfolioAssetResponse] {
         try await client.request(
             endpoint: "/investments/portfolios/\(portfolioId)/assets",

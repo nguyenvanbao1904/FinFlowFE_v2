@@ -2,8 +2,6 @@ import FinFlowCore
 import SwiftUI
 
 public struct AddInvestmentActionSheet: View {
-    @Environment(\.dismiss) private var dismiss
-
     let onCashTransaction: () -> Void
     let onStockTrade: () -> Void
     let onImportPortfolio: () -> Void
@@ -30,40 +28,21 @@ public struct AddInvestmentActionSheet: View {
                         icon: "dollarsign.circle.fill",
                         color: AppColors.chartAssetCash,
                         title: "Giao dịch nạp/rút tiền",
-                        action: {
-                            onCashTransaction()
-                            dismiss()
-                        }
+                        action: onCashTransaction
                     )
                     actionCard(
                         icon: "building.columns",
                         color: AppColors.chartCapitalDeposits,
                         title: "Giao dịch chứng khoán",
-                        action: {
-                            onStockTrade()
-                            dismiss()
-                        }
+                        action: onStockTrade
                     )
                     actionCard(
                         icon: "tag.fill",
                         color: AppColors.chartIncomeOther,
                         title: "Nhập danh mục mã hiện tại",
-                        action: {
-                            onImportPortfolio()
-                            dismiss()
-                        }
+                        action: onImportPortfolio
                     )
                 }
-
-                Button {
-                    onImportPortfolio()
-                    dismiss()
-                } label: {
-                    Label("Thêm giao dịch", systemImage: "plus")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .primaryButton()
-                .padding(.top, Spacing.xs)
             }
             .padding(.horizontal, Spacing.lg)
         }

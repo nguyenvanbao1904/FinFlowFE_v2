@@ -10,6 +10,8 @@ public struct InvestmentViewDependencies {
     let getPortfoliosUseCase: GetPortfoliosUseCase
     let getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase
     let createPortfolioUseCase: CreatePortfolioUseCase
+    let updatePortfolioUseCase: UpdatePortfolioUseCase
+    let deletePortfolioUseCase: DeletePortfolioUseCase
     let createTradeTransactionUseCase: CreateTradeTransactionUseCase
     let importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase
     let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
@@ -23,6 +25,8 @@ public struct InvestmentViewDependencies {
         getPortfoliosUseCase: GetPortfoliosUseCase,
         getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase,
         createPortfolioUseCase: CreatePortfolioUseCase,
+        updatePortfolioUseCase: UpdatePortfolioUseCase,
+        deletePortfolioUseCase: DeletePortfolioUseCase,
         createTradeTransactionUseCase: CreateTradeTransactionUseCase,
         importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase,
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
@@ -35,6 +39,8 @@ public struct InvestmentViewDependencies {
         self.getPortfoliosUseCase = getPortfoliosUseCase
         self.getPortfolioAssetsUseCase = getPortfolioAssetsUseCase
         self.createPortfolioUseCase = createPortfolioUseCase
+        self.updatePortfolioUseCase = updatePortfolioUseCase
+        self.deletePortfolioUseCase = deletePortfolioUseCase
         self.createTradeTransactionUseCase = createTradeTransactionUseCase
         self.importPortfolioSnapshotUseCase = importPortfolioSnapshotUseCase
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
@@ -46,6 +52,7 @@ public struct InvestmentViewDependencies {
 public struct InvestmentView: View {
     private enum ActiveSheet: String, Identifiable {
         case createPortfolio
+        case renamePortfolio
         case addInvestmentAction
         case addCashTransaction
         case addStockTrade
@@ -60,6 +67,7 @@ public struct InvestmentView: View {
 
     @State private var activeSheet: ActiveSheet?
     @State private var selectedAssetForDetail: PortfolioAssetResponse?
+    @State private var showDeletePortfolioConfirm = false
 
     private let suggestCompaniesUseCase: SuggestCompaniesUseCase
 
@@ -78,6 +86,8 @@ public struct InvestmentView: View {
                 getPortfoliosUseCase: dependencies.getPortfoliosUseCase,
                 getPortfolioAssetsUseCase: dependencies.getPortfolioAssetsUseCase,
                 createPortfolioUseCase: dependencies.createPortfolioUseCase,
+                updatePortfolioUseCase: dependencies.updatePortfolioUseCase,
+                deletePortfolioUseCase: dependencies.deletePortfolioUseCase,
                 createTradeTransactionUseCase: dependencies.createTradeTransactionUseCase,
                 importPortfolioSnapshotUseCase: dependencies.importPortfolioSnapshotUseCase,
                 getPortfolioHealthUseCase: dependencies.getPortfolioHealthUseCase,
@@ -103,6 +113,14 @@ public struct InvestmentView: View {
                     asset: asset,
                     portfolioStockValue: portfolioVM.portfolioStockValue
                 )
+            }
+            .alert("Xóa danh mục?", isPresented: $showDeletePortfolioConfirm) {
+                Button("Xóa", role: .destructive) {
+                    Task { await portfolioVM.deletePortfolio() }
+                }
+                Button("Hủy", role: .cancel) {}
+            } message: {
+                Text("Toàn bộ tài sản và giao dịch trong danh mục sẽ bị xóa vĩnh viễn.")
             }
             .task { await portfolioVM.loadAll() }
             .refreshable { await portfolioVM.loadAll(force: true) }
@@ -144,7 +162,9 @@ public struct InvestmentView: View {
                     get: { activeSheet == .addInvestmentAction },
                     set: { activeSheet = $0 ? .addInvestmentAction : nil }
                 ),
-                selectedAssetForDetail: $selectedAssetForDetail
+                selectedAssetForDetail: $selectedAssetForDetail,
+                onRenamePortfolio: { activeSheet = .renamePortfolio },
+                onDeletePortfolio: { showDeletePortfolioConfirm = true }
             )
         }
     }
@@ -173,6 +193,11 @@ public struct InvestmentView: View {
         case .createPortfolio:
             CreatePortfolioSheet { name in
                 await portfolioVM.createPortfolio(name: name)
+                await MainActor.run { activeSheet = nil }
+            }
+        case .renamePortfolio:
+            RenamePortfolioSheet(currentName: portfolioVM.selectedPortfolio?.name ?? "") { newName in
+                await portfolioVM.updatePortfolio(name: newName)
                 await MainActor.run { activeSheet = nil }
             }
         case .addInvestmentAction:
