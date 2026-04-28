@@ -57,7 +57,7 @@ public final class StockAnalysisViewModel {
             let result = try await getStockAnalysisUseCase.execute(
                 symbol: requestedSymbol,
                 annualLimit: 4,
-                quarterlyLimit: 4
+                quarterlyLimit: 13
             )
             guard requestedSymbol == currentSymbol else { return }
             overview = result.overview

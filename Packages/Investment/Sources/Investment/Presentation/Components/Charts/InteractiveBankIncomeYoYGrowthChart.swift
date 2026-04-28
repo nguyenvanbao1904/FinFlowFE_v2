@@ -62,16 +62,11 @@ struct InteractiveBankIncomeYoYGrowthChart: View {
     }
 
     private var yoyRows: [YoYRow] {
-        var out: [YoYRow] = []
-        for i in rows.indices {
+        rows.indices.map { i in
             let cur = rows[i]
-            var yoy: Double?
-            if i > 0, let c = cur.totalIncome, let p = rows[i - 1].totalIncome, p != 0 {
-                yoy = (c - p) / p * 100
-            }
-            out.append(YoYRow(id: cur.id, year: cur.year, yoy: yoy))
+            let item = sortedItems[i]
+            return YoYRow(id: cur.id, year: cur.year, yoy: item.yoyTotalOperatingIncome)
         }
-        return out
     }
 
     private var labels: [String] {

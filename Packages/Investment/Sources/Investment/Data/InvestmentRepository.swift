@@ -232,6 +232,13 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
                 BankFinancialDataPoint(
                     year: item.year ?? 0,
                     quarter: item.quarter ?? 0,
+                    quarterCount: item.quarterCount,
+                    yoyGrowth: item.yoyGrowth,
+                    totalAssets: item.totalAssets,
+                    npl: item.npl,
+                    yoyCustomerLoan: item.yoyCustomerLoan,
+                    yoyTotalOperatingIncome: item.yoyTotalOperatingIncome,
+                    yoyNpl: item.yoyNpl,
                     cashAndEquivalents: item.cashAndEquivalents,
                     depositsAtSBV: item.depositsAtSBV,
                     interbankPlacements: item.interbankPlacements,
@@ -292,6 +299,10 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
                 NonBankFinancialDataPoint(
                     year: item.year ?? 0,
                     quarter: item.quarter ?? 0,
+                    quarterCount: item.quarterCount,
+                    yoyGrowth: item.yoyGrowth,
+                    yoyNetRevenue: item.yoyNetRevenue,
+                    yoyInventories: item.yoyInventories,
                     cashAndEquivalents: item.cashAndEquivalents,
                     shortTermInvestments: item.shortTermInvestments,
                     shortTermReceivables: item.shortTermReceivables,
@@ -498,6 +509,13 @@ private struct FinancialSeriesDTO: Codable, Sendable {
 private struct BankPointDTO: Codable, Sendable {
     let year: Int?
     let quarter: Int?
+    let quarterCount: Int?
+    let yoyGrowth: Double?
+    let totalAssets: Double?
+    let npl: Double?
+    let yoyCustomerLoan: Double?
+    let yoyTotalOperatingIncome: Double?
+    let yoyNpl: Double?
     let cashAndEquivalents: Double?
     let depositsAtSBV: Double?
     let interbankPlacements: Double?
@@ -555,6 +573,10 @@ private struct BankPointDTO: Codable, Sendable {
 private struct NonBankPointDTO: Codable, Sendable {
     let year: Int?
     let quarter: Int?
+    let quarterCount: Int?
+    let yoyGrowth: Double?
+    let yoyNetRevenue: Double?
+    let yoyInventories: Double?
     let cashAndEquivalents: Double?
     let shortTermInvestments: Double?
     let shortTermReceivables: Double?

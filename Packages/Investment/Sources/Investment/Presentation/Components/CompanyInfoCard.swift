@@ -19,12 +19,6 @@ public struct CompanyInfoCard: View {
             descriptionSection
 
             Divider()
-            keyMetricsSection
-
-            Divider()
-            valuationSection
-
-            Divider()
             shareholdersSection
         }
         .padding(Spacing.lg)
@@ -78,48 +72,6 @@ public struct CompanyInfoCard: View {
         }
     }
 
-    // MARK: - Key Metrics
-
-    private var keyMetricsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Các chỉ số quan trọng")
-                .font(AppTypography.headline)
-
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.xs), count: 3),
-                spacing: Spacing.xs
-            ) {
-                metricCell(label: "ROE", value: String(format: "%.2f%%", overview.roe))
-                metricCell(label: "ROA", value: String(format: "%.2f%%", overview.roa))
-                metricCell(label: "EPS", value: formatNumber(overview.eps))
-                metricCell(label: "BVPS", value: formatNumber(overview.bvps))
-                metricCell(label: "CPLH", value: String(format: "%.1f tỷ", overview.cplh))
-            }
-        }
-    }
-
-    // MARK: - Valuation
-
-    private var valuationSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Góc nhìn FinFlow")
-                .font(AppTypography.headline)
-            if overview.livePriceVnd != nil {
-                Text(
-                    "So với trung vị & trung bình lịch sử (theo các quý có P/E, P/B, P/S trong DB): giá hiển thị là VPS gần nhất; EPS TTM, BVPS, doanh thu/CP trên BCTC."
-                )
-                .font(AppTypography.caption2)
-                .foregroundStyle(.secondary)
-            }
-
-            VStack(spacing: Spacing.xs) {
-                valuationRow(label: "Định giá P/E", current: overview.displayPE, median: overview.medianPE, mean: overview.meanPE)
-                valuationRow(label: "Định giá P/B", current: overview.displayPB, median: overview.medianPB, mean: overview.meanPB)
-                valuationRow(label: "Định giá P/S", current: overview.displayPS, median: overview.medianPS, mean: overview.meanPS)
-            }
-        }
-    }
-
     // MARK: - Shareholders
 
     private var shareholdersSection: some View {
@@ -162,72 +114,4 @@ public struct CompanyInfoCard: View {
         return palette[index % palette.count]
     }
 
-    // MARK: - Helpers
-
-    private func metricCell(label: String, value: String) -> some View {
-        VStack(spacing: Spacing.xs) {
-            Text(label)
-                .font(AppTypography.caption)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(AppTypography.body)
-                .fontWeight(.semibold)
-                .foregroundStyle(AppColors.apple)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.xs)
-        .background(AppColors.appBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small))
-    }
-
-    private func valuationRow(label: String, current: Double, median: Double, mean: Double?) -> some View {
-        let diff = current - median
-        let pct = median > 0 ? abs(diff) / median * 100 : 0
-        let assessment: (text: String, color: Color) = {
-            if median <= 0 { return ("Chưa có trung vị", .secondary) }
-            if pct < 5 { return ("Gần trung vị", .secondary) }
-            if diff < 0 { return (String(format: "Thấp hơn trung vị %.0f%%", pct), AppColors.success) }
-            return (String(format: "Cao hơn trung vị %.0f%%", pct), AppColors.chartGrowthStable)
-        }()
-        let benchmarkLine: String? = {
-            var parts: [String] = []
-            if median > 0 {
-                parts.append(String(format: "TV %.2f", median))
-            }
-            if let m = mean, m.isFinite, m > 0 {
-                parts.append(String(format: "TB %.2f", m))
-            }
-            if parts.isEmpty { return nil }
-            return parts.joined(separator: " · ")
-        }()
-
-        return HStack(alignment: .center) {
-            Text(label)
-                .font(AppTypography.subheadline)
-                .foregroundStyle(.secondary)
-            Spacer()
-            VStack(alignment: .trailing, spacing: Spacing.xs) {
-                HStack(spacing: Spacing.xs) {
-                    Circle().fill(assessment.color).frame(width: UILayout.chartLegendDotMedium, height: UILayout.chartLegendDotMedium)
-                    Text(assessment.text)
-                        .font(AppTypography.caption)
-                        .foregroundStyle(assessment.color)
-                }
-                if let benchmarkLine {
-                    Text(benchmarkLine)
-                        .font(AppTypography.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding(.vertical, Spacing.xs)
-    }
-
-    private func formatNumber(_ value: Double) -> String {
-        if abs(value) >= 1_000 {
-            return String(format: "%.0f", value)
-                .replacingOccurrences(of: "(?<=\\d)(?=(\\d{3})+$)", with: ",", options: .regularExpression)
-        }
-        return String(format: "%.2f", value)
-    }
 }

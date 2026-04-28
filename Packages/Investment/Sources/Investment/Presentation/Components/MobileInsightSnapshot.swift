@@ -11,7 +11,7 @@ public struct MobileInsightSnapshot: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Snapshot tài chính")
+            Text("Các chỉ số quan trọng")
                 .font(AppTypography.headline)
 
             LazyVGrid(columns: SnapshotGridLayout.twoColumns, spacing: SnapshotGridLayout.spacing) {
@@ -28,16 +28,22 @@ public struct MobileInsightSnapshot: View {
                     accent: AppColors.chartCapitalDeposits
                 )
                 CompactMetricCard(
-                    title: "Định giá P/E",
-                    value: String(format: "%.2f", overview.displayPE),
-                    caption: valuationTrend(current: overview.displayPE, median: overview.medianPE, mean: overview.meanPE),
+                    title: "EPS",
+                    value: formatNumber(overview.eps),
+                    caption: "VND / cổ phiếu",
                     accent: AppColors.chartRevenue
                 )
                 CompactMetricCard(
-                    title: "Định giá P/B",
-                    value: String(format: "%.2f", overview.displayPB),
-                    caption: valuationTrend(current: overview.displayPB, median: overview.medianPB, mean: overview.meanPB),
+                    title: "BVPS",
+                    value: formatNumber(overview.bvps),
+                    caption: "VND / cổ phiếu",
                     accent: AppColors.chartProfit
+                )
+                CompactMetricCard(
+                    title: "CPLH",
+                    value: String(format: "%.1f tỷ", overview.cplh),
+                    caption: "Cổ phiếu lưu hành",
+                    accent: AppColors.chartIncomeFee
                 )
             }
         }
@@ -53,23 +59,11 @@ public struct MobileInsightSnapshot: View {
         return "Thấp, cần cải thiện hiệu quả"
     }
 
-    private func valuationTrend(current: Double, median: Double, mean: Double?) -> String {
-        var lines: [String] = []
-        if median > 0 {
-            let pct = abs(current - median) / median * 100
-            if pct < 5 {
-                lines.append("Gần trung vị lịch sử")
-            } else if current < median {
-                lines.append(String(format: "Thấp hơn TV %.0f%%", pct))
-            } else {
-                lines.append(String(format: "Cao hơn TV %.0f%%", pct))
-            }
-        } else {
-            lines.append("Chưa có TV lịch sử")
+    private func formatNumber(_ value: Double) -> String {
+        if abs(value) >= 1_000 {
+            return String(format: "%.0f", value)
+                .replacingOccurrences(of: "(?<=\\d)(?=(\\d{3})+$)", with: ",", options: .regularExpression)
         }
-        if let m = mean, m.isFinite, m > 0 {
-            lines.append(String(format: "TB lịch sử: %.2f", m))
-        }
-        return lines.joined(separator: "\n")
+        return String(format: "%.2f", value)
     }
 }

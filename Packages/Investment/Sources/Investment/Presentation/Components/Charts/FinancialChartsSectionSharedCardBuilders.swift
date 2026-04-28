@@ -22,30 +22,28 @@ extension FinancialChartsSection {
         }
     }
 
-    func profitGrowthCard(_ data: [(year: Int, quarter: Int, value: Double)]) -> some View {
+    func profitGrowthCard(_ data: [(year: Int, quarter: Int, value: Double, yoy: Double?)]) -> some View {
         let sorted = data.sorted {
             if $0.year != $1.year { return $0.year < $1.year }
             return $0.quarter < $1.quarter
         }
-        let yearlyProfit = aggregateYearlyFlow(
-            sorted.map { (year: $0.year, value: $0.value) }
-        )
-        let cagrInfo = computeRecentCAGR(yearlyProfit, targetYears: 5)
-        let cagrStr: String? = cagrInfo.map { recent in
-            String(
-                format: "Tăng trưởng kép bình quân %d năm (%d-%d): %.1f%%/năm",
-                recent.years,
-                recent.startYear,
-                recent.endYear,
-                recent.rate
-            )
-        }
-        let sub = cagrStr
+        let cagrInfo: RecentCAGRInfo? = {
+            if showQuarterly {
+                return computeRecentQuarterlyCAGR(
+                    sorted.map { (year: $0.year, quarter: $0.quarter, value: $0.value) },
+                    targetQuarters: 12
+                )
+            } else {
+                let yearly = aggregateYearlyFlow(sorted.map { (year: $0.year, value: $0.value) })
+                return computeRecentCAGR(yearly, targetYears: 5)
+            }
+        }()
+        let subtitle = cagrInfo.map { cagrSubtitle($0) }
         let subtitleColor = growthSubtitleColor(for: cagrInfo?.rate)
 
         return chartCard(
             title: "Lợi nhuận hàng năm",
-            subtitle: sub?.isEmpty == false ? sub : nil,
+            subtitle: subtitle,
             subtitleColor: subtitleColor,
             expandKind: .profit
         ) {
@@ -77,7 +75,11 @@ extension FinancialChartsSection {
         let sorted = filtered.sorted { $0.year < $1.year }
         var subtitle: String?
         if let recent = sorted.last(where: { ($0.payoutRatio ?? 0) > 0 }), let pr = recent.payoutRatio {
-            subtitle = String(format: "Tỷ lệ chi trả %d: %.1f%%", recent.year, pr)
+            if let dp = recent.dividendPaid {
+                subtitle = String(format: "Tỷ lệ chi trả %d: %.1f%% / %@", recent.year, pr, formatVndCompact(dp))
+            } else {
+                subtitle = String(format: "Tỷ lệ chi trả %d: %.1f%%", recent.year, pr)
+            }
         }
         return AnyView(chartCard(
             title: "Cổ tức",

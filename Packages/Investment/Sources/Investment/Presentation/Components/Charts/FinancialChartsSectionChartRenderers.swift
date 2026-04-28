@@ -98,19 +98,6 @@ extension FinancialChartsSection {
         return 0...upper
     }
 
-    private func roeRoaYDomain(values: [Double]) -> ClosedRange<Double> {
-        niceDomain(values: values)
-    }
-
-    func bankNimChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        InteractiveBankNimChart(
-            items: items,
-            showQuarterly: showQuarterly,
-            height: height,
-            fullScreen: fullScreen
-        )
-    }
-
     // --- NonBank: metric column (DT or LNST) + YoY line ---
     func nonBankRevenueYoYChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         nonBankMetricYoYChart(items, kind: .revenue, height: height, fullScreen: fullScreen)
@@ -129,7 +116,8 @@ extension FinancialChartsSection {
         let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
         let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
             let v: Double? = kind == .revenue ? item.netRevenue : item.profitAfterTax
-            return .init(id: item.id.uuidString, periodLabel: item.periodLabel, value: v)
+            let yoy: Double? = kind == .revenue ? item.yoyNetRevenue : item.yoyGrowth
+            return .init(id: item.id.uuidString, periodLabel: item.periodLabel, value: v, yoy: yoy)
         }
         let barColor = kind == .revenue ? AppColors.chartRevenue : AppColors.chartProfit
         let barLabel = kind == .revenue ? "Doanh thu" : "LNST"
@@ -165,13 +153,13 @@ extension FinancialChartsSection {
 
     // --- Bank Profit YoY Growth (bar + line) ---
     func bankProfitYoYGrowthChart(
-        _ data: [(year: Int, quarter: Int, value: Double)],
+        _ data: [(year: Int, quarter: Int, value: Double, yoy: Double?)],
         height: CGFloat,
         fullScreen: Bool
     ) -> some View {
         let rows = data.map { p -> InteractiveSingleBarYoYChart.BarYoYRow in
             let label = (showQuarterly && p.quarter != 0) ? "Q\(p.quarter) \(p.year % 100)" : "\(p.year)"
-            return .init(id: "\(p.year)-\(p.quarter)", periodLabel: label, value: p.value)
+            return .init(id: "\(p.year)-\(p.quarter)", periodLabel: label, value: p.value, yoy: p.yoy)
         }
         return InteractiveSingleBarYoYChart(
             rows: rows,
@@ -223,29 +211,11 @@ extension FinancialChartsSection {
         )
     }
 
-    // --- Bank NPL (bar + line) ---
-    func nplBankChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
-        let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
-            .init(id: "\(item.year)-\(item.quarter)", periodLabel: item.periodLabel, value: item.nplToLoan)
-        }
-        return InteractiveSingleBarYoYChart(
-            rows: rows,
-            barColor: AppColors.expense,
-            barLabel: "Tỷ lệ nợ xấu %",
-            yoyLineColor: AppColors.chartGrowthStable,
-            yoyLabel: "Biến động YoY",
-            popoverSubtitle: "Nợ xấu & dự phòng",
-            height: height,
-            fullScreen: fullScreen
-        )
-    }
-
     // --- Bank Customer Loan (bar + YoY) ---
     func customerLoanBankChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
         let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
-            .init(id: "\(item.year)-\(item.quarter)", periodLabel: item.periodLabel, value: item.customerLoan)
+            .init(id: "\(item.year)-\(item.quarter)", periodLabel: item.periodLabel, value: item.customerLoan, yoy: item.yoyCustomerLoan)
         }
         return InteractiveSingleBarYoYChart(
             rows: rows,
@@ -263,7 +233,7 @@ extension FinancialChartsSection {
     func inventoryTurnoverChart(_ items: [NonBankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
         let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
         let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
-            .init(id: item.id.uuidString, periodLabel: item.periodLabel, value: item.inventories)
+            .init(id: item.id.uuidString, periodLabel: item.periodLabel, value: item.inventories, yoy: item.yoyInventories)
         }
         return InteractiveSingleBarYoYChart(
             rows: rows,
@@ -277,43 +247,22 @@ extension FinancialChartsSection {
         )
     }
 
-    // --- Bank: Debt Group 2→5 (bar: watchlist+NPL, line: coverage) ---
-    func debtGroup2to5BankChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
-        let rows = sorted.map { item -> InteractiveSingleBarYoYChart.BarYoYRow in
-            let watchlist = item.watchlistDebt ?? 0
-            let nplVal = item.npl ?? 0
-            let total = watchlist + nplVal
-            return .init(id: "\(item.year)-\(item.quarter)", periodLabel: item.periodLabel, value: total > 0 ? total : nil)
-        }
-        return InteractiveSingleBarYoYChart(
-            rows: rows,
-            barColor: AppColors.expense,
-            barLabel: "Nợ nhóm 2→5",
-            yoyLineColor: AppColors.chartGrowthStable,
-            yoyLabel: "Biến động YoY",
-            popoverSubtitle: "Nợ nhóm 2→5",
+    // --- Bank: NPL Composite (stacked bar nhóm 2-5) ---
+    func nplCompositeBankChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
+        let series: [(name: String, color: Color, value: (BankFinancialDataPoint) -> Double?)] = [
+            ("Nhóm 2 (cần CY)", AppColors.chartGrowthStable, \.watchlistDebt),
+            ("Nhóm 3 (dưới chuẩn)", AppColors.chartIncomeFee, \.substandardDebt),
+            ("Nhóm 4 (nghi ngờ)", AppColors.chartIncomeOther, \.doubtfulDebt),
+            ("Nhóm 5 (mất vốn)", AppColors.expense, \.badDebt)
+        ]
+        return InteractiveStackedBarChart(
+            items: items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) },
+            series: series,
+            yearKey: \.year,
+            quarterKey: \.quarter,
+            showQuarterly: showQuarterly,
             height: height,
             fullScreen: fullScreen
-        )
-    }
-
-    // --- Bank: NPL Structure (multi-line: substandard/doubtful/bad) ---
-    func nplStructureBankChart(_ items: [BankFinancialDataPoint], height: CGFloat, fullScreen: Bool) -> some View {
-        let sorted = items.sorted { ($0.year, $0.quarter) < ($1.year, $1.quarter) }
-        return InteractiveMultiLineChart(
-            items: sorted,
-            labelKey: { $0.periodLabel },
-            lines: [
-                MultiLineSeries(name: "Nhóm 3 (dưới chuẩn)", color: AppColors.chartGrowthStable, value: { $0.substandardDebt }),
-                MultiLineSeries(name: "Nhóm 4 (nghi ngờ)", color: AppColors.chartIncomeFee, value: { $0.doubtfulDebt }),
-                MultiLineSeries(name: "Nhóm 5 (có k/n mất vốn)", color: AppColors.expense, value: { $0.badDebt })
-            ],
-            popoverSubtitle: "Cơ cấu nợ xấu",
-            height: height,
-            fullScreen: fullScreen,
-            yAxisFormat: .auto,
-            valueFormat: "%.0f"
         )
     }
 

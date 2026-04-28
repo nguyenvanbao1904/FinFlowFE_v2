@@ -34,25 +34,27 @@ extension FinancialChartsSection {
     }
 
     func revenueYoYGrowthNonBankCard(_ items: [NonBankFinancialDataPoint]) -> some View {
-        let sorted = items.sorted { $0.year < $1.year }
-        var subtitle: String?
-        var subtitleColor: Color = AppColors.success
-        let yearlyRevenue = aggregateYearlyFlow(
-            sorted.compactMap { item -> (year: Int, value: Double)? in
-                guard let v = item.netRevenue else { return nil }
-                return (year: item.year, value: v)
-            }
-        )
-        if let recent = computeRecentCAGR(yearlyRevenue, targetYears: 5) {
-            subtitle = String(
-                format: "Tăng trưởng kép bình quân %d năm (%d-%d): %.1f%%/năm",
-                recent.years,
-                recent.startYear,
-                recent.endYear,
-                recent.rate
-            )
-            subtitleColor = growthSubtitleColor(for: recent.rate)
+        let sorted = items.sorted {
+            if $0.year != $1.year { return $0.year < $1.year }
+            return $0.quarter < $1.quarter
         }
+        let cagrInfo: RecentCAGRInfo? = {
+            if showQuarterly {
+                let qData = sorted.compactMap { item -> (year: Int, quarter: Int, value: Double)? in
+                    guard let v = item.netRevenue else { return nil }
+                    return (year: item.year, quarter: item.quarter, value: v)
+                }
+                return computeRecentQuarterlyCAGR(qData, targetQuarters: 12)
+            } else {
+                let yearly = aggregateYearlyFlow(sorted.compactMap { item -> (year: Int, value: Double)? in
+                    guard let v = item.netRevenue else { return nil }
+                    return (year: item.year, value: v)
+                })
+                return computeRecentCAGR(yearly, targetYears: 5)
+            }
+        }()
+        let subtitle = cagrInfo.map { cagrSubtitle($0) }
+        let subtitleColor = growthSubtitleColor(for: cagrInfo?.rate)
         return chartCard(
             title: "Doanh thu & tăng trưởng YoY",
             subtitle: subtitle,
@@ -64,25 +66,27 @@ extension FinancialChartsSection {
     }
 
     func profitYoYGrowthNonBankCard(_ items: [NonBankFinancialDataPoint]) -> some View {
-        let sorted = items.sorted { $0.year < $1.year }
-        var subtitle: String?
-        var subtitleColor: Color = AppColors.success
-        let yearlyProfit = aggregateYearlyFlow(
-            sorted.compactMap { item -> (year: Int, value: Double)? in
-                guard let v = item.profitAfterTax else { return nil }
-                return (year: item.year, value: v)
-            }
-        )
-        if let recent = computeRecentCAGR(yearlyProfit, targetYears: 5) {
-            subtitle = String(
-                format: "Tăng trưởng kép bình quân %d năm (%d-%d): %.1f%%/năm",
-                recent.years,
-                recent.startYear,
-                recent.endYear,
-                recent.rate
-            )
-            subtitleColor = growthSubtitleColor(for: recent.rate)
+        let sorted = items.sorted {
+            if $0.year != $1.year { return $0.year < $1.year }
+            return $0.quarter < $1.quarter
         }
+        let cagrInfo: RecentCAGRInfo? = {
+            if showQuarterly {
+                let qData = sorted.compactMap { item -> (year: Int, quarter: Int, value: Double)? in
+                    guard let v = item.profitAfterTax else { return nil }
+                    return (year: item.year, quarter: item.quarter, value: v)
+                }
+                return computeRecentQuarterlyCAGR(qData, targetQuarters: 12)
+            } else {
+                let yearly = aggregateYearlyFlow(sorted.compactMap { item -> (year: Int, value: Double)? in
+                    guard let v = item.profitAfterTax else { return nil }
+                    return (year: item.year, value: v)
+                })
+                return computeRecentCAGR(yearly, targetYears: 5)
+            }
+        }()
+        let subtitle = cagrInfo.map { cagrSubtitle($0) }
+        let subtitleColor = growthSubtitleColor(for: cagrInfo?.rate)
         return chartCard(
             title: "LNST & tăng trưởng YoY",
             subtitle: subtitle,

@@ -164,6 +164,13 @@ public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
     public let quarter: Int
+    public let quarterCount: Int?
+    public let yoyGrowth: Double?
+    public let totalAssets: Double?
+    public let npl: Double?
+    public let yoyCustomerLoan: Double?
+    public let yoyTotalOperatingIncome: Double?
+    public let yoyNpl: Double?
 
     public var periodLabel: String {
         quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
@@ -231,26 +238,17 @@ public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public let creditRiskProvisionsExpense: Double?
     public let interestAndSimilarIncome: Double?
 
-    public var totalAssets: Double? {
-        let parts = [cashAndEquivalents, depositsAtSBV, interbankPlacements, tradingSecurities, investmentSecurities, customerLoans].compactMap { $0 }
-        guard !parts.isEmpty else { return nil }
-        return parts.reduce(0, +)
-    }
-
     public var totalCapital: Double? {
         let parts = [sbvBorrowings, customerDeposits, valuablePapers, depositsBorrowingsOthers, equity].compactMap { $0 }
         guard !parts.isEmpty else { return nil }
         return parts.reduce(0, +)
     }
 
-    public var npl: Double? {
-        let parts = [substandardDebt, doubtfulDebt, badDebt].compactMap { $0 }
-        guard !parts.isEmpty else { return nil }
-        return parts.reduce(0, +)
-    }
-
     public init(
         year: Int, quarter: Int = 0,
+        quarterCount: Int? = nil, yoyGrowth: Double? = nil,
+        totalAssets: Double? = nil, npl: Double? = nil,
+        yoyCustomerLoan: Double? = nil, yoyTotalOperatingIncome: Double? = nil, yoyNpl: Double? = nil,
         cashAndEquivalents: Double? = nil, depositsAtSBV: Double? = nil,
         interbankPlacements: Double? = nil, tradingSecurities: Double? = nil,
         investmentSecurities: Double? = nil, customerLoans: Double? = nil,
@@ -280,6 +278,9 @@ public struct BankFinancialDataPoint: Identifiable, Equatable, Sendable {
         creditRiskProvisionsExpense: Double? = nil, interestAndSimilarIncome: Double? = nil
     ) {
         self.year = year; self.quarter = quarter
+        self.quarterCount = quarterCount; self.yoyGrowth = yoyGrowth
+        self.totalAssets = totalAssets; self.npl = npl
+        self.yoyCustomerLoan = yoyCustomerLoan; self.yoyTotalOperatingIncome = yoyTotalOperatingIncome; self.yoyNpl = yoyNpl
         self.cashAndEquivalents = cashAndEquivalents; self.depositsAtSBV = depositsAtSBV
         self.interbankPlacements = interbankPlacements; self.tradingSecurities = tradingSecurities
         self.investmentSecurities = investmentSecurities; self.customerLoans = customerLoans
@@ -314,6 +315,10 @@ public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
     public var id = UUID()
     public let year: Int
     public let quarter: Int
+    public let quarterCount: Int?
+    public let yoyGrowth: Double?
+    public let yoyNetRevenue: Double?
+    public let yoyInventories: Double?
 
     public var periodLabel: String {
         quarter != 0 ? "Q\(quarter) \(year % 100)" : "\(year)"
@@ -404,6 +409,8 @@ public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
 
     public init(
         year: Int, quarter: Int = 0,
+        quarterCount: Int? = nil, yoyGrowth: Double? = nil,
+        yoyNetRevenue: Double? = nil, yoyInventories: Double? = nil,
         cashAndEquivalents: Double? = nil, shortTermInvestments: Double? = nil,
         shortTermReceivables: Double? = nil, inventories: Double? = nil,
         fixedAssets: Double? = nil, longTermReceivables: Double? = nil,
@@ -427,6 +434,8 @@ public struct NonBankFinancialDataPoint: Identifiable, Equatable, Sendable {
         sellingExpense: Double? = nil, managingExpense: Double? = nil
     ) {
         self.year = year; self.quarter = quarter
+        self.quarterCount = quarterCount; self.yoyGrowth = yoyGrowth
+        self.yoyNetRevenue = yoyNetRevenue; self.yoyInventories = yoyInventories
         self.cashAndEquivalents = cashAndEquivalents; self.shortTermInvestments = shortTermInvestments
         self.shortTermReceivables = shortTermReceivables; self.inventories = inventories
         self.fixedAssets = fixedAssets; self.longTermReceivables = longTermReceivables

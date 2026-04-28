@@ -18,6 +18,7 @@ struct InteractiveSingleBarYoYChart: View {
         let id: String
         let periodLabel: String
         let value: Double?
+        let yoy: Double?
     }
 
     private var labels: [String] { rows.map(\.periodLabel) }
@@ -28,24 +29,6 @@ struct InteractiveSingleBarYoYChart: View {
     }
 
     private let yoyDomain: ClosedRange<Double> = -100...100
-
-    private var yoyRows: [YoYEntry] {
-        var out: [YoYEntry] = []
-        for i in rows.indices {
-            var yoy: Double?
-            if i > 0, let c = rows[i].value, let p = rows[i - 1].value, p != 0 {
-                yoy = (c - p) / p * 100
-            }
-            out.append(YoYEntry(id: rows[i].id, periodLabel: rows[i].periodLabel, yoy: yoy))
-        }
-        return out
-    }
-
-    private struct YoYEntry: Identifiable {
-        let id: String
-        let periodLabel: String
-        let yoy: Double?
-    }
 
     // MARK: - YoY ↔ Bar domain scaling
 
@@ -73,8 +56,7 @@ struct InteractiveSingleBarYoYChart: View {
             popoverBuilder: { _, idx in
                 guard rows.indices.contains(idx) else { return nil }
                 let row = rows[idx]
-                let yoy = yoyRows.indices.contains(idx) ? yoyRows[idx].yoy : nil
-                return makeMetrics(row: row, yoy: yoy)
+                return makeMetrics(row: row)
             },
             popoverSubtitle: popoverSubtitle,
             legend: {
@@ -96,13 +78,13 @@ struct InteractiveSingleBarYoYChart: View {
                     .foregroundStyle(Color.primary.opacity(OpacityLevel.high))
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 5]))
 
-                ForEach(yoyRows) { y in
-                    if let rv = y.yoy {
-                        LineMark(x: .value("Kỳ", y.periodLabel), y: .value("YoY", scaleYoY(rv)))
+                ForEach(rows) { r in
+                    if let rv = r.yoy {
+                        LineMark(x: .value("Kỳ", r.periodLabel), y: .value("YoY", scaleYoY(rv)))
                             .foregroundStyle(yoyLineColor)
                             .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                             .interpolationMethod(.monotone)
-                        PointMark(x: .value("Kỳ", y.periodLabel), y: .value("YoY", scaleYoY(rv)))
+                        PointMark(x: .value("Kỳ", r.periodLabel), y: .value("YoY", scaleYoY(rv)))
                             .foregroundStyle(yoyLineColor)
                             .symbolSize(36)
                     }
@@ -145,14 +127,14 @@ struct InteractiveSingleBarYoYChart: View {
         }
     }
 
-    private func makeMetrics(row: BarYoYRow, yoy: Double?) -> [ChartPopoverMetric] {
+    private func makeMetrics(row: BarYoYRow) -> [ChartPopoverMetric] {
         var m: [ChartPopoverMetric] = []
         if let v = row.value {
             m.append(ChartPopoverMetric(id: "bar", label: barLabel, value: formatVndCompact(v), color: barColor))
         }
         m.append(ChartPopoverMetric(
             id: "yoy", label: yoyLabel,
-            value: yoy.map { String(format: "%.2f%%", $0) } ?? "—",
+            value: row.yoy.map { String(format: "%.2f%%", $0) } ?? "—",
             color: yoyLineColor
         ))
         return m

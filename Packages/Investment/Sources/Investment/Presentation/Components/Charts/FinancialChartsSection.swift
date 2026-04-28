@@ -51,20 +51,19 @@ public struct FinancialChartsSection: View {
 
     @ViewBuilder
     private func bankCharts(_ items: [BankFinancialDataPoint], cashFlows: [CashFlowDataPoint]) -> some View {
-        let series = items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+        let series = items.filter {
+            showQuarterly ? $0.quarter != 0 : ($0.quarter == 0 && ($0.quarterCount ?? 4) == 4)
+        }
         assetStructureBankCard(series)
         capitalStructureBankCard(series)
         roeRoaCard(series.map { RoeRoaPoint(year: $0.year, quarter: $0.quarter, roe: $0.roe, roa: $0.roa) })
         toiStructureBankCard(series)
         profitabilityBankCard(series)
-        nimBankCard(series)
         let profitData = series.compactMap { item in
-            item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0) }
+            item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0, yoy: item.yoyGrowth) }
         }
         profitGrowthCard(profitData)
-        nplBankCard(series)
-        debtGroup2to5BankCard(series)
-        nplStructureBankCard(series)
+        nplCompositeBankCard(series)
         customerLoanBankCard(series)
         dividendCard(bankDividendRows(items))
         cashFlowCard(cashFlows)
@@ -72,7 +71,9 @@ public struct FinancialChartsSection: View {
 
     @ViewBuilder
     private func nonBankCharts(_ items: [NonBankFinancialDataPoint], cashFlows: [CashFlowDataPoint]) -> some View {
-        let series = items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+        let series = items.filter {
+            showQuarterly ? $0.quarter != 0 : ($0.quarter == 0 && ($0.quarterCount ?? 4) == 4)
+        }
         assetStructureNonBankCard(series)
         capitalStructureNonBankCard(series)
         roeRoaCard(series.map { RoeRoaPoint(year: $0.year, quarter: $0.quarter, roe: $0.roe, roa: $0.roa) })
@@ -104,26 +105,20 @@ public struct FinancialChartsSection: View {
             bankProfitYoYGrowthChart(bankProfitSeries(), height: height, fullScreen: true)
         case .incomeBank:
             bankIncomeYoYGrowthChart(filteredSortedBankSeries(), height: height, fullScreen: true)
-        case .nimBank:
-            bankNimChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         case .assetNonBank:
             nonBankAssetChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
         case .capitalNonBank:
             nonBankCapitalChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
         case .cashFlow:
             cashFlowChart(filteredCashFlows(), height: height, fullScreen: true)
-        case .nplBank:
-            nplBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
+        case .nplCompositeBank:
+            nplCompositeBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         case .customerLoanBank:
             customerLoanBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         case .inventoryTurnoverNonBank:
             inventoryTurnoverChart(filteredSortedNonBankSeries(), height: height, fullScreen: true)
         case .dividend:
             dividendFullscreenChart(height: height)
-        case .debtGroup2to5Bank:
-            debtGroup2to5BankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
-        case .nplStructureBank:
-            nplStructureBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         case .profitabilityBank:
             profitabilityBankChart(filteredSortedBankSeries(), height: height, fullScreen: true)
         }
@@ -131,12 +126,16 @@ public struct FinancialChartsSection: View {
 
     private func filteredSortedBankSeries() -> [BankFinancialDataPoint] {
         guard case .bank(let items, _) = financials else { return [] }
-        return items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+        return items.filter {
+            showQuarterly ? $0.quarter != 0 : ($0.quarter == 0 && ($0.quarterCount ?? 4) == 4)
+        }
     }
 
     private func filteredSortedNonBankSeries() -> [NonBankFinancialDataPoint] {
         guard case .nonBank(let items, _) = financials else { return [] }
-        return items.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
+        return items.filter {
+            showQuarterly ? $0.quarter != 0 : ($0.quarter == 0 && ($0.quarterCount ?? 4) == 4)
+        }
     }
 
     private func filteredCashFlows() -> [CashFlowDataPoint] {
@@ -149,9 +148,9 @@ public struct FinancialChartsSection: View {
         return cfs.filter { showQuarterly ? $0.quarter != 0 : $0.quarter == 0 }
     }
 
-    private func bankProfitSeries() -> [(year: Int, quarter: Int, value: Double)] {
+    private func bankProfitSeries() -> [(year: Int, quarter: Int, value: Double, yoy: Double?)] {
         filteredSortedBankSeries().compactMap { item in
-            item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0) }
+            item.profitAfterTax.map { (year: item.year, quarter: item.quarter, value: $0, yoy: item.yoyGrowth) }
         }
     }
 

@@ -34,22 +34,24 @@ extension FinancialChartsSection {
     }
 
     func toiStructureBankCard(_ items: [BankFinancialDataPoint]) -> some View {
-        let totalIncomeByPeriod: [(year: Int, value: Double)] = items.compactMap { item in
-            let parts = [item.netInterestIncome, item.feeAndCommissionIncome, item.otherIncome].compactMap { $0 }
-            guard !parts.isEmpty else { return nil }
-            return (year: item.year, value: parts.reduce(0, +))
-        }
-        let totalIncome = aggregateYearlyFlow(totalIncomeByPeriod)
-        let cagrInfo = computeRecentCAGR(totalIncome, targetYears: 5)
-        let subtitle = cagrInfo.map { recent in
-            String(
-                format: "Tăng trưởng kép bình quân %d năm (%d-%d): %.1f%%/năm",
-                recent.years,
-                recent.startYear,
-                recent.endYear,
-                recent.rate
-            )
-        }
+        let cagrInfo: RecentCAGRInfo? = {
+            if showQuarterly {
+                let qData = items.compactMap { item -> (year: Int, quarter: Int, value: Double)? in
+                    let parts = [item.netInterestIncome, item.feeAndCommissionIncome, item.otherIncome].compactMap { $0 }
+                    guard !parts.isEmpty else { return nil }
+                    return (year: item.year, quarter: item.quarter, value: parts.reduce(0, +))
+                }
+                return computeRecentQuarterlyCAGR(qData, targetQuarters: 12)
+            } else {
+                let totalIncomeByPeriod: [(year: Int, value: Double)] = items.compactMap { item in
+                    let parts = [item.netInterestIncome, item.feeAndCommissionIncome, item.otherIncome].compactMap { $0 }
+                    guard !parts.isEmpty else { return nil }
+                    return (year: item.year, value: parts.reduce(0, +))
+                }
+                return computeRecentCAGR(aggregateYearlyFlow(totalIncomeByPeriod), targetYears: 5)
+            }
+        }()
+        let subtitle = cagrInfo.map { cagrSubtitle($0) }
         let subtitleColor = growthSubtitleColor(for: cagrInfo?.rate)
 
         return chartCard(
@@ -62,25 +64,7 @@ extension FinancialChartsSection {
         }
     }
 
-    func nimBankCard(_ items: [BankFinancialDataPoint]) -> some View {
-        let sorted = items.sorted { $0.year < $1.year }
-        var subtitle: String?
-        if let last = sorted.last,
-           let nii = last.netInterestIncome,
-           let assets = last.totalAssets,
-           assets > 0 {
-            // Khớp InteractiveBankNimChart: BCTC năm (quarter==0) đã là cả năm — không ×4.
-            let annualized = last.quarter == 0 ? nii : nii * 4.0
-            let pct = (annualized / assets) * 100
-            let label = last.quarter == 0 ? "NIM (ước tính)" : "NIM (Ước tính TTM)"
-            subtitle = String(format: "%@: %.2f%%", label, pct)
-        }
-        return chartCard(title: "Bức tranh biên lãi", subtitle: subtitle, expandKind: .nimBank) {
-            bankNimChart(items, height: 200, fullScreen: false)
-        }
-    }
-
-    func nplBankCard(_ items: [BankFinancialDataPoint]) -> some View {
+    func nplCompositeBankCard(_ items: [BankFinancialDataPoint]) -> some View {
         let sorted = items.sorted { $0.year < $1.year }
         var subtitle: String?
         if let last = sorted.last, let npl = last.nplToLoan {
@@ -89,26 +73,29 @@ extension FinancialChartsSection {
                 subtitle! += String(format: " • Bao phủ: %.0f%%", coverage)
             }
         }
-        return chartCard(title: "Nợ xấu & dự phòng", subtitle: subtitle, expandKind: .nplBank) {
-            nplBankChart(items, height: 200, fullScreen: false)
+        return chartCard(title: "Cơ cấu nợ xấu", subtitle: subtitle, expandKind: .nplCompositeBank) {
+            nplCompositeBankChart(items, height: 200, fullScreen: false)
         }
     }
 
     func customerLoanBankCard(_ items: [BankFinancialDataPoint]) -> some View {
         let sorted = items.sorted { $0.year < $1.year }
-        let yearlyLoan = aggregateYearlyFlow(
-            sorted.compactMap { item -> (year: Int, value: Double)? in
-                guard let v = item.customerLoan else { return nil }
-                return (year: item.year, value: v)
+        let cagrInfo: RecentCAGRInfo? = {
+            if showQuarterly {
+                let qData = sorted.compactMap { item -> (year: Int, quarter: Int, value: Double)? in
+                    guard let v = item.customerLoan else { return nil }
+                    return (year: item.year, quarter: item.quarter, value: v)
+                }
+                return computeRecentQuarterlyCAGR(qData, targetQuarters: 12)
+            } else {
+                let loanByPeriod = sorted.compactMap { item -> (year: Int, value: Double)? in
+                    guard let v = item.customerLoan else { return nil }
+                    return (year: item.year, value: v)
+                }
+                return computeRecentCAGR(latestPerYear(loanByPeriod), targetYears: 5)
             }
-        )
-        let cagrInfo = computeRecentCAGR(yearlyLoan, targetYears: 5)
-        let subtitle = cagrInfo.map { recent in
-            String(
-                format: "Tăng trưởng kép %d năm (%d-%d): %.1f%%/năm",
-                recent.years, recent.startYear, recent.endYear, recent.rate
-            )
-        }
+        }()
+        let subtitle = cagrInfo.map { cagrSubtitle($0) }
         let subtitleColor = growthSubtitleColor(for: cagrInfo?.rate)
         return chartCard(
             title: "Cho vay khách hàng",
@@ -120,36 +107,6 @@ extension FinancialChartsSection {
         }
     }
 
-    func debtGroup2to5BankCard(_ items: [BankFinancialDataPoint]) -> some View {
-        let sorted = items.sorted { $0.year < $1.year }
-        var subtitle: String?
-        if let last = sorted.last {
-            let watchlist = last.watchlistDebt ?? 0
-            let nplVal = last.npl ?? 0
-            let total = watchlist + nplVal
-            if total > 0 {
-                subtitle = String(format: "Nợ nhóm 2→5: %@", formatVndCompact(total))
-            }
-        }
-        return chartCard(title: "Nợ nhóm 2→5", subtitle: subtitle, expandKind: .debtGroup2to5Bank) {
-            debtGroup2to5BankChart(items, height: 200, fullScreen: false)
-        }
-    }
-
-    func nplStructureBankCard(_ items: [BankFinancialDataPoint]) -> some View {
-        let sorted = items.sorted { $0.year < $1.year }
-        var subtitle: String?
-        if let last = sorted.last {
-            var parts: [String] = []
-            if let s = last.substandardDebt { parts.append(String(format: "Nhóm 3: %@", formatVndCompact(s))) }
-            if let d = last.doubtfulDebt { parts.append(String(format: "Nhóm 4: %@", formatVndCompact(d))) }
-            if let b = last.badDebt { parts.append(String(format: "Nhóm 5: %@", formatVndCompact(b))) }
-            subtitle = parts.isEmpty ? nil : parts.joined(separator: " • ")
-        }
-        return chartCard(title: "Cơ cấu nợ xấu", subtitle: subtitle, expandKind: .nplStructureBank) {
-            nplStructureBankChart(items, height: 200, fullScreen: false)
-        }
-    }
 
     func profitabilityBankCard(_ items: [BankFinancialDataPoint]) -> some View {
         let sorted = items.sorted { $0.year < $1.year }
