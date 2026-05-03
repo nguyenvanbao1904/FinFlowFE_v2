@@ -138,32 +138,11 @@ public struct AddWealthAccountView: View {
                         .frame(maxWidth: .infinity)
                         .padding(Spacing.lg)
                 } else {
-                    ForEach(viewModel.accountTypes) { typeOption in
-                        Button {
-                            viewModel.selectedAccountType = typeOption
-                            activeSheet = nil
-                        } label: {
-                            let typeColor = Color(hex: typeOption.color)
-                            HStack(spacing: Spacing.md) {
-                                ZStack {
-                                    Circle()
-                                        .fill(typeColor.opacity(OpacityLevel.ultraLight))
-                                        .frame(
-                                            width: Spacing.touchTarget, height: Spacing.touchTarget)
-                                    Image(systemName: typeOption.icon)
-                                        .font(AppTypography.iconMedium)
-                                        .foregroundStyle(typeColor)
-                                }
-                                Text(typeOption.displayName)
-                                    .font(AppTypography.body)
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if viewModel.selectedAccountType?.id == typeOption.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(AppColors.primary)
-                                }
+                    ForEach(viewModel.groupedAccountTypes, id: \.header) { group in
+                        Section(group.header) {
+                            ForEach(group.items) { typeOption in
+                                accountTypeRow(typeOption)
                             }
-                            .padding(.vertical, Spacing.xs)
                         }
                     }
                 }
@@ -180,5 +159,33 @@ public struct AddWealthAccountView: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    private func accountTypeRow(_ typeOption: AccountTypeOptionResponse) -> some View {
+        Button {
+            viewModel.selectedAccountType = typeOption
+            activeSheet = nil
+        } label: {
+            let typeColor = Color(hex: typeOption.color)
+            HStack(spacing: Spacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(typeColor.opacity(OpacityLevel.ultraLight))
+                        .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+                    Image(systemName: typeOption.icon)
+                        .font(AppTypography.iconMedium)
+                        .foregroundStyle(typeColor)
+                }
+                Text(typeOption.displayName)
+                    .font(AppTypography.body)
+                    .foregroundStyle(.primary)
+                Spacer()
+                if viewModel.selectedAccountType?.id == typeOption.id {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(AppColors.primary)
+                }
+            }
+            .padding(.vertical, Spacing.xs)
+        }
     }
 }

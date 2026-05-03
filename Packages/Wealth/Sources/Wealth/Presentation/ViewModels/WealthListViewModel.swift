@@ -38,21 +38,26 @@ public final class WealthListViewModel {
 
     // MARK: - Computed
 
-    public var liquidityAccounts: [WealthAccountResponse] {
-        accounts.filter { $0.accountType.transactionEligible }
-    }
-
-    public var otherAccounts: [WealthAccountResponse] {
-        accounts.filter { !$0.accountType.transactionEligible }
-    }
-
-    public var totalLiquidity: Double {
-        liquidityAccounts.reduce(0) { $0 + $1.balance }
-    }
-
     public var netWorth: Double {
         accounts.filter { $0.includeInNetWorth }.reduce(0) { $0 + $1.balance }
     }
+
+    /// Accounts grouped by `group` field, ordered: LIQUID → INVESTMENT → ASSET → DEBT.
+    /// Unknown groups fall back to raw key as header and appear last.
+    public var groupedAccounts: [(header: String, accounts: [WealthAccountResponse])] {
+        let grouped = Dictionary(grouping: accounts, by: { $0.accountType.group })
+        return grouped
+            .sorted { (Self.groupOrder[$0.key] ?? 99) < (Self.groupOrder[$1.key] ?? 99) }
+            .map { (header: Self.groupDisplayNames[$0.key] ?? $0.key, accounts: $0.value) }
+    }
+
+    private static let groupOrder = ["LIQUID": 0, "INVESTMENT": 1, "ASSET": 2, "DEBT": 3]
+    private static let groupDisplayNames = [
+        "LIQUID": "Thanh khoản",
+        "INVESTMENT": "Đầu tư",
+        "ASSET": "Tài sản",
+        "DEBT": "Nợ",
+    ]
 
     // MARK: - Actions
 

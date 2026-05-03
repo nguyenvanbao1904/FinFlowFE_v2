@@ -1,14 +1,7 @@
 import FinFlowCore
 import SwiftUI
 
-enum AccountListTab: String, CaseIterable, Identifiable {
-    case liquidity = "Thanh khoản"
-    case assets = "Tài sản & Nợ"
-
-    var id: String { rawValue }
-}
-
-/// Main view for the Wealth tab: list of accounts (thanh khoản + tài sản & nợ).
+/// Main view for the Wealth tab: single scrollable list of accounts grouped by category.
 public struct WealthListView: View {
     private enum ActiveSheet: String, Identifiable {
         case addAccount
@@ -18,7 +11,6 @@ public struct WealthListView: View {
     @Bindable var viewModel: WealthListViewModel
 
     @State private var activeSheet: ActiveSheet?
-    @State private var selectedTab: AccountListTab = .liquidity
     @State private var accountToEdit: WealthAccountResponse?
     @State private var accountToDelete: WealthAccountResponse?
     @State private var showDeleteConfirmation = false
@@ -28,60 +20,81 @@ public struct WealthListView: View {
     }
 
     public var body: some View {
-        VStack(spacing: .zero) {
-            Picker("Chế độ xem", selection: $selectedTab) {
-                ForEach(AccountListTab.allCases) { tab in
-                    Text(tab.rawValue).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.bottom, Spacing.sm)
-            .background(AppColors.settingsCardBackground)
-
-            Group {
-                switch selectedTab {
-                case .liquidity:
-                    WealthAccountSectionList(
-                        config: AccountSectionConfig(
-                            sectionHeader: "Tài khoản khả dụng",
-                            title: "Tổng số dư (Thanh khoản)",
-                            subtitle: "Sẵn sàng giao dịch",
-                            amount: viewModel.totalLiquidity
-                        ),
-                        items: viewModel.liquidityAccounts,
-                        isLoading: viewModel.isLoading,
-                        actions: AccountSectionActions(
-                            onEdit: { accountToEdit = $0 },
-                            onDelete: {
-                                accountToDelete = $0
-                                showDeleteConfirmation = true
-                            },
-                            onAdd: { activeSheet = .addAccount }
-                        )
-                    )
-                case .assets:
-                    WealthAccountSectionList(
-                        config: AccountSectionConfig(
-                            sectionHeader: "Tài sản & Nợ",
+        List {
+            // Hero card
+            Section {
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(Spacing.lg)
+                    } else {
+                        FinancialHeroCard(
                             title: "Tài sản ròng",
-                            subtitle: "Tài sản + Tiêu sản − Nợ",
-                            amount: viewModel.netWorth
-                        ),
-                        items: viewModel.otherAccounts,
-                        isLoading: viewModel.isLoading,
-                        actions: AccountSectionActions(
-                            onEdit: { accountToEdit = $0 },
-                            onDelete: {
-                                accountToDelete = $0
-                                showDeleteConfirmation = true
-                            },
-                            onAdd: { activeSheet = .addAccount }
+                            mainAmount: CurrencyFormatter.format(viewModel.netWorth),
+                            subtitle: "Tài sản + Tiêu sản − Nợ"
                         )
+                    }
+                }
+                .listRowInsets(
+                    EdgeInsets(top: Spacing.sm, leading: .zero, bottom: Spacing.sm, trailing: .zero)
+                )
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
+            if viewModel.accounts.isEmpty && !viewModel.isLoading {
+                Section {
+                    EmptyStateView(
+                        icon: "creditcard",
+                        title: "Chưa có tài khoản nào",
+                        subtitle: "Thêm ví hoặc tài khoản để bắt đầu theo dõi tài sản",
+                        buttonTitle: "Thêm tài khoản",
+                        action: { activeSheet = .addAccount }
                     )
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+            } else {
+                ForEach(viewModel.groupedAccounts, id: \.header) { group in
+                    Section(group.header) {
+                        ForEach(group.accounts) { account in
+                            Button {
+                                accountToEdit = account
+                            } label: {
+                                AccountRowView(account: account)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    accountToDelete = account
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Xóa", systemImage: "trash")
+                                }
+                            }
+                            .contextMenu {
+                                Button {
+                                    accountToEdit = account
+                                } label: {
+                                    Label("Sửa", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    accountToDelete = account
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Xóa", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            .animation(.default, value: selectedTab)
+        }
+        .listStyle(.insetGrouped)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: Spacing.xl)
         }
         .background(AppColors.appBackground)
         .navigationTitle("Tài sản")
@@ -141,16 +154,29 @@ public struct WealthListView: View {
             }
             Button("Xóa", role: .destructive) {
                 if let account = accountToDelete {
-                    Task {
-                        await viewModel.deleteAccount(account)
-                    }
+                    Task { await viewModel.deleteAccount(account) }
                 }
                 accountToDelete = nil
             }
         } message: {
-            Text(
-                "Bạn có chắc chắn muốn xóa tài khoản này? Giao dịch liên quan có thể bị ảnh hưởng.")
+            Text("Bạn có chắc chắn muốn xóa tài khoản này? Giao dịch liên quan có thể bị ảnh hưởng.")
         }
     }
+}
 
+private struct AccountRowView: View {
+    let account: WealthAccountResponse
+
+    var body: some View {
+        IconTitleTrailingRow(
+            icon: account.accountType.icon,
+            color: Color(hex: account.accountType.color),
+            title: account.name,
+            subtitle: nil,
+            trailing: {
+                BalanceLabel(balance: account.balance)
+                    .font(AppTypography.headline)
+            }
+        )
+    }
 }

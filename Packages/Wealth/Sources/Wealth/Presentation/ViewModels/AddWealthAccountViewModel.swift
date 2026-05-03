@@ -48,6 +48,16 @@ public final class AddWealthAccountViewModel {
         }
     }
 
+    /// Account types grouped by `group` key, ordered: LIQUID → INVESTMENT → ASSET → DEBT.
+    public var groupedAccountTypes: [(header: String, items: [AccountTypeOptionResponse])] {
+        let order = ["LIQUID": 0, "INVESTMENT": 1, "ASSET": 2, "DEBT": 3]
+        let grouped = Dictionary(grouping: accountTypes, by: \.group)
+        let displayNames = ["LIQUID": "Thanh khoản", "INVESTMENT": "Đầu tư", "ASSET": "Tài sản", "DEBT": "Nợ"]
+        return grouped
+            .sorted { (order[$0.key] ?? 99) < (order[$1.key] ?? 99) }
+            .map { (header: displayNames[$0.key] ?? $0.key, items: $0.value) }
+    }
+
     /// UI-level check: có đủ input để bật nút Save không.
     public var isValid: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

@@ -12,6 +12,8 @@ public struct AccountTypeOptionResponse: Codable, Sendable, Identifiable, Hashab
     public let transactionEligible: Bool
     /// True when balance is stored as negative (e.g. LOAN). Use for sign when creating/updating.
     public let debt: Bool
+    /// Grouping key for UI display: LIQUID | INVESTMENT | ASSET | DEBT
+    public let group: String
 
     public init(
         id: String,
@@ -20,7 +22,8 @@ public struct AccountTypeOptionResponse: Codable, Sendable, Identifiable, Hashab
         icon: String,
         color: String,
         transactionEligible: Bool,
-        debt: Bool = false
+        debt: Bool = false,
+        group: String = "ASSET"
     ) {
         self.id = id
         self.code = code
@@ -29,6 +32,7 @@ public struct AccountTypeOptionResponse: Codable, Sendable, Identifiable, Hashab
         self.color = color
         self.transactionEligible = transactionEligible
         self.debt = debt
+        self.group = group
     }
 }
 

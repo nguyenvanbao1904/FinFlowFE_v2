@@ -125,12 +125,19 @@ public class DependencyContainer {
     /// Cùng lý do: mở sheet "Thêm giao dịch" đổi `presentedSheet` → body `AppRootView` rebuild → `makeMainTabView` gọi lại. Không cache thì `TransactionListViewModel` mới + `.task` fetch lại toàn bộ danh sách (spinner 5–10 phút nếu API chậm).
     var cachedTransactionListViewModel: TransactionListViewModel?
 
+    /// Cùng lý do với cachedTransactionListViewModel — mở/đóng chatbot là đổi presentedSheet, làm AppRootView rebuild và makeMainTabView tạo WealthListViewModel mới → accounts bị clear.
+    var cachedWealthListViewModel: WealthListViewModel?
+
     func resetCachedHomeViewModel() {
         cachedHomeViewModel = nil
     }
 
     func resetCachedTransactionListViewModel() {
         cachedTransactionListViewModel = nil
+    }
+
+    func resetCachedWealthListViewModel() {
+        cachedWealthListViewModel = nil
     }
 
     // MARK: - Auth State

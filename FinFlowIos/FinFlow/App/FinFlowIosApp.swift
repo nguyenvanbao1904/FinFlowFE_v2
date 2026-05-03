@@ -91,7 +91,8 @@ struct AppRootView: View {
                 }
                 .presentationDetents({
                     switch route {
-                    case .chatThreadList, .finFlowBotChat: return [.medium, .large]
+                    case .chatThreadList: return [.medium, .large]
+                    case .finFlowBotChat: return [.large]
                     default: return [.large]
                     }
                 }())
@@ -152,6 +153,7 @@ struct AppRootView: View {
             if newRoot != .dashboard {
                 container.resetCachedHomeViewModel()
                 container.resetCachedTransactionListViewModel()
+                container.resetCachedWealthListViewModel()
             }
         }
     }

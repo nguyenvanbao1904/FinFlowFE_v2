@@ -188,17 +188,23 @@ extension DependencyContainer {
     }
 
     @MainActor
-    func makeWealthView(router: any AppRouterProtocol) -> some View {
-        return WealthListView(
-            viewModel: WealthListViewModel(
-                getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
-                getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase(repository: wealthAccountRepository),
-                createWealthAccountUseCase: CreateWealthAccountUseCase(repository: wealthAccountRepository),
-                updateWealthAccountUseCase: UpdateWealthAccountUseCase(repository: wealthAccountRepository),
-                deleteWealthAccountUseCase: DeleteWealthAccountUseCase(repository: wealthAccountRepository),
-                sessionManager: sessionManager
-            )
+    func wealthListViewModelForDashboard() -> WealthListViewModel {
+        if let cached = cachedWealthListViewModel { return cached }
+        let vm = WealthListViewModel(
+            getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
+            getWealthAccountTypesUseCase: GetWealthAccountTypesUseCase(repository: wealthAccountRepository),
+            createWealthAccountUseCase: CreateWealthAccountUseCase(repository: wealthAccountRepository),
+            updateWealthAccountUseCase: UpdateWealthAccountUseCase(repository: wealthAccountRepository),
+            deleteWealthAccountUseCase: DeleteWealthAccountUseCase(repository: wealthAccountRepository),
+            sessionManager: sessionManager
         )
+        cachedWealthListViewModel = vm
+        return vm
+    }
+
+    @MainActor
+    func makeWealthView(router: any AppRouterProtocol) -> some View {
+        return WealthListView(viewModel: wealthListViewModelForDashboard())
     }
 
     @MainActor

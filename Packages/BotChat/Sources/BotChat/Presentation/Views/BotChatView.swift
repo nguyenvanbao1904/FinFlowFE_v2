@@ -59,41 +59,67 @@ public struct FinFlowBotChatView: View {
     // MARK: - Chat List
 
     private var chatList: some View {
-        List {
-            Section {
-                if viewModel.shouldShowQuickPrompts {
-                    botIntroCard
-                        .listRowBackground(AppColors.settingsCardBackground)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+        ScrollViewReader { proxy in
+            List {
+                Section {
+                    if viewModel.shouldShowQuickPrompts {
+                        botIntroCard
+                            .listRowBackground(AppColors.settingsCardBackground)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
 
-                    quickPromptSection
+                        quickPromptSection
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: .zero, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
+                    }
+
+                    if viewModel.isLoadingHistory {
+                        statusRow(text: "Đang tải lịch sử hội thoại...")
+                    }
+
+                    ForEach(viewModel.messages) { message in
+                        FinFlowBotChatMessageRow(message: message)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.xs, bottom: .zero, trailing: Spacing.xs))
+                    }
+
+                    if viewModel.isBotTyping {
+                        statusRow(text: "FinFlow Bot đang soạn...")
+                            .id("typingIndicator")
+                    }
+
+                    Color.clear.frame(height: 1)
+                        .id("bottomAnchor")
+                        .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: .zero, leading: Spacing.md, bottom: Spacing.xs, trailing: Spacing.md))
-                }
-
-                if viewModel.isLoadingHistory {
-                    statusRow(text: "Đang tải lịch sử hội thoại...")
-                }
-
-                ForEach(viewModel.messages) { message in
-                    FinFlowBotChatMessageRow(message: message)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: Spacing.xs, leading: Spacing.md, bottom: .zero, trailing: Spacing.md))
-                }
-
-                if viewModel.isBotTyping {
-                    statusRow(text: "FinFlow Bot đang soạn...")
                 }
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .scrollDismissesKeyboard(.interactively)
+            .background(AppColors.appBackground)
+            .onTapGesture { isComposerFocused = false }
+            .onChange(of: viewModel.messages.count) { _, _ in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    proxy.scrollTo("bottomAnchor", anchor: .bottom)
+                }
+            }
+            .onChange(of: viewModel.isBotTyping) { _, isTyping in
+                if isTyping {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        proxy.scrollTo("bottomAnchor", anchor: .bottom)
+                    }
+                }
+            }
+            .task {
+                // Scroll to bottom after history loads
+                try? await Task.sleep(for: .milliseconds(100))
+                proxy.scrollTo("bottomAnchor", anchor: .bottom)
+            }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .scrollDismissesKeyboard(.interactively)
-        .background(AppColors.appBackground)
-        .onTapGesture { isComposerFocused = false }
     }
 
     // MARK: - Subviews
