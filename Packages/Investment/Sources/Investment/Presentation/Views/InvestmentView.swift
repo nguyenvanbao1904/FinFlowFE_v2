@@ -50,6 +50,8 @@ public struct InvestmentViewDependencies {
 }
 
 public struct InvestmentView: View {
+    public var onAskAI: ((String) -> Void)?
+
     private enum ActiveSheet: String, Identifiable {
         case createPortfolio
         case renamePortfolio
@@ -164,7 +166,8 @@ public struct InvestmentView: View {
                 ),
                 selectedAssetForDetail: $selectedAssetForDetail,
                 onRenamePortfolio: { activeSheet = .renamePortfolio },
-                onDeletePortfolio: { showDeletePortfolioConfirm = true }
+                onDeletePortfolio: { showDeletePortfolioConfirm = true },
+                onAskAI: onAskAI
             )
         }
     }

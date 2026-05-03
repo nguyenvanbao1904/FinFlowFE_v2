@@ -9,6 +9,7 @@ struct InvestmentPortfolioTabContent: View {
     @Binding var selectedAssetForDetail: PortfolioAssetResponse?
     var onRenamePortfolio: () -> Void = {}
     var onDeletePortfolio: () -> Void = {}
+    var onAskAI: ((String) -> Void)?
 
     var body: some View {
         @Bindable var viewModel = viewModel
@@ -170,6 +171,16 @@ struct InvestmentPortfolioTabContent: View {
                         .clipShape(.rect(cornerRadius: CornerRadius.medium))
                     }
                 }
+
+                let assessment = PortfolioAssessment.compute(
+                    assets: viewModel.sortedAssets,
+                    industryAllocations: viewModel.compactIndustryAllocations
+                )
+                PortfolioAssessmentCard(
+                    assessment: assessment,
+                    portfolioName: viewModel.selectedPortfolio?.name ?? "Danh mục",
+                    onAskAI: onAskAI
+                )
 
                 if let portfolioHealth = viewModel.portfolioHealth {
                     if let portfolioBenchmark = viewModel.portfolioBenchmark {

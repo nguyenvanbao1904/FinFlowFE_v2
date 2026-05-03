@@ -209,7 +209,7 @@ extension DependencyContainer {
 
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
-        InvestmentView(
+        var view = InvestmentView(
             dependencies: InvestmentViewDependencies(
                 getStockAnalysisUseCase: GetStockAnalysisUseCase(repository: investmentRepository),
                 getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase(repository: investmentRepository),
@@ -226,6 +226,10 @@ extension DependencyContainer {
                 sessionManager: sessionManager
             )
         )
+        view.onAskAI = { [weak router] prompt in
+            router?.presentSheet(.finFlowBotChat(threadId: nil, initialPrompt: prompt))
+        }
+        return view
     }
 
     @MainActor
