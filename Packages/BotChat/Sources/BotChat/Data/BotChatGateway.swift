@@ -47,8 +47,27 @@ public actor BotChatGateway {
             content: finalContent,
             needsClarification: response.needsClarification,
             clarificationQuestion: response.clarificationQuestion,
-            citations: assistant.sources.map(mapCitation)
+            citations: assistant.sources.map(mapCitation),
+            mutationEvents: parseMutationEvents(from: assistant.toolCallsJson)
         )
+    }
+
+    private func parseMutationEvents(from toolCallsJson: String?) -> [BotMutationEvent] {
+        guard let json = toolCallsJson,
+              let data = json.data(using: .utf8),
+              let calls = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+        else { return [] }
+
+        let transactionTools: Set<String> = ["add_transaction"]
+        let budgetTools: Set<String> = ["add_budget", "update_budget", "delete_budget"]
+        let wealthTools: Set<String> = ["create_wealth_account"]
+
+        var events: [BotMutationEvent] = []
+        let names = Set(calls.compactMap { $0["name"] as? String })
+        if !names.isDisjoint(with: transactionTools) { events.append(.transactionSaved) }
+        if !names.isDisjoint(with: budgetTools) { events.append(.budgetSaved) }
+        if !names.isDisjoint(with: wealthTools) { events.append(.wealthAccountSaved) }
+        return events
     }
 
     private func mapMessage(_ message: ChatMessageResponse) -> FinFlowBotChatMessage {

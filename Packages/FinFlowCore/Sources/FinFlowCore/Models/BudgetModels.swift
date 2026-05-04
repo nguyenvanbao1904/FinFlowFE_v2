@@ -130,4 +130,5 @@ public struct UpdateBudgetRequest: Codable, Sendable {
 
 extension Notification.Name {
     public static let budgetDidSave = Notification.Name("budgetDidSave")
+    public static let wealthAccountDidSave = Notification.Name("wealthAccountDidSave")
 }

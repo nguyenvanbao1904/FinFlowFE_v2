@@ -180,21 +180,30 @@ public struct FinFlowBotChatMessage: Identifiable, Equatable, Sendable {
     }
 }
 
+public enum BotMutationEvent: Sendable {
+    case transactionSaved
+    case budgetSaved
+    case wealthAccountSaved
+}
+
 public struct FinFlowBotSendResult: Sendable {
     public let content: String
     public let needsClarification: Bool
     public let clarificationQuestion: String?
     public let citations: [FinFlowBotCitation]
+    public let mutationEvents: [BotMutationEvent]
 
     public init(
         content: String,
         needsClarification: Bool,
         clarificationQuestion: String?,
-        citations: [FinFlowBotCitation]
+        citations: [FinFlowBotCitation],
+        mutationEvents: [BotMutationEvent] = []
     ) {
         self.content = content
         self.needsClarification = needsClarification
         self.clarificationQuestion = clarificationQuestion
         self.citations = citations
+        self.mutationEvents = mutationEvents
     }
 }

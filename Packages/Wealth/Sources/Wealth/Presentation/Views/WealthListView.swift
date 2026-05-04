@@ -113,6 +113,9 @@ public struct WealthListView: View {
         }
         .task { await viewModel.loadData() }
         .refreshable { await viewModel.loadData(force: true) }
+        .onReceive(NotificationCenter.default.publisher(for: .wealthAccountDidSave)) { _ in
+            Task { await viewModel.loadData(force: true) }
+        }
         .alertHandler($viewModel.loadError)
         // swiftlint:disable:next no_direct_sheet_or_cover
         .sheet(item: $activeSheet) { _ in

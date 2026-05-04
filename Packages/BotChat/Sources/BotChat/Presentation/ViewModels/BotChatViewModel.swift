@@ -97,6 +97,16 @@ public final class BotChatViewModel {
                     messages.append(
                         FinFlowBotChatMessage(sender: .bot, text: assistantText, sentAt: Date(), citations: result.citations)
                     )
+                    for event in result.mutationEvents {
+                        switch event {
+                        case .transactionSaved:
+                            NotificationCenter.default.post(name: .transactionDidSave, object: nil)
+                        case .budgetSaved:
+                            NotificationCenter.default.post(name: .budgetDidSave, object: nil)
+                        case .wealthAccountSaved:
+                            NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
+                        }
+                    }
                 } else {
                     try await Task.sleep(for: .milliseconds(650))
                     messages.append(
