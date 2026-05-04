@@ -18,6 +18,11 @@ public final class InvestmentPortfolioViewModel {
 
     public var errorAlert: AppErrorAlert?
 
+    public var tradeTransactions: [TradeTransactionResponse] = []
+    public var isLoadingTransactions = false
+    public var hasMoreTransactions = true
+    private var currentTransactionPage = 0
+
     private let getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase
     private let getPortfoliosUseCase: GetPortfoliosUseCase
     private let getPortfolioAssetsUseCase: GetPortfolioAssetsUseCase
@@ -28,6 +33,7 @@ public final class InvestmentPortfolioViewModel {
     private let importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase
     private let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
     private let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
+    private let getTradeTransactionsUseCase: GetTradeTransactionsUseCase
 
     private let sessionManager: any SessionManagerProtocol
     private var latestPortfolioLoadRequestID = UUID()
@@ -44,6 +50,7 @@ public final class InvestmentPortfolioViewModel {
         importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase,
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
+        getTradeTransactionsUseCase: GetTradeTransactionsUseCase,
         sessionManager: any SessionManagerProtocol
     ) {
         self.getCompanyIndustriesUseCase = getCompanyIndustriesUseCase
@@ -56,7 +63,7 @@ public final class InvestmentPortfolioViewModel {
         self.importPortfolioSnapshotUseCase = importPortfolioSnapshotUseCase
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
-
+        self.getTradeTransactionsUseCase = getTradeTransactionsUseCase
         self.sessionManager = sessionManager
     }
 
@@ -283,6 +290,32 @@ public final class InvestmentPortfolioViewModel {
             request: ImportPortfolioSnapshotRequest(cashBalance: cashBalance, holdings: holdings)
         )
         await loadAll(force: true)
+    }
+
+    public func loadTradeTransactions(reset: Bool = false) async {
+        guard let selectedPortfolio, !isLoadingTransactions else { return }
+        if reset {
+            currentTransactionPage = 0
+            hasMoreTransactions = true
+            tradeTransactions = []
+        }
+        guard hasMoreTransactions else { return }
+        isLoadingTransactions = true
+        defer { isLoadingTransactions = false }
+        do {
+            let page = try await getTradeTransactionsUseCase.execute(
+                portfolioId: selectedPortfolio.id,
+                page: currentTransactionPage,
+                size: 20
+            )
+            tradeTransactions += page.content
+            hasMoreTransactions = !page.last
+            currentTransactionPage += 1
+        } catch {
+            if !(error is CancellationError) {
+                errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tải lịch sử giao dịch")
+            }
+        }
     }
 
     public var sortedAssets: [PortfolioAssetResponse] {

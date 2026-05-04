@@ -223,6 +223,7 @@ extension DependencyContainer {
                 importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase(repository: portfolioRepository),
                 getPortfolioHealthUseCase: GetPortfolioHealthUseCase(repository: portfolioRepository),
                 getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase(repository: portfolioRepository),
+                getTradeTransactionsUseCase: GetTradeTransactionsUseCase(repository: portfolioRepository),
                 sessionManager: sessionManager
             )
         )

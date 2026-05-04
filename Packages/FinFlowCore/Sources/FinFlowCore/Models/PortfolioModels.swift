@@ -244,6 +244,43 @@ public struct PortfolioHealthPoint: Codable, Sendable, Identifiable {
     }
 }
 
+// MARK: - Trade Transaction History
+
+/// Một giao dịch lịch sử từ GET /api/investments/portfolios/{id}/transactions
+public struct TradeTransactionResponse: Codable, Sendable, Identifiable {
+    public let id: String
+    public let tradeType: TradeType
+    public let symbol: String?
+    public let quantity: Double?
+    public let price: Double?
+    public let totalAmount: Double
+    public let feeAmount: Double
+    public let taxAmount: Double
+    public let transactionDate: String
+
+    public init(
+        id: String,
+        tradeType: TradeType,
+        symbol: String? = nil,
+        quantity: Double? = nil,
+        price: Double? = nil,
+        totalAmount: Double,
+        feeAmount: Double = 0,
+        taxAmount: Double = 0,
+        transactionDate: String
+    ) {
+        self.id = id
+        self.tradeType = tradeType
+        self.symbol = symbol
+        self.quantity = quantity
+        self.price = price
+        self.totalAmount = totalAmount
+        self.feeAmount = feeAmount
+        self.taxAmount = taxAmount
+        self.transactionDate = transactionDate
+    }
+}
+
 // MARK: - Portfolio Vs Market Benchmark
 
 public struct PortfolioMarketBenchmarkResponse: Codable, Sendable {

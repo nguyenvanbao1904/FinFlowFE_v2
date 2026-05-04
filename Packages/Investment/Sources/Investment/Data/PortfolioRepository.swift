@@ -117,4 +117,18 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         )
     }
 
+    public func getTradeTransactions(
+        portfolioId: String,
+        page: Int,
+        size: Int
+    ) async throws -> PageResponse<TradeTransactionResponse> {
+        try await client.request(
+            endpoint: "/investments/portfolios/\(portfolioId)/transactions?page=\(page)&size=\(size)",
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
 }

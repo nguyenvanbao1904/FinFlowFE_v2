@@ -16,6 +16,7 @@ public struct InvestmentViewDependencies {
     let importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase
     let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
     let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
+    let getTradeTransactionsUseCase: GetTradeTransactionsUseCase
     let sessionManager: any SessionManagerProtocol
 
     public init(
@@ -31,6 +32,7 @@ public struct InvestmentViewDependencies {
         importPortfolioSnapshotUseCase: ImportPortfolioSnapshotUseCase,
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
+        getTradeTransactionsUseCase: GetTradeTransactionsUseCase,
         sessionManager: any SessionManagerProtocol
     ) {
         self.getStockAnalysisUseCase = getStockAnalysisUseCase
@@ -45,6 +47,7 @@ public struct InvestmentViewDependencies {
         self.importPortfolioSnapshotUseCase = importPortfolioSnapshotUseCase
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
+        self.getTradeTransactionsUseCase = getTradeTransactionsUseCase
         self.sessionManager = sessionManager
     }
 }
@@ -59,6 +62,7 @@ public struct InvestmentView: View {
         case addCashTransaction
         case addStockTrade
         case importPortfolio
+        case tradeHistory
 
         var id: String { rawValue }
     }
@@ -94,6 +98,7 @@ public struct InvestmentView: View {
                 importPortfolioSnapshotUseCase: dependencies.importPortfolioSnapshotUseCase,
                 getPortfolioHealthUseCase: dependencies.getPortfolioHealthUseCase,
                 getPortfolioVsMarketUseCase: dependencies.getPortfolioVsMarketUseCase,
+                getTradeTransactionsUseCase: dependencies.getTradeTransactionsUseCase,
                 sessionManager: dependencies.sessionManager
             )
         )
@@ -167,6 +172,10 @@ public struct InvestmentView: View {
                 selectedAssetForDetail: $selectedAssetForDetail,
                 onRenamePortfolio: { activeSheet = .renamePortfolio },
                 onDeletePortfolio: { showDeletePortfolioConfirm = true },
+                onShowHistory: {
+                    Task { @MainActor in await portfolioVM.loadTradeTransactions(reset: true) }
+                    activeSheet = .tradeHistory
+                },
                 onAskAI: onAskAI
             )
         }
@@ -219,6 +228,7 @@ public struct InvestmentView: View {
         case .addStockTrade:
             if portfolioVM.selectedPortfolio != nil {
                 AddStockTradeSheet(
+                    assets: portfolioVM.sortedAssets,
                     onSuggest: { query in
                         try await suggestCompaniesUseCase.execute(query: query, limit: 10)
                     },
@@ -239,6 +249,13 @@ public struct InvestmentView: View {
                         try await portfolioVM.importPortfolioSnapshot(
                             cashBalance: cashBalance, holdings: holdings, transactionDate: date)
                     }
+                )
+            }
+        case .tradeHistory:
+            if let portfolio = portfolioVM.selectedPortfolio {
+                TradeTransactionHistorySheet(
+                    portfolioName: portfolio.name,
+                    viewModel: portfolioVM
                 )
             }
         }

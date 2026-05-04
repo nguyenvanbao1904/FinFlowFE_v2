@@ -9,6 +9,7 @@ struct InvestmentPortfolioTabContent: View {
     @Binding var selectedAssetForDetail: PortfolioAssetResponse?
     var onRenamePortfolio: () -> Void = {}
     var onDeletePortfolio: () -> Void = {}
+    var onShowHistory: () -> Void = {}
     var onAskAI: ((String) -> Void)?
 
     var body: some View {
@@ -117,9 +118,25 @@ struct InvestmentPortfolioTabContent: View {
                     }
 
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Danh sách mã nắm giữ")
-                            .font(AppTypography.displayCaption)
-                            .foregroundStyle(.primary)
+                        HStack {
+                            Text("Danh sách mã nắm giữ")
+                                .font(AppTypography.displayCaption)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Button {
+                                onShowHistory()
+                            } label: {
+                                HStack(spacing: Spacing.xs / 2) {
+                                    Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                                        .font(AppTypography.caption)
+                                    Text("Lịch sử")
+                                        .font(AppTypography.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundStyle(AppColors.primary)
+                            }
+                            .buttonStyle(.plain)
+                        }
 
                         VStack(spacing: Spacing.sm) {
                             ForEach(viewModel.sortedAssets, id: \.symbol) { asset in
@@ -209,13 +226,17 @@ struct InvestmentPortfolioTabContent: View {
         }()
 
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("Giá trị thị trường: \(CurrencyFormatter.format(viewModel.selectedPortfolioMarketValue))")
+            Text("Cổ phiếu: \(CurrencyFormatter.format(viewModel.selectedPortfolioMarketValue - (viewModel.selectedPortfolio?.cashBalance ?? 0)))")
                 .font(AppTypography.subheadline)
                 .foregroundStyle(AppColors.textInverted.opacity(OpacityLevel.high))
 
-            Text("Giá vốn danh mục: \(CurrencyFormatter.format(viewModel.portfolioCostBasis))")
+            Text("Tiền mặt: \(CurrencyFormatter.format(viewModel.selectedPortfolio?.cashBalance ?? 0))")
                 .font(AppTypography.subheadline)
                 .foregroundStyle(AppColors.textInverted.opacity(OpacityLevel.high))
+
+            Text("Giá vốn: \(CurrencyFormatter.format(viewModel.portfolioCostBasis))")
+                .font(AppTypography.subheadline)
+                .foregroundStyle(AppColors.textInverted.opacity(OpacityLevel.medium))
 
             Text("Lãi/Lỗ tạm tính: \(pnlPrefix)\(CurrencyFormatter.format(pnlValue)) (\(pnlPctText))")
                 .font(AppTypography.subheadline)

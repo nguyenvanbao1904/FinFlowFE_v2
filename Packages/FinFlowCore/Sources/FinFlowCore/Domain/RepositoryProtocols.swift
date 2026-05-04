@@ -111,6 +111,12 @@ public protocol PortfolioRepositoryProtocol: Sendable {
         portfolioId: String,
         code: String
     ) async throws -> PortfolioMarketBenchmarkResponse
+
+    func getTradeTransactions(
+        portfolioId: String,
+        page: Int,
+        size: Int
+    ) async throws -> PageResponse<TradeTransactionResponse>
 }
 
 // MARK: - AI Chat Repository Protocol
