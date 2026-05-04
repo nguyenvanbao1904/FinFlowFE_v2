@@ -28,6 +28,8 @@ public struct InvestmentViewDependencies {
     let monthlyNetBuyProvider: @MainActor () -> Double
     /// Thu nhập thặng dư tháng này (thu nhập - chi tiêu) — dùng cho FSI invest ratio.
     let monthlySurplusProvider: @MainActor () -> Double
+    /// Async loader gọi API monthly summary; kết quả được cache ở DI container.
+    let monthlySummaryLoader: @MainActor () async -> Void
 
     public init(
         getStockAnalysisUseCase: GetStockAnalysisUseCase,
@@ -48,7 +50,8 @@ public struct InvestmentViewDependencies {
         liquidAssetsProvider: @escaping @MainActor () -> Double = { 0 },
         monthlyExpensesProvider: @escaping @MainActor () -> Double = { 0 },
         monthlyNetBuyProvider: @escaping @MainActor () -> Double = { 0 },
-        monthlySurplusProvider: @escaping @MainActor () -> Double = { 0 }
+        monthlySurplusProvider: @escaping @MainActor () -> Double = { 0 },
+        monthlySummaryLoader: @escaping @MainActor () async -> Void = {}
     ) {
         self.getStockAnalysisUseCase = getStockAnalysisUseCase
         self.getCompanyIndustriesUseCase = getCompanyIndustriesUseCase
@@ -69,6 +72,7 @@ public struct InvestmentViewDependencies {
         self.monthlyExpensesProvider = monthlyExpensesProvider
         self.monthlyNetBuyProvider = monthlyNetBuyProvider
         self.monthlySurplusProvider = monthlySurplusProvider
+        self.monthlySummaryLoader = monthlySummaryLoader
     }
 }
 
@@ -96,9 +100,11 @@ public struct InvestmentView: View {
     @State private var showDeletePortfolioConfirm = false
 
     private let suggestCompaniesUseCase: SuggestCompaniesUseCase
+    private let monthlySummaryLoader: @MainActor () async -> Void
 
     public init(dependencies: InvestmentViewDependencies) {
         self.suggestCompaniesUseCase = dependencies.suggestCompaniesUseCase
+        self.monthlySummaryLoader = dependencies.monthlySummaryLoader
 
         let portfolioVM = InvestmentPortfolioViewModel(
             getCompanyIndustriesUseCase: dependencies.getCompanyIndustriesUseCase,
@@ -156,8 +162,14 @@ public struct InvestmentView: View {
             } message: {
                 Text("Toàn bộ tài sản và giao dịch trong danh mục sẽ bị xóa vĩnh viễn.")
             }
-            .task { await portfolioVM.loadAll() }
-            .refreshable { await portfolioVM.loadAll(force: true) }
+            .task {
+                await portfolioVM.loadAll()
+                await monthlySummaryLoader()
+            }
+            .refreshable {
+                await portfolioVM.loadAll(force: true)
+                await monthlySummaryLoader()
+            }
             .onChange(of: portfolioVM.selectedPortfolio?.id) { _, _ in
                 Task { @MainActor in await portfolioVM.loadAssetsForSelectedPortfolio() }
             }

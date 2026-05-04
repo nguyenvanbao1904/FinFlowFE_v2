@@ -98,6 +98,20 @@ public actor TransactionRepository: TransactionRepositoryProtocol {
         )
     }
 
+    public func getMonthlySummary(month: String? = nil) async throws -> TransactionSummaryResponse {
+        var endpoint = "/transactions/summary/monthly"
+        if let month {
+            endpoint += "?month=\(month)"
+        }
+        return try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
     public func analyzeTransaction(request: AnalyzeTransactionRequest) async throws
         -> AnalyzeTransactionResponse {
         return try await client.request(

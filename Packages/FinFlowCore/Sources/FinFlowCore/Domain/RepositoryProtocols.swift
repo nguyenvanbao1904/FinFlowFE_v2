@@ -50,6 +50,7 @@ public protocol TransactionRepositoryProtocol: Sendable {
     func getTransactions(page: Int, size: Int, startDate: Date?, endDate: Date?, keyword: String?)
         async throws -> PaginatedResponse<TransactionResponse>
     func getTransactionSummary() async throws -> TransactionSummaryResponse
+    func getMonthlySummary(month: String?) async throws -> TransactionSummaryResponse
     func analyzeTransaction(request: AnalyzeTransactionRequest) async throws
         -> AnalyzeTransactionResponse
     func getAnalyticsInsights() async throws -> TransactionAnalyticsInsightsResponse

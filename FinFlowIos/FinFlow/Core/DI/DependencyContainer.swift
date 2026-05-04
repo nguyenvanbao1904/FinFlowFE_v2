@@ -128,6 +128,9 @@ public class DependencyContainer {
     /// Cùng lý do với cachedTransactionListViewModel — mở/đóng chatbot là đổi presentedSheet, làm AppRootView rebuild và makeMainTabView tạo WealthListViewModel mới → accounts bị clear.
     var cachedWealthListViewModel: WealthListViewModel?
 
+    /// Monthly summary cache — dùng cho FSI survival runway + invest ratio.
+    var cachedMonthlySummary: TransactionSummaryResponse?
+
     func resetCachedHomeViewModel() {
         cachedHomeViewModel = nil
     }

@@ -210,6 +210,7 @@ extension DependencyContainer {
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
         let wealthVM = wealthListViewModelForDashboard()
+        let getMonthlySummaryUseCase = GetMonthlySummaryUseCase(repository: transactionRepository)
         var view = InvestmentView(
             dependencies: InvestmentViewDependencies(
                 getStockAnalysisUseCase: GetStockAnalysisUseCase(repository: investmentRepository),
@@ -231,6 +232,22 @@ extension DependencyContainer {
                     wealthVM?.accounts
                         .filter { $0.accountType.group == "LIQUID" }
                         .reduce(0) { $0 + $1.balance } ?? 0
+                },
+                monthlyExpensesProvider: { [weak self] in
+                    self?.cachedMonthlySummary?.totalExpense ?? 0
+                },
+                monthlyNetBuyProvider: { 0 },
+                monthlySurplusProvider: { [weak self] in
+                    guard let summary = self?.cachedMonthlySummary else { return 0 }
+                    return summary.totalIncome - summary.totalExpense
+                },
+                monthlySummaryLoader: { [weak self] in
+                    guard let self else { return }
+                    do {
+                        self.cachedMonthlySummary = try await getMonthlySummaryUseCase.execute()
+                    } catch {
+                        // Không hiện lỗi — FSI badge chỉ không hiện nếu không có data
+                    }
                 }
             )
         )
