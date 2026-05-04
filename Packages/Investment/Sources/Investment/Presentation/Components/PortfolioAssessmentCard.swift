@@ -122,6 +122,9 @@ struct PortfolioAssessmentCard: View {
     let assessment: PortfolioAssessment
     let portfolioName: String
     var onAskAI: ((String) -> Void)?
+    var survivalRunwayMonths: Double?
+    var monthlyInvestRatio: Double?
+    var onOpenCFO: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -160,6 +163,30 @@ struct PortfolioAssessmentCard: View {
                         }
                     }
                 }
+            }
+
+            if let runway = survivalRunwayMonths, let ratio = monthlyInvestRatio,
+               (runway < 3 || ratio > 0.80) {
+                Divider()
+                FinancialStressIndicatorBadge(
+                    survivalRunwayMonths: runway < 3 ? runway : nil,
+                    monthlyInvestRatio: ratio > 0.80 ? ratio : nil,
+                    onOpenCFO: onOpenCFO
+                )
+            } else if let runway = survivalRunwayMonths, runway < 3 {
+                Divider()
+                FinancialStressIndicatorBadge(
+                    survivalRunwayMonths: runway,
+                    monthlyInvestRatio: nil,
+                    onOpenCFO: onOpenCFO
+                )
+            } else if let ratio = monthlyInvestRatio, ratio > 0.80 {
+                Divider()
+                FinancialStressIndicatorBadge(
+                    survivalRunwayMonths: nil,
+                    monthlyInvestRatio: ratio,
+                    onOpenCFO: onOpenCFO
+                )
             }
 
             if let onAskAI {

@@ -142,6 +142,14 @@ public struct StockAnalysisView: View {
         }
         .padding(.horizontal, Spacing.lg)
 
+        DynamicMoSCard(
+            overview: overview,
+            cautionLevel: $viewModel.mosCautionLevel,
+            allocationRatio: viewModel.allocationRatio,
+            requiredMargin: viewModel.requiredMargin
+        )
+        .padding(.horizontal, Spacing.lg)
+
         ValuationChartGroup(
             valuations: viewModel.valuations,
             dailyValuations: viewModel.dailyValuations,

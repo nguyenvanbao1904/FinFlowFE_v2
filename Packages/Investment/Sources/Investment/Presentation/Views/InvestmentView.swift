@@ -18,6 +18,16 @@ public struct InvestmentViewDependencies {
     let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
     let getTradeTransactionsUseCase: GetTradeTransactionsUseCase
     let sessionManager: any SessionManagerProtocol
+    /// Closure trả về tổng tài sản ròng từ Wealth module (live value mỗi lần đọc).
+    let netWorthProvider: @MainActor () -> Double
+    /// Tổng tài sản thanh khoản (tài khoản nhóm LIQUID) — dùng cho FSI survival runway.
+    let liquidAssetsProvider: @MainActor () -> Double
+    /// Chi tiêu trung bình hàng tháng — dùng cho FSI survival runway.
+    let monthlyExpensesProvider: @MainActor () -> Double
+    /// Mua ròng cổ phiếu tháng này — dùng cho FSI invest ratio.
+    let monthlyNetBuyProvider: @MainActor () -> Double
+    /// Thu nhập thặng dư tháng này (thu nhập - chi tiêu) — dùng cho FSI invest ratio.
+    let monthlySurplusProvider: @MainActor () -> Double
 
     public init(
         getStockAnalysisUseCase: GetStockAnalysisUseCase,
@@ -33,7 +43,12 @@ public struct InvestmentViewDependencies {
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
         getTradeTransactionsUseCase: GetTradeTransactionsUseCase,
-        sessionManager: any SessionManagerProtocol
+        sessionManager: any SessionManagerProtocol,
+        netWorthProvider: @escaping @MainActor () -> Double = { 0 },
+        liquidAssetsProvider: @escaping @MainActor () -> Double = { 0 },
+        monthlyExpensesProvider: @escaping @MainActor () -> Double = { 0 },
+        monthlyNetBuyProvider: @escaping @MainActor () -> Double = { 0 },
+        monthlySurplusProvider: @escaping @MainActor () -> Double = { 0 }
     ) {
         self.getStockAnalysisUseCase = getStockAnalysisUseCase
         self.getCompanyIndustriesUseCase = getCompanyIndustriesUseCase
@@ -49,6 +64,11 @@ public struct InvestmentViewDependencies {
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
         self.getTradeTransactionsUseCase = getTradeTransactionsUseCase
         self.sessionManager = sessionManager
+        self.netWorthProvider = netWorthProvider
+        self.liquidAssetsProvider = liquidAssetsProvider
+        self.monthlyExpensesProvider = monthlyExpensesProvider
+        self.monthlyNetBuyProvider = monthlyNetBuyProvider
+        self.monthlySurplusProvider = monthlySurplusProvider
     }
 }
 
@@ -80,26 +100,33 @@ public struct InvestmentView: View {
     public init(dependencies: InvestmentViewDependencies) {
         self.suggestCompaniesUseCase = dependencies.suggestCompaniesUseCase
 
+        let portfolioVM = InvestmentPortfolioViewModel(
+            getCompanyIndustriesUseCase: dependencies.getCompanyIndustriesUseCase,
+            getPortfoliosUseCase: dependencies.getPortfoliosUseCase,
+            getPortfolioAssetsUseCase: dependencies.getPortfolioAssetsUseCase,
+            createPortfolioUseCase: dependencies.createPortfolioUseCase,
+            updatePortfolioUseCase: dependencies.updatePortfolioUseCase,
+            deletePortfolioUseCase: dependencies.deletePortfolioUseCase,
+            createTradeTransactionUseCase: dependencies.createTradeTransactionUseCase,
+            importPortfolioSnapshotUseCase: dependencies.importPortfolioSnapshotUseCase,
+            getPortfolioHealthUseCase: dependencies.getPortfolioHealthUseCase,
+            getPortfolioVsMarketUseCase: dependencies.getPortfolioVsMarketUseCase,
+            getTradeTransactionsUseCase: dependencies.getTradeTransactionsUseCase,
+            sessionManager: dependencies.sessionManager
+        )
+        portfolioVM.liquidAssetsProvider = dependencies.liquidAssetsProvider
+        portfolioVM.monthlyExpensesProvider = dependencies.monthlyExpensesProvider
+        portfolioVM.monthlyNetBuyProvider = dependencies.monthlyNetBuyProvider
+        portfolioVM.monthlySurplusProvider = dependencies.monthlySurplusProvider
+        _portfolioVM = State(initialValue: portfolioVM)
+
+        let netWorthProvider = dependencies.netWorthProvider
         _stockAnalysisVM = State(
             initialValue: StockAnalysisViewModel(
                 getStockAnalysisUseCase: dependencies.getStockAnalysisUseCase,
-                sessionManager: dependencies.sessionManager
-            )
-        )
-        _portfolioVM = State(
-            initialValue: InvestmentPortfolioViewModel(
-                getCompanyIndustriesUseCase: dependencies.getCompanyIndustriesUseCase,
-                getPortfoliosUseCase: dependencies.getPortfoliosUseCase,
-                getPortfolioAssetsUseCase: dependencies.getPortfolioAssetsUseCase,
-                createPortfolioUseCase: dependencies.createPortfolioUseCase,
-                updatePortfolioUseCase: dependencies.updatePortfolioUseCase,
-                deletePortfolioUseCase: dependencies.deletePortfolioUseCase,
-                createTradeTransactionUseCase: dependencies.createTradeTransactionUseCase,
-                importPortfolioSnapshotUseCase: dependencies.importPortfolioSnapshotUseCase,
-                getPortfolioHealthUseCase: dependencies.getPortfolioHealthUseCase,
-                getPortfolioVsMarketUseCase: dependencies.getPortfolioVsMarketUseCase,
-                getTradeTransactionsUseCase: dependencies.getTradeTransactionsUseCase,
-                sessionManager: dependencies.sessionManager
+                sessionManager: dependencies.sessionManager,
+                netWorthProvider: netWorthProvider,
+                portfolioValueProvider: { portfolioVM.portfolioTotalValue }
             )
         )
     }

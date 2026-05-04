@@ -39,6 +39,35 @@ public final class InvestmentPortfolioViewModel {
     private var latestPortfolioLoadRequestID = UUID()
     private var loadedPortfolioDetailsID: String?
 
+    // MARK: - FSI providers (injected from outside, read live each access)
+    @ObservationIgnored public var liquidAssetsProvider: @MainActor () -> Double = { 0 }
+    @ObservationIgnored public var monthlyExpensesProvider: @MainActor () -> Double = { 0 }
+    @ObservationIgnored public var monthlyNetBuyProvider: @MainActor () -> Double = { 0 }
+    @ObservationIgnored public var monthlySurplusProvider: @MainActor () -> Double = { 0 }
+
+    // MARK: - FSI computed
+
+    /// Số tháng sống được nếu mất thu nhập (= thanh khoản / chi tiêu/tháng).
+    public var survivalRunwayMonths: Double? {
+        let expenses = monthlyExpensesProvider()
+        guard expenses > 0 else { return nil }
+        return liquidAssetsProvider() / expenses
+    }
+
+    /// Tỉ lệ mua ròng tháng / thu nhập thặng dư.
+    public var monthlyInvestRatio: Double? {
+        let surplus = monthlySurplusProvider()
+        guard surplus > 0 else { return nil }
+        return monthlyNetBuyProvider() / surplus
+    }
+
+    /// True khi trigger hiện FSI badge.
+    public var shouldShowFSIBadge: Bool {
+        if let runway = survivalRunwayMonths, runway < 3 { return true }
+        if let ratio = monthlyInvestRatio, ratio > 0.80 { return true }
+        return false
+    }
+
     public init(
         getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase,
         getPortfoliosUseCase: GetPortfoliosUseCase,

@@ -209,6 +209,7 @@ extension DependencyContainer {
 
     @MainActor
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
+        let wealthVM = wealthListViewModelForDashboard()
         var view = InvestmentView(
             dependencies: InvestmentViewDependencies(
                 getStockAnalysisUseCase: GetStockAnalysisUseCase(repository: investmentRepository),
@@ -224,7 +225,13 @@ extension DependencyContainer {
                 getPortfolioHealthUseCase: GetPortfolioHealthUseCase(repository: portfolioRepository),
                 getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase(repository: portfolioRepository),
                 getTradeTransactionsUseCase: GetTradeTransactionsUseCase(repository: portfolioRepository),
-                sessionManager: sessionManager
+                sessionManager: sessionManager,
+                netWorthProvider: { [weak wealthVM] in wealthVM?.netWorth ?? 0 },
+                liquidAssetsProvider: { [weak wealthVM] in
+                    wealthVM?.accounts
+                        .filter { $0.accountType.group == "LIQUID" }
+                        .reduce(0) { $0 + $1.balance } ?? 0
+                }
             )
         )
         view.onAskAI = { [weak router] prompt in
