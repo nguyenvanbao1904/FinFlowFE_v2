@@ -413,6 +413,26 @@ import Observation
 - Commit messages: concise English, imperative mood
 - PR descriptions: summary + test plan
 
+## 11.10 IDE / SourceKit Troubleshooting
+
+### "No such module 'FinFlowCore'" trong IDE
+
+**Triệu chứng:** SourceKit (VS Code, Claude Code, sourcekit-lsp) báo đỏ `No such module 'FinFlowCore'` (hoặc tên package khác) trên dòng `import` ở đầu file.
+
+**Nguyên nhân:** SourceKit khi chạy ngoài Xcode workspace không có build context đầy đủ — nó resolve từng SPM package riêng lẻ mà không build dependency graph. Kết quả là không tìm thấy các package phụ thuộc dù `Package.swift` đã khai báo đúng.
+
+**Cách xử lý:**
+- Đây là **false positive** — bỏ qua, không cần sửa code.
+- Compile qua Xcode (`⌘B`) hoặc `xcodebuild` sẽ resolve đúng và build thành công.
+- Nếu muốn SourceKit resolve được trong IDE: mở file từ bên trong `FinFlowIos.xcodeproj` thay vì mở thẳng thư mục `Packages/`.
+
+**Tất cả 8 feature packages** đều có pattern này (đều phụ thuộc `FinFlowCore` qua `path: "../FinFlowCore"`):
+
+| Package | Phụ thuộc |
+|---------|-----------|
+| Identity, Transaction, Planning, Wealth, Investment, Profile, Dashboard | `FinFlowCore` |
+| BotChat | `FinFlowCore` + `swift-markdown-ui` |
+
 ---
 
 _Previous: [Chapter 10 — Testing](./10-testing.md)_
