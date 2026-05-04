@@ -40,18 +40,48 @@ final class AddTradeViewModel {
 
     // MARK: - Dependencies
 
+    private let assets: [PortfolioAssetResponse]
     private let onSuggest: @Sendable (_ query: String) async throws -> [CompanySuggestionResponse]
     private let onSubmit: @Sendable (TradeType, String, Double, Double, Double, Date) async throws -> Void
 
     init(
+        assets: [PortfolioAssetResponse],
         onSuggest: @escaping @Sendable (_ query: String) async throws -> [CompanySuggestionResponse],
         onSubmit: @escaping @Sendable (TradeType, String, Double, Double, Double, Date) async throws -> Void
     ) {
+        self.assets = assets
         self.onSuggest = onSuggest
         self.onSubmit = onSubmit
     }
 
     // MARK: - Computed
+
+    private var trimmedSymbol: String {
+        symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+    }
+
+    /// Asset trong danh mục khớp mã đang nhập (chỉ dùng khi SELL).
+    var matchedAsset: PortfolioAssetResponse? {
+        guard tradeType == .SELL, !trimmedSymbol.isEmpty else { return nil }
+        return assets.first { $0.symbol == trimmedSymbol }
+    }
+
+    /// Cảnh báo khi SELL mã không có trong danh mục (sau khi user đã nhập xong suggestion).
+    var sellSymbolWarning: String? {
+        guard tradeType == .SELL,
+              !trimmedSymbol.isEmpty,
+              !showSuggestions
+        else { return nil }
+        if matchedAsset == nil {
+            return "\(trimmedSymbol) không có trong danh mục. Kiểm tra lại mã cổ phiếu."
+        }
+        return nil
+    }
+
+    /// Số lượng tối đa có thể bán.
+    var maxSellQuantity: Double? {
+        matchedAsset.map { $0.totalQuantity }
+    }
 
     var isSubmitDisabled: Bool {
         isSaving
@@ -96,14 +126,26 @@ final class AddTradeViewModel {
         isSaving = true
         defer { isSaving = false }
 
-        let trimmedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        guard !trimmedSymbol.isEmpty else {
+        let sym = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !sym.isEmpty else {
             errorMessage = "Mã cổ phiếu không được để trống."
+            return false
+        }
+
+        if tradeType == .SELL, !assets.contains(where: { $0.symbol == sym }) {
+            errorMessage = "\(sym) không có trong danh mục. Không thể bán."
             return false
         }
 
         guard let quantity = CurrencyFormatter.parseIntegerInput(quantityText), quantity > 0 else {
             errorMessage = "Khối lượng phải là số nguyên dương."
+            return false
+        }
+
+        if tradeType == .SELL,
+           let asset = assets.first(where: { $0.symbol == sym }),
+           quantity > asset.totalQuantity {
+            errorMessage = "Khối lượng bán (\(CurrencyFormatter.formatQuantity(quantity))) vượt quá số cổ phiếu đang có (\(CurrencyFormatter.formatQuantity(asset.totalQuantity)))."
             return false
         }
         guard let price = CurrencyFormatter.parseCurrencyInput(priceText), price >= 0 else {
@@ -116,7 +158,7 @@ final class AddTradeViewModel {
         }
 
         do {
-            try await onSubmit(tradeType, trimmedSymbol, quantity, price, feePercent, transactionDate)
+            try await onSubmit(tradeType, sym, quantity, price, feePercent, transactionDate)
             return true
         } catch {
             errorMessage = "Không thể thêm giao dịch. Vui lòng thử lại."

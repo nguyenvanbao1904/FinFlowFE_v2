@@ -6,12 +6,14 @@ public struct AddStockTradeSheet: View {
     @State private var viewModel: AddTradeViewModel
 
     public init(
+        assets: [PortfolioAssetResponse] = [],
         onSuggest: @escaping @Sendable (_ query: String) async throws -> [CompanySuggestionResponse],
         onSubmit: @escaping @Sendable (
             TradeType, String, Double, Double, Double, Date
         ) async throws -> Void
     ) {
         self._viewModel = State(initialValue: AddTradeViewModel(
+            assets: assets,
             onSuggest: onSuggest,
             onSubmit: onSubmit
         ))
@@ -31,6 +33,7 @@ public struct AddStockTradeSheet: View {
                     if viewModel.showSuggestions, !viewModel.suggestions.isEmpty {
                         suggestionsList
                     }
+                    symbolInfoBox
                     quantityField
                     priceField
                     feeField
@@ -67,10 +70,48 @@ public struct AddStockTradeSheet: View {
     private var symbolField: some View {
         GlassField(
             text: $viewModel.symbol,
-            placeholder: "Mã cổ phiếu (VD: AAPL)",
+            placeholder: "Mã cổ phiếu (VD: VCB, HPG, FPT)",
             icon: "tag.fill",
             showsIcon: false
         )
+        .textInputAutocapitalization(.characters)
+    }
+
+    @ViewBuilder
+    private var symbolInfoBox: some View {
+        if let warning = viewModel.sellSymbolWarning {
+            infoRow(icon: "exclamationmark.triangle.fill", text: warning, color: AppColors.error)
+        } else if let maxQty = viewModel.maxSellQuantity,
+                  let asset = viewModel.matchedAsset {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                infoRow(
+                    icon: "checkmark.circle.fill",
+                    text: "Đang nắm giữ \(CurrencyFormatter.formatQuantity(maxQty)) cổ phiếu \(asset.symbol)",
+                    color: AppColors.chartGrowthStrong
+                )
+                infoRow(
+                    icon: "info.circle.fill",
+                    text: "Giá vốn bình quân: \(CurrencyFormatter.format(asset.averagePrice))",
+                    color: AppColors.primary
+                )
+            }
+        }
+    }
+
+    private func infoRow(icon: String, text: String, color: Color) -> some View {
+        HStack(alignment: .top, spacing: Spacing.xs) {
+            Image(systemName: icon)
+                .font(AppTypography.caption)
+                .foregroundStyle(color)
+            Text(text)
+                .font(AppTypography.caption)
+                .foregroundStyle(color)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Spacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.08))
+        .clipShape(.rect(cornerRadius: CornerRadius.small))
     }
 
     private var suggestionsList: some View {
