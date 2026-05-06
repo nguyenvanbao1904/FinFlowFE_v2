@@ -142,6 +142,39 @@ public actor InvestmentRepository: InvestmentRepositoryProtocol {
         )
     }
 
+    public func getFairValue(symbol: String, targetYear: Int?) async throws -> FairValueResult {
+        var endpoint = "/investments/companies/\(urlEncode(symbol))/fair-value"
+        if let yr = targetYear {
+            endpoint += "?targetYear=\(yr)"
+        }
+        let dto: FairValueResponseDTO = try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+        return FairValueResult(
+            symbol: dto.symbol ?? symbol,
+            companyName: dto.companyName ?? symbol,
+            targetYear: dto.targetYear ?? 0,
+            industryKey: dto.industryKey ?? "",
+            method: dto.method ?? "",
+            weightsUsed: dto.weightsUsed ?? "",
+            priceComposite: dto.priceComposite ?? 0,
+            pricePE: dto.pricePE ?? 0,
+            pricePB: dto.pricePB ?? 0,
+            pricePS: dto.pricePS ?? 0,
+            livePrice: dto.livePrice ?? 0,
+            upsidePct: dto.upsidePct ?? 0,
+            verdict: dto.verdict ?? "",
+            peTarget: dto.peTarget ?? 0,
+            pbTarget: dto.pbTarget ?? 0,
+            cagr: dto.cagr ?? 0,
+            error: dto.error
+        )
+    }
+
     public func getCompanyIndustries(symbols: [String]) async throws -> [CompanyIndustryResponse] {
         let normalized = symbols
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
@@ -634,4 +667,24 @@ private struct DividendDTO: Codable, Sendable {
     let recordDate: String?
     let exrightDate: String?
     let issueDate: String?
+}
+
+private struct FairValueResponseDTO: Codable, Sendable {
+    let symbol: String?
+    let companyName: String?
+    let targetYear: Int?
+    let industryKey: String?
+    let method: String?
+    let weightsUsed: String?
+    let priceComposite: Double?
+    let pricePE: Double?
+    let pricePB: Double?
+    let pricePS: Double?
+    let livePrice: Double?
+    let upsidePct: Double?
+    let verdict: String?
+    let peTarget: Double?
+    let pbTarget: Double?
+    let cagr: Double?
+    let error: String?
 }

@@ -131,4 +131,17 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         )
     }
 
+    public func getMonthlyNetBuy(month: String? = nil) async throws -> Double {
+        var endpoint = "/investments/portfolios/monthly-net-buy"
+        if let month { endpoint += "?month=\(month)" }
+        let response: [String: Double] = try await client.request(
+            endpoint: endpoint,
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+        return response["monthlyNetBuy"] ?? 0
+    }
+
 }

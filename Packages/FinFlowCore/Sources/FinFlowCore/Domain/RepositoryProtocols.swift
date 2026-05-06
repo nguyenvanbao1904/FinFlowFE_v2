@@ -118,6 +118,8 @@ public protocol PortfolioRepositoryProtocol: Sendable {
         page: Int,
         size: Int
     ) async throws -> PageResponse<TradeTransactionResponse>
+
+    func getMonthlyNetBuy(month: String?) async throws -> Double
 }
 
 // MARK: - AI Chat Repository Protocol

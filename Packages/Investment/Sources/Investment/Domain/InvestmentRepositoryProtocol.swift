@@ -37,4 +37,9 @@ public protocol InvestmentRepositoryProtocol: Sendable {
     func getCompanyIndustries(
         symbols: [String]
     ) async throws -> [CompanyIndustryResponse]
+
+    func getFairValue(
+        symbol: String,
+        targetYear: Int?
+    ) async throws -> FairValueResult
 }
