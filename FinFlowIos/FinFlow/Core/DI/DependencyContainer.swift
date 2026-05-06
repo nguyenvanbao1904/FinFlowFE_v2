@@ -131,6 +131,9 @@ public class DependencyContainer {
     /// Monthly summary cache — dùng cho FSI survival runway + invest ratio.
     var cachedMonthlySummary: TransactionSummaryResponse?
 
+    /// Monthly BUY net amount cache — dùng cho FSI invest ratio.
+    var cachedMonthlyNetBuy: Double?
+
     func resetCachedHomeViewModel() {
         cachedHomeViewModel = nil
     }

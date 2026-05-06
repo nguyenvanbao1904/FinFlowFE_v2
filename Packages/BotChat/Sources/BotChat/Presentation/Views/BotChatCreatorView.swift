@@ -14,6 +14,8 @@ public struct BotChatCreatorView: View {
         self.gateway = gateway
         self.threadId = threadId
         self.initialPrompt = initialPrompt
+        // Show spinner immediately when we need to create a new thread (avoids blank sheet)
+        self._isCreating = State(initialValue: threadId == nil)
     }
 
     public var body: some View {

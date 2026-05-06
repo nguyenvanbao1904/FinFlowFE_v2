@@ -211,9 +211,11 @@ extension DependencyContainer {
     func makeInvestmentView(router: any AppRouterProtocol) -> some View {
         let wealthVM = wealthListViewModelForDashboard()
         let getMonthlySummaryUseCase = GetMonthlySummaryUseCase(repository: transactionRepository)
+        let getMonthlyNetBuyUseCase = GetMonthlyNetBuyUseCase(repository: portfolioRepository)
         var view = InvestmentView(
             dependencies: InvestmentViewDependencies(
                 getStockAnalysisUseCase: GetStockAnalysisUseCase(repository: investmentRepository),
+                getFairValueUseCase: GetFairValueUseCase(repository: investmentRepository),
                 getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase(repository: investmentRepository),
                 suggestCompaniesUseCase: SuggestCompaniesUseCase(repository: investmentRepository),
                 getPortfoliosUseCase: GetPortfoliosUseCase(repository: portfolioRepository),
@@ -227,7 +229,6 @@ extension DependencyContainer {
                 getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase(repository: portfolioRepository),
                 getTradeTransactionsUseCase: GetTradeTransactionsUseCase(repository: portfolioRepository),
                 sessionManager: sessionManager,
-                netWorthProvider: { [weak wealthVM] in wealthVM?.netWorth ?? 0 },
                 liquidAssetsProvider: { [weak wealthVM] in
                     wealthVM?.accounts
                         .filter { $0.accountType.group == "LIQUID" }
@@ -236,19 +237,26 @@ extension DependencyContainer {
                 monthlyExpensesProvider: { [weak self] in
                     self?.cachedMonthlySummary?.totalExpense ?? 0
                 },
-                monthlyNetBuyProvider: { 0 },
+                monthlyNetBuyProvider: { [weak self] in
+                    self?.cachedMonthlyNetBuy ?? 0
+                },
                 monthlySurplusProvider: { [weak self] in
                     guard let summary = self?.cachedMonthlySummary else { return 0 }
                     return summary.totalIncome - summary.totalExpense
                 },
                 monthlySummaryLoader: { [weak self] in
                     guard let self else { return }
+                    async let summaryTask = getMonthlySummaryUseCase.execute()
+                    async let netBuyTask = getMonthlyNetBuyUseCase.execute()
                     do {
-                        self.cachedMonthlySummary = try await getMonthlySummaryUseCase.execute()
+                        let (summary, netBuy) = try await (summaryTask, netBuyTask)
+                        self.cachedMonthlySummary = summary
+                        self.cachedMonthlyNetBuy = netBuy
                     } catch {
                         // Không hiện lỗi — FSI badge chỉ không hiện nếu không có data
                     }
-                }
+                },
+                gateway: botChatGateway
             )
         )
         view.onAskAI = { [weak router] prompt in
