@@ -68,6 +68,11 @@ public final class InvestmentPortfolioViewModel {
         return false
     }
 
+    /// True khi đã có dữ liệu thu chi (expenses hoặc surplus > 0 từ Transaction module).
+    public var hasTransactionData: Bool {
+        monthlyExpensesProvider() > 0 || monthlySurplusProvider() > 0
+    }
+
     public init(
         getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase,
         getPortfoliosUseCase: GetPortfoliosUseCase,

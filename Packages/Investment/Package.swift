@@ -8,13 +8,15 @@ let package = Package(
         .library(name: "Investment", targets: ["Investment"])
     ],
     dependencies: [
-        .package(path: "../FinFlowCore")
+        .package(path: "../FinFlowCore"),
+        .package(path: "../BotChat")
     ],
     targets: [
         .target(
             name: "Investment",
             dependencies: [
-                .product(name: "FinFlowCore", package: "FinFlowCore")
+                .product(name: "FinFlowCore", package: "FinFlowCore"),
+                .product(name: "BotChat", package: "BotChat")
             ]
         )
     ]

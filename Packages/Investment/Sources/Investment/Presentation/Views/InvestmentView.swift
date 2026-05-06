@@ -1,3 +1,4 @@
+import BotChat
 import FinFlowCore
 import SwiftUI
 
@@ -5,6 +6,7 @@ import SwiftUI
 /// Using a struct keeps the view initializer lean and avoids long argument lists.
 public struct InvestmentViewDependencies {
     let getStockAnalysisUseCase: GetStockAnalysisUseCase
+    let getFairValueUseCase: GetFairValueUseCase
     let getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase
     let suggestCompaniesUseCase: SuggestCompaniesUseCase
     let getPortfoliosUseCase: GetPortfoliosUseCase
@@ -18,8 +20,6 @@ public struct InvestmentViewDependencies {
     let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
     let getTradeTransactionsUseCase: GetTradeTransactionsUseCase
     let sessionManager: any SessionManagerProtocol
-    /// Closure trả về tổng tài sản ròng từ Wealth module (live value mỗi lần đọc).
-    let netWorthProvider: @MainActor () -> Double
     /// Tổng tài sản thanh khoản (tài khoản nhóm LIQUID) — dùng cho FSI survival runway.
     let liquidAssetsProvider: @MainActor () -> Double
     /// Chi tiêu trung bình hàng tháng — dùng cho FSI survival runway.
@@ -30,9 +30,11 @@ public struct InvestmentViewDependencies {
     let monthlySurplusProvider: @MainActor () -> Double
     /// Async loader gọi API monthly summary; kết quả được cache ở DI container.
     let monthlySummaryLoader: @MainActor () async -> Void
+    let gateway: BotChatGateway?
 
     public init(
         getStockAnalysisUseCase: GetStockAnalysisUseCase,
+        getFairValueUseCase: GetFairValueUseCase,
         getCompanyIndustriesUseCase: GetCompanyIndustriesUseCase,
         suggestCompaniesUseCase: SuggestCompaniesUseCase,
         getPortfoliosUseCase: GetPortfoliosUseCase,
@@ -46,14 +48,15 @@ public struct InvestmentViewDependencies {
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
         getTradeTransactionsUseCase: GetTradeTransactionsUseCase,
         sessionManager: any SessionManagerProtocol,
-        netWorthProvider: @escaping @MainActor () -> Double = { 0 },
         liquidAssetsProvider: @escaping @MainActor () -> Double = { 0 },
         monthlyExpensesProvider: @escaping @MainActor () -> Double = { 0 },
         monthlyNetBuyProvider: @escaping @MainActor () -> Double = { 0 },
         monthlySurplusProvider: @escaping @MainActor () -> Double = { 0 },
-        monthlySummaryLoader: @escaping @MainActor () async -> Void = {}
+        monthlySummaryLoader: @escaping @MainActor () async -> Void = {},
+        gateway: BotChatGateway? = nil
     ) {
         self.getStockAnalysisUseCase = getStockAnalysisUseCase
+        self.getFairValueUseCase = getFairValueUseCase
         self.getCompanyIndustriesUseCase = getCompanyIndustriesUseCase
         self.suggestCompaniesUseCase = suggestCompaniesUseCase
         self.getPortfoliosUseCase = getPortfoliosUseCase
@@ -67,12 +70,12 @@ public struct InvestmentViewDependencies {
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
         self.getTradeTransactionsUseCase = getTradeTransactionsUseCase
         self.sessionManager = sessionManager
-        self.netWorthProvider = netWorthProvider
         self.liquidAssetsProvider = liquidAssetsProvider
         self.monthlyExpensesProvider = monthlyExpensesProvider
         self.monthlyNetBuyProvider = monthlyNetBuyProvider
         self.monthlySurplusProvider = monthlySurplusProvider
         self.monthlySummaryLoader = monthlySummaryLoader
+        self.gateway = gateway
     }
 }
 
@@ -100,11 +103,16 @@ public struct InvestmentView: View {
     @State private var showDeletePortfolioConfirm = false
 
     private let suggestCompaniesUseCase: SuggestCompaniesUseCase
+    private let getFairValueUseCase: GetFairValueUseCase
     private let monthlySummaryLoader: @MainActor () async -> Void
+    private let gateway: BotChatGateway?
 
     public init(dependencies: InvestmentViewDependencies) {
+        Logger.debug("InvestmentView init | gateway=\(dependencies.gateway != nil ? "exists" : "nil")", category: "InvestmentView")
         self.suggestCompaniesUseCase = dependencies.suggestCompaniesUseCase
+        self.getFairValueUseCase = dependencies.getFairValueUseCase
         self.monthlySummaryLoader = dependencies.monthlySummaryLoader
+        self.gateway = dependencies.gateway
 
         let portfolioVM = InvestmentPortfolioViewModel(
             getCompanyIndustriesUseCase: dependencies.getCompanyIndustriesUseCase,
@@ -126,13 +134,10 @@ public struct InvestmentView: View {
         portfolioVM.monthlySurplusProvider = dependencies.monthlySurplusProvider
         _portfolioVM = State(initialValue: portfolioVM)
 
-        let netWorthProvider = dependencies.netWorthProvider
         _stockAnalysisVM = State(
             initialValue: StockAnalysisViewModel(
                 getStockAnalysisUseCase: dependencies.getStockAnalysisUseCase,
-                sessionManager: dependencies.sessionManager,
-                netWorthProvider: netWorthProvider,
-                portfolioValueProvider: { portfolioVM.portfolioTotalValue }
+                sessionManager: dependencies.sessionManager
             )
         )
     }
@@ -181,7 +186,7 @@ public struct InvestmentView: View {
 
             TabView(selection: $selectedSegment) {
                 portfolioTab.tag(0)
-                StockAnalysisView(viewModel: stockAnalysisVM).tag(1)
+                StockAnalysisView(viewModel: stockAnalysisVM, getFairValueUseCase: getFairValueUseCase).tag(1)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.25), value: selectedSegment)
@@ -193,6 +198,7 @@ public struct InvestmentView: View {
 
     @ViewBuilder
     private var portfolioTab: some View {
+        let _ = Logger.debug("portfolioTab | isLoading=\(portfolioVM.isLoadingPortfolios) portfolioCount=\(portfolioVM.portfolios.count) gateway=\(gateway != nil ? "exists" : "nil")", category: "InvestmentView")
         if portfolioVM.isLoadingPortfolios {
             portfolioListLoadingView
         } else if portfolioVM.portfolios.isEmpty {
@@ -215,7 +221,8 @@ public struct InvestmentView: View {
                     Task { @MainActor in await portfolioVM.loadTradeTransactions(reset: true) }
                     activeSheet = .tradeHistory
                 },
-                onAskAI: onAskAI
+                onAskAI: onAskAI,
+                gateway: gateway
             )
         }
     }

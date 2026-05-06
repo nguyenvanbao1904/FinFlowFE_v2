@@ -1,3 +1,4 @@
+import BotChat
 import Charts
 import FinFlowCore
 import SwiftUI
@@ -11,6 +12,7 @@ struct InvestmentPortfolioTabContent: View {
     var onDeletePortfolio: () -> Void = {}
     var onShowHistory: () -> Void = {}
     var onAskAI: ((String) -> Void)?
+    var gateway: BotChatGateway?
 
     var body: some View {
         @Bindable var viewModel = viewModel
@@ -189,18 +191,13 @@ struct InvestmentPortfolioTabContent: View {
                     }
                 }
 
-                let assessment = PortfolioAssessment.compute(
-                    assets: viewModel.sortedAssets,
-                    industryAllocations: viewModel.compactIndustryAllocations
-                )
-                PortfolioAssessmentCard(
-                    assessment: assessment,
-                    portfolioName: viewModel.selectedPortfolio?.name ?? "Danh mục",
-                    onAskAI: onAskAI,
-                    survivalRunwayMonths: viewModel.survivalRunwayMonths,
-                    monthlyInvestRatio: viewModel.monthlyInvestRatio,
-                    onOpenCFO: onAskAI.map { askAI in { askAI(cfoPrompt(viewModel: viewModel)) } }
-                )
+                if let gateway {
+                    PortfolioAssessmentCard(
+                        viewModel: viewModel,
+                        gateway: gateway,
+                        onAskAI: onAskAI
+                    )
+                }
 
                 if let portfolioHealth = viewModel.portfolioHealth {
                     if let portfolioBenchmark = viewModel.portfolioBenchmark {
@@ -274,19 +271,6 @@ struct InvestmentPortfolioTabContent: View {
         .padding(Spacing.lg)
         .background(AppColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
-    }
-
-    private func cfoPrompt(viewModel: InvestmentPortfolioViewModel) -> String {
-        var parts = ["Phân tích tình hình tài chính của tôi với vai trò CFO ảo:"]
-        if let runway = viewModel.survivalRunwayMonths {
-            parts.append("Quỹ dự phòng hiện tại: \(String(format: "%.1f", runway)) tháng.")
-        }
-        if let ratio = viewModel.monthlyInvestRatio {
-            parts.append("Tỉ lệ đầu tư/thu nhập thặng dư: \(Int(round(ratio * 100)))%.")
-        }
-        parts.append("Danh mục: \(viewModel.selectedPortfolio?.name ?? "Danh mục chính").")
-        parts.append("Đánh giá rủi ro tài chính tổng thể và đề xuất hướng cân bằng dòng tiền.")
-        return parts.joined(separator: " ")
     }
 
     private func colorForSymbol(_ symbol: String) -> Color {

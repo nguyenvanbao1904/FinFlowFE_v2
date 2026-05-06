@@ -1,302 +1,219 @@
+import BotChat
 import FinFlowCore
 import SwiftUI
 
-// MARK: - Data types
+struct PortfolioAssessmentCard: View {
+    let viewModel: InvestmentPortfolioViewModel
+    let gateway: BotChatGateway
+    var onAskAI: ((String) -> Void)?
 
-struct PortfolioWarning: Identifiable {
-    enum Level { case info, caution, risk }
-    let id = UUID()
-    let level: Level
-    let title: String
-    let detail: String
+    @State private var insights: [PortfolioInsight] = []
+    @State private var isLoading = false
+    @State private var fetchedPortfolioId: String?
 
-    var iconName: String {
-        switch level {
-        case .info: "info.circle"
-        case .caution: "exclamationmark.triangle"
-        case .risk: "exclamationmark.circle"
-        }
-    }
+    private struct PortfolioInsight: Identifiable {
+        let id = UUID()
+        let category: Category
+        let message: String
 
-    var color: Color {
-        switch level {
-        case .info: AppColors.primary
-        case .caution: .orange
-        case .risk: AppColors.error
-        }
-    }
-}
+        enum Category {
+            case nhanXet, canhBao, loiKhuyen
 
-enum PortfolioHealthLevel {
-    case good, caution, risk
+            var label: String {
+                switch self {
+                case .nhanXet: return "Nhận xét"
+                case .canhBao: return "Cảnh báo"
+                case .loiKhuyen: return "Lời khuyên"
+                }
+            }
 
-    var label: String {
-        switch self {
-        case .good: "Tốt"
-        case .caution: "Cần chú ý"
-        case .risk: "Rủi ro cao"
-        }
-    }
+            var icon: String {
+                switch self {
+                case .nhanXet: return "chart.bar.fill"
+                case .canhBao: return "exclamationmark.triangle.fill"
+                case .loiKhuyen: return "lightbulb.fill"
+                }
+            }
 
-    var color: Color {
-        switch self {
-        case .good: AppColors.chartGrowthStrong
-        case .caution: .orange
-        case .risk: AppColors.error
-        }
-    }
-}
-
-// MARK: - Computation
-
-struct PortfolioAssessment {
-    let level: PortfolioHealthLevel
-    let warnings: [PortfolioWarning]
-
-    static func compute(
-        assets: [PortfolioAssetResponse],
-        industryAllocations: [(name: String, weight: Double)]
-    ) -> PortfolioAssessment {
-        var warnings: [PortfolioWarning] = []
-
-        let totalMarket = assets.reduce(0.0) { sum, a in
-            sum + (a.marketValueClose ?? (a.totalQuantity * a.averagePrice))
-        }
-
-        if totalMarket > 0 {
-            for asset in assets {
-                let value = asset.marketValueClose ?? (asset.totalQuantity * asset.averagePrice)
-                let pct = (value / totalMarket) * 100
-                if pct > 40 {
-                    warnings.append(.init(
-                        level: .risk,
-                        title: "\(asset.symbol) chiếm \(String(format: "%.0f", pct))% danh mục",
-                        detail: "Rủi ro tập trung — cân nhắc phân bổ lại sang các mã khác"
-                    ))
+            var color: Color {
+                switch self {
+                case .nhanXet: return AppColors.primary
+                case .canhBao: return AppColors.error
+                case .loiKhuyen: return Color.orange
                 }
             }
         }
-
-        for asset in assets {
-            if let pct = asset.unrealizedPnLPct, pct < -20 {
-                warnings.append(.init(
-                    level: .caution,
-                    title: "\(asset.symbol) đang lỗ \(String(format: "%.1f", abs(pct)))%",
-                    detail: "Xem lại luận điểm đầu tư, xác định có còn phù hợp không"
-                ))
-            }
-        }
-
-        if let topSector = industryAllocations.first, topSector.name != "Khác", topSector.weight > 60 {
-            warnings.append(.init(
-                level: .info,
-                title: "\(topSector.name) chiếm \(String(format: "%.0f", topSector.weight))% danh mục",
-                detail: "Danh mục tập trung 1 ngành — cân nhắc đa dạng hóa sang ngành khác"
-            ))
-        }
-
-        let stockCount = assets.filter { $0.totalQuantity > 0 }.count
-        if stockCount > 0 && stockCount <= 3 {
-            warnings.append(.init(
-                level: .info,
-                title: "Chỉ có \(stockCount) mã cổ phiếu",
-                detail: "Danh mục nhỏ — thêm 2-3 mã từ các ngành khác để giảm rủi ro tập trung"
-            ))
-        }
-
-        let level: PortfolioHealthLevel = {
-            let hasRisk = warnings.contains { $0.level == .risk }
-            let hasCaution = warnings.contains { $0.level == .caution }
-            if hasRisk { return .risk }
-            if hasCaution || warnings.count >= 2 { return .caution }
-            return .good
-        }()
-
-        return PortfolioAssessment(level: level, warnings: warnings)
     }
-}
-
-// MARK: - View
-
-struct PortfolioAssessmentCard: View {
-    let assessment: PortfolioAssessment
-    let portfolioName: String
-    var onAskAI: ((String) -> Void)?
-    var survivalRunwayMonths: Double?
-    var monthlyInvestRatio: Double?
-    var onOpenCFO: (() -> Void)?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Text("Đánh giá sức khỏe")
-                    .font(AppTypography.headline)
-                    .foregroundStyle(.primary)
-                Spacer()
-                HStack(spacing: Spacing.xs) {
-                    Circle()
-                        .fill(assessment.level.color)
-                        .frame(width: 8, height: 8)
-                    Text(assessment.level.label)
-                        .font(AppTypography.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(assessment.level.color)
-                }
-            }
-
-            if assessment.warnings.isEmpty {
+        let _ = Logger.debug("body evaluated | portfolio=\(viewModel.selectedPortfolio?.id ?? "nil") assets=\(viewModel.assets.count) isLoading=\(isLoading) insightCount=\(insights.count)", category: "PortfolioAssessmentCard")
+        Group {
+            if isLoading {
                 HStack(spacing: Spacing.sm) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(AppColors.chartGrowthStrong)
-                        .font(.body)
-                    Text("Danh mục phân bổ tốt, không có cảnh báo đặc biệt.")
-                        .font(AppTypography.body)
+                    ProgressView().scaleEffect(0.8)
+                    Text("Đang phân tích danh mục...")
+                        .font(AppTypography.caption)
                         .foregroundStyle(.secondary)
                 }
-                .padding(.top, Spacing.xs)
-            } else {
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Spacing.md)
+                .background(AppColors.cardBackground)
+                .clipShape(.rect(cornerRadius: CornerRadius.large))
+            } else if !insights.isEmpty {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    ForEach(assessment.warnings) { warning in
-                        warningRow(warning)
-                        if warning.id != assessment.warnings.last?.id {
-                            Divider()
+                    ForEach(insights) { insight in
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            HStack(spacing: Spacing.xs) {
+                                Image(systemName: insight.category.icon)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(insight.category.color)
+                                Text(insight.category.label.uppercased())
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(insight.category.color)
+                                    .tracking(0.5)
+                            }
+                            Text(insight.message)
+                                .font(AppTypography.caption)
+                                .foregroundStyle(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
+                        .padding(Spacing.sm)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(insight.category.color.opacity(0.08))
+                        .clipShape(.rect(cornerRadius: CornerRadius.small))
                     }
+
+                    Divider()
+
+                    Button {
+                        onAskAI?("Phân tích chi tiết danh mục \"\(viewModel.selectedPortfolio?.name ?? "")\" của tôi")
+                    } label: {
+                        HStack(spacing: Spacing.xs) {
+                            Image(systemName: "brain").font(AppTypography.subheadline)
+                            Text("Phân tích chi tiết với AI")
+                                .font(AppTypography.subheadline)
+                                .fontWeight(.medium)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .foregroundStyle(AppColors.primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(Spacing.md)
+                .background(AppColors.cardBackground)
+                .clipShape(.rect(cornerRadius: CornerRadius.large))
+            }
+        }
+        .onAppear {
+            Task { await fetchSummary() }
+        }
+        .onChange(of: viewModel.selectedPortfolio?.id) { _, _ in
+            Task { await fetchSummary() }
+        }
+        .onChange(of: viewModel.assets.isEmpty) { _, isEmpty in
+            if !isEmpty { Task { await fetchSummary() } }
+        }
+    }
+
+    private func fetchSummary() async {
+        Logger.debug("fetchSummary | portfolio=\(viewModel.selectedPortfolio?.id ?? "nil") assets=\(viewModel.assets.count) fetchedFor=\(fetchedPortfolioId ?? "nil")", category: "PortfolioAssessmentCard")
+        guard let portfolio = viewModel.selectedPortfolio else { return }
+        guard !viewModel.assets.isEmpty else { return }
+        guard fetchedPortfolioId != portfolio.id else { return }
+
+        isLoading = true
+        insights = []
+        fetchedPortfolioId = portfolio.id
+
+        do {
+            let thread = try await gateway.createThread(title: nil)
+            let result = try await gateway.sendMessage(buildPrompt(portfolioName: portfolio.name), threadId: thread.id)
+            Logger.info("got response len=\(result.content.count)", category: "PortfolioAssessmentCard")
+            insights = parseInsights(from: result.content)
+        } catch {
+            Logger.error("fetch failed: \(error.localizedDescription)", category: "PortfolioAssessmentCard")
+            fetchedPortfolioId = nil
+        }
+
+        isLoading = false
+    }
+
+    private func parseInsights(from text: String) -> [PortfolioInsight] {
+        Logger.debug("parseInsights raw text: \(text.prefix(200))", category: "PortfolioAssessmentCard")
+
+        guard let data = text.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
+        else {
+            Logger.error("Failed to parse JSON, falling back to single insight", category: "PortfolioAssessmentCard")
+            return [PortfolioInsight(category: .nhanXet, message: text)]
+        }
+
+        Logger.debug("Parsed \(json.count) insights from JSON", category: "PortfolioAssessmentCard")
+
+        // Fallback: nếu LLM không trả đúng category, dùng thứ tự để map
+        let expectedCategories: [PortfolioInsight.Category] = [.nhanXet, .canhBao, .loiKhuyen]
+
+        return json.enumerated().compactMap { index, item in
+            guard let msg = item["message"] else {
+                Logger.error("Missing message in item: \(item)", category: "PortfolioAssessmentCard")
+                return nil
+            }
+
+            let cat = item["category"] ?? ""
+            let category: PortfolioInsight.Category
+
+            switch cat {
+            case "nhan_xet": category = .nhanXet
+            case "canh_bao": category = .canhBao
+            case "loi_khuyen": category = .loiKhuyen
+            default:
+                // Fallback: dùng thứ tự nếu LLM không trả đúng category
+                if index < expectedCategories.count {
+                    category = expectedCategories[index]
+                    Logger.debug("Using fallback category for index \(index): \(category)", category: "PortfolioAssessmentCard")
+                } else {
+                    Logger.error("Unknown category '\(cat)' at index \(index)", category: "PortfolioAssessmentCard")
+                    category = .nhanXet
                 }
             }
 
-            if let runway = survivalRunwayMonths, let ratio = monthlyInvestRatio,
-               (runway < 3 || ratio > 0.80) {
-                Divider()
-                FinancialStressIndicatorBadge(
-                    survivalRunwayMonths: runway < 3 ? runway : nil,
-                    monthlyInvestRatio: ratio > 0.80 ? ratio : nil,
-                    onOpenCFO: onOpenCFO
-                )
-            } else if let runway = survivalRunwayMonths, runway < 3 {
-                Divider()
-                FinancialStressIndicatorBadge(
-                    survivalRunwayMonths: runway,
-                    monthlyInvestRatio: nil,
-                    onOpenCFO: onOpenCFO
-                )
-            } else if let ratio = monthlyInvestRatio, ratio > 0.80 {
-                Divider()
-                FinancialStressIndicatorBadge(
-                    survivalRunwayMonths: nil,
-                    monthlyInvestRatio: ratio,
-                    onOpenCFO: onOpenCFO
-                )
-            }
-
-            if let onAskAI {
-                Divider()
-                Button {
-                    onAskAI(aiPrompt)
-                } label: {
-                    HStack(spacing: Spacing.xs) {
-                        Image(systemName: "brain")
-                            .font(AppTypography.subheadline)
-                        Text("Phân tích chi tiết với AI")
-                            .font(AppTypography.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(AppTypography.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .foregroundStyle(AppColors.primary)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(Spacing.md)
-        .background(AppColors.cardBackground)
-        .clipShape(.rect(cornerRadius: CornerRadius.large))
-    }
-
-    private var aiPrompt: String {
-        "Phân tích danh mục đầu tư \"\(portfolioName)\" của tôi: đánh giá sức khỏe tổng thể, rủi ro tập trung, định giá hiện tại so với lịch sử, và đưa ra nhận xét cụ thể."
-    }
-
-    @ViewBuilder
-    private func warningRow(_ warning: PortfolioWarning) -> some View {
-        HStack(alignment: .top, spacing: Spacing.sm) {
-            Image(systemName: warning.iconName)
-                .foregroundStyle(warning.color)
-                .font(.body)
-                .frame(width: 20, alignment: .center)
-            VStack(alignment: .leading, spacing: Spacing.xs / 4) {
-                Text(warning.title)
-                    .font(AppTypography.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-                Text(warning.detail)
-                    .font(AppTypography.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Logger.debug("Parsed insight[\(index)]: category=\(category) msg=\(msg.prefix(50))", category: "PortfolioAssessmentCard")
+            return PortfolioInsight(category: category, message: msg)
         }
     }
-}
 
-// MARK: - Preview
+    private func buildPrompt(portfolioName: String) -> String {
+        var fsiNote = ""
+        let expenses = viewModel.monthlyExpensesProvider()
+        if expenses > 0 {
+            let runway = viewModel.liquidAssetsProvider() / expenses
+            if runway < 3 {
+                fsiNote += " Quỹ dự phòng còn \(String(format: "%.1f", runway)) tháng (dưới mức an toàn 3 tháng)."
+            }
+        }
+        if let ratio = viewModel.monthlyInvestRatio, ratio > 0.80 {
+            fsiNote += " ~\(Int(round(ratio * 100)))% thu nhập thặng dư đang đổ vào đầu tư."
+        }
 
-#Preview("Có cảnh báo") {
-    let mockAssets = [
-        PortfolioAssetResponse(
-            symbol: "TCB", totalQuantity: 10000, averagePrice: 20_000,
-            closePrice: 23_000, marketValueClose: 230_000_000,
-            unrealizedPnL: 30_000_000, unrealizedPnLPct: 15.0
-        ),
-        PortfolioAssetResponse(
-            symbol: "VHM", totalQuantity: 3000, averagePrice: 40_000,
-            closePrice: 30_000, marketValueClose: 90_000_000,
-            unrealizedPnL: -30_000_000, unrealizedPnLPct: -25.0
-        ),
-        PortfolioAssetResponse(
-            symbol: "VCB", totalQuantity: 500, averagePrice: 90_000,
-            closePrice: 95_000, marketValueClose: 47_500_000,
-            unrealizedPnL: 2_500_000, unrealizedPnLPct: 5.6
-        ),
-    ]
-    let industryAlloc: [(name: String, weight: Double)] = [
-        ("Ngân hàng", 74.7), ("Bất động sản", 25.3),
-    ]
-    let assessment = PortfolioAssessment.compute(assets: mockAssets, industryAllocations: industryAlloc)
-    return PortfolioAssessmentCard(assessment: assessment, portfolioName: "Danh mục chính", onAskAI: { _ in })
-        .padding()
-        .background(AppColors.appBackground)
-}
+        return """
+        Dùng get_portfolio_analysis và get_personal_finance_report để lấy dữ liệu, rồi đưa ra đánh giá về danh mục "\(portfolioName)".\(fsiNote)
 
-#Preview("Danh mục tốt") {
-    let mockAssets = [
-        PortfolioAssetResponse(
-            symbol: "TCB", totalQuantity: 3000, averagePrice: 20_000,
-            closePrice: 23_000, marketValueClose: 69_000_000,
-            unrealizedPnL: 9_000_000, unrealizedPnLPct: 15.0
-        ),
-        PortfolioAssetResponse(
-            symbol: "VHM", totalQuantity: 2000, averagePrice: 35_000,
-            closePrice: 38_000, marketValueClose: 76_000_000,
-            unrealizedPnL: 6_000_000, unrealizedPnLPct: 8.6
-        ),
-        PortfolioAssetResponse(
-            symbol: "FPT", totalQuantity: 1000, averagePrice: 95_000,
-            closePrice: 110_000, marketValueClose: 110_000_000,
-            unrealizedPnL: 15_000_000, unrealizedPnLPct: 15.8
-        ),
-        PortfolioAssetResponse(
-            symbol: "MWG", totalQuantity: 2000, averagePrice: 42_000,
-            closePrice: 45_000, marketValueClose: 90_000_000,
-            unrealizedPnL: 6_000_000, unrealizedPnLPct: 7.1
-        ),
-    ]
-    let industryAlloc: [(name: String, weight: Double)] = [
-        ("Bán lẻ", 26.0), ("Công nghệ", 31.7), ("Ngân hàng", 19.9), ("Bất động sản", 22.0),
-    ]
-    let assessment = PortfolioAssessment.compute(assets: mockAssets, industryAllocations: industryAlloc)
-    return PortfolioAssessmentCard(assessment: assessment, portfolioName: "Danh mục chính", onAskAI: { _ in })
-        .padding()
-        .background(AppColors.appBackground)
+        Trả lời bằng JSON array với ĐÚNG 3 mục theo thứ tự:
+        1. "nhan_xet" — Tình trạng tổng thể: danh mục đang lãi/lỗ bao nhiêu, có ổn không (1 câu ngắn)
+        2. "canh_bao" — Rủi ro chính: tập trung quá cao, thiếu đa dạng hóa, hoặc vấn đề tài chính cá nhân (1 câu ngắn)
+        3. "loi_khuyen" — Hành động cụ thể: nên làm gì tiếp theo để cải thiện (1 câu ngắn)
+
+        Format:
+        [
+          {"category": "nhan_xet", "message": "Danh mục đang lãi 3.26 triệu (9.2%), tình hình tốt"},
+          {"category": "canh_bao", "message": "VCB và HPG chiếm 60% danh mục — rủi ro tập trung cao"},
+          {"category": "loi_khuyen", "message": "Xây dựng quỹ dự phòng 3-6 tháng chi tiêu trước khi tăng đầu tư"}
+        ]
+
+        Chỉ trả JSON, không thêm text nào khác. Mỗi message ngắn gọn, có số liệu cụ thể.
+        """
+    }
 }
