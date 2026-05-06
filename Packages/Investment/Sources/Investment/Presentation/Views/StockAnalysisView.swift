@@ -3,13 +3,15 @@ import SwiftUI
 
 public struct StockAnalysisView: View {
     @Bindable var viewModel: StockAnalysisViewModel
+    let getFairValueUseCase: GetFairValueUseCase
     @State private var searchText = ""
     @State private var financialShowQuarterly = true
     /// Mặc định theo ngày (API Finfo + chỉ số theo từng ngày); chọn «Quý» trên segmented để xem điểm cuối kỳ.
     @State private var valuationGranularity: ValuationSeriesGranularity = .daily
 
-    public init(viewModel: StockAnalysisViewModel) {
+    public init(viewModel: StockAnalysisViewModel, getFairValueUseCase: GetFairValueUseCase) {
         self.viewModel = viewModel
+        self.getFairValueUseCase = getFairValueUseCase
     }
 
     public var body: some View {
@@ -142,13 +144,8 @@ public struct StockAnalysisView: View {
         }
         .padding(.horizontal, Spacing.lg)
 
-        DynamicMoSCard(
-            overview: overview,
-            cautionLevel: $viewModel.mosCautionLevel,
-            allocationRatio: viewModel.allocationRatio,
-            requiredMargin: viewModel.requiredMargin
-        )
-        .padding(.horizontal, Spacing.lg)
+        DynamicMoSCard(overview: overview, getFairValueUseCase: getFairValueUseCase)
+            .padding(.horizontal, Spacing.lg)
 
         ValuationChartGroup(
             valuations: viewModel.valuations,

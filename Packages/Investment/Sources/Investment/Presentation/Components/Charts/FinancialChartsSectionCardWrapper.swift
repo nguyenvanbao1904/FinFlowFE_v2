@@ -6,6 +6,7 @@ extension FinancialChartsSection {
         title: String,
         subtitle: String? = nil,
         subtitleColor: Color = AppColors.success,
+        explanation: String? = nil,
         expandKind: ChartKind,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
@@ -13,6 +14,7 @@ extension FinancialChartsSection {
             title: title,
             subtitle: subtitle,
             subtitleColor: subtitleColor,
+            explanation: explanation,
             onExpand: { expandChartFullscreen(expandKind) }
         ) {
             content()
