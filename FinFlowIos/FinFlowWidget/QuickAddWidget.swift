@@ -62,10 +62,11 @@ struct QuickAddWidgetView: View {
 
     private var smallView: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "bolt.fill")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.blue)
+            HStack(spacing: 4) {
+                Image("AppLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
                 Text("FinFlow")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -95,14 +96,14 @@ struct QuickAddWidgetView: View {
                     url: "finflow://quickadd?mode=voice"
                 )
                 actionLink(
-                    systemImage: "sparkles",
-                    label: "AI",
+                    systemImage: "keyboard",
+                    label: "Nhập",
                     tint: .purple,
                     url: "finflow://quickadd?mode=text"
                 )
                 actionLink(
                     systemImage: "camera.viewfinder",
-                    label: "OCR",
+                    label: "Chụp",
                     tint: .orange,
                     url: "finflow://quickadd?mode=ocr"
                 )
@@ -118,9 +119,10 @@ struct QuickAddWidgetView: View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Image(systemName: "bolt.fill")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.blue)
+                    Image("AppLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
                     Text("FinFlow")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
@@ -151,14 +153,14 @@ struct QuickAddWidgetView: View {
                     url: "finflow://quickadd?mode=voice"
                 )
                 bigActionLink(
-                    systemImage: "sparkles",
-                    label: "Văn bản AI",
+                    systemImage: "keyboard",
+                    label: "Nhập văn bản",
                     tint: .purple,
                     url: "finflow://quickadd?mode=text"
                 )
                 bigActionLink(
                     systemImage: "camera.viewfinder",
-                    label: "Chụp hoá đơn",
+                    label: "Chụp ảnh",
                     tint: .orange,
                     url: "finflow://quickadd?mode=ocr"
                 )
