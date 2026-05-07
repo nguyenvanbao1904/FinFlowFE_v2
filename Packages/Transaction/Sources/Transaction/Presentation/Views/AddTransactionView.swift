@@ -33,8 +33,13 @@ public struct AddTransactionView: View {
     @State private var activeSheet: ActiveSheet?
     @FocusState private var focusedField: InputField?
 
-    public init(viewModel: AddTransactionViewModel) {
+    private let autoTriggerMode: WidgetInputMode?
+    @State private var hasTriggeredAutoMode = false
+    @State private var focusAIInput = false
+
+    public init(viewModel: AddTransactionViewModel, autoTriggerMode: WidgetInputMode? = nil) {
         self.viewModel = viewModel
+        self.autoTriggerMode = autoTriggerMode
     }
 
     public var body: some View {
@@ -46,6 +51,7 @@ public struct AddTransactionView: View {
                     set: { _ in }
                 ),
                 placeholder: "Ví dụ: Đổ xăng 50 cành...",
+                autoFocus: $focusAIInput,
                 onSubmit: { text in
                     focusedField = nil
                     assistant.submitTextForAnalysis(text, mirrorToInput: true, analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
@@ -103,6 +109,31 @@ public struct AddTransactionView: View {
             }
         }
         .task { await viewModel.fetchCategories() }
+        .task {
+            // Auto-trigger input mode từ widget (chỉ chạy 1 lần)
+            guard !hasTriggeredAutoMode, let mode = autoTriggerMode else { return }
+            hasTriggeredAutoMode = true
+
+            // Đợi categories load xong
+            await viewModel.fetchCategories()
+
+            // Delay nhỏ để UI render xong
+            try? await Task.sleep(for: .milliseconds(300))
+
+            await MainActor.run {
+                switch mode {
+                case .voice:
+                    assistant.toggleVoiceInput(
+                        analyze: { await viewModel.analyzeText(input: $0) },
+                        alertAfter: { viewModel.alert != nil }
+                    )
+                case .text:
+                    focusAIInput = true
+                case .ocr:
+                    cameraSheet = .camera
+                }
+            }
+        }
         // swiftlint:disable:next no_direct_sheet_or_cover
         .sheet(item: $activeSheet) { sheet in
             switch sheet {

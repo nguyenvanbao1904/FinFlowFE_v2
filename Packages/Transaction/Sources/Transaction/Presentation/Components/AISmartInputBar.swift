@@ -17,6 +17,7 @@ struct AISmartInputBar: View {
     var placeholder: String
     var showVoiceButton: Bool
     var showCameraButton: Bool
+    var autoFocus: Binding<Bool>?
 
     var onSubmit: (String) -> Void
     var onVoice: () -> Void
@@ -28,6 +29,7 @@ struct AISmartInputBar: View {
         placeholder: String = "Ví dụ: Đổ xăng 50 cành...",
         showVoiceButton: Bool = true,
         showCameraButton: Bool = true,
+        autoFocus: Binding<Bool>? = nil,
         onSubmit: @escaping (String) -> Void,
         onVoice: @escaping () -> Void = {},
         onCamera: @escaping () -> Void = {}
@@ -37,6 +39,7 @@ struct AISmartInputBar: View {
         self.placeholder = placeholder
         self.showVoiceButton = showVoiceButton
         self.showCameraButton = showCameraButton
+        self.autoFocus = autoFocus
         self.onSubmit = onSubmit
         self.onVoice = onVoice
         self.onCamera = onCamera
@@ -78,6 +81,9 @@ struct AISmartInputBar: View {
                 )
                 .accessibilityLabel("Chụp ảnh hoá đơn")
             }
+        }
+        .onChange(of: autoFocus?.wrappedValue ?? false) { _, shouldFocus in
+            if shouldFocus { isFocused = true }
         }
     }
 
