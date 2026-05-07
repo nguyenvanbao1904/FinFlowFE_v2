@@ -10,13 +10,34 @@ public protocol HTTPClientProtocol: Sendable {
         headers: [String: String]?,
         version: String?,
         retryOn401: Bool,
-        extendedTimeout: Bool
+        extendedTimeout: Bool,
+        skipAuth: Bool
     ) async throws -> T
 }
 
 // Default convenience to keep call sites short
 public extension HTTPClientProtocol {
-    // Overload for backward compatibility (default retryOn401 = true)
+    func request<T: Codable & Sendable>(
+        endpoint: String,
+        method: String,
+        body: (any Encodable & Sendable)?,
+        headers: [String: String]?,
+        version: String?,
+        retryOn401: Bool,
+        extendedTimeout: Bool
+    ) async throws -> T {
+        try await request(
+            endpoint: endpoint,
+            method: method,
+            body: body,
+            headers: headers,
+            version: version,
+            retryOn401: retryOn401,
+            extendedTimeout: extendedTimeout,
+            skipAuth: false
+        )
+    }
+
     func request<T: Codable & Sendable>(
         endpoint: String,
         method: String,
@@ -24,14 +45,15 @@ public extension HTTPClientProtocol {
         headers: [String: String]?,
         version: String?
     ) async throws -> T {
-        return try await request(
+        try await request(
             endpoint: endpoint,
             method: method,
             body: body,
             headers: headers,
             version: version,
             retryOn401: true,
-            extendedTimeout: false
+            extendedTimeout: false,
+            skipAuth: false
         )
     }
 
@@ -50,7 +72,8 @@ public extension HTTPClientProtocol {
             headers: headers,
             version: version,
             retryOn401: retryOn401,
-            extendedTimeout: false
+            extendedTimeout: false,
+            skipAuth: false
         )
     }
 
@@ -66,7 +89,8 @@ public extension HTTPClientProtocol {
             headers: nil,
             version: nil,
             retryOn401: true,
-            extendedTimeout: false
+            extendedTimeout: false,
+            skipAuth: false
         )
     }
 
@@ -74,6 +98,36 @@ public extension HTTPClientProtocol {
         endpoint: String,
         method: String
     ) async throws -> T {
-        try await request(endpoint: endpoint, method: method, body: nil, headers: nil, version: nil)
+        try await request(
+            endpoint: endpoint,
+            method: method,
+            body: nil,
+            headers: nil,
+            version: nil,
+            retryOn401: true,
+            extendedTimeout: false,
+            skipAuth: false
+        )
+    }
+
+    func request<T: Codable & Sendable>(
+        endpoint: String,
+        method: String,
+        body: (any Encodable & Sendable)?,
+        headers: [String: String]?,
+        version: String?,
+        retryOn401: Bool,
+        skipAuth: Bool
+    ) async throws -> T {
+        try await request(
+            endpoint: endpoint,
+            method: method,
+            body: body,
+            headers: headers,
+            version: version,
+            retryOn401: retryOn401,
+            extendedTimeout: false,
+            skipAuth: skipAuth
+        )
     }
 }

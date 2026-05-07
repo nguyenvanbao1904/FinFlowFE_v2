@@ -56,7 +56,8 @@ public actor APIClient: HTTPClientProtocol {
             headers: headers,
             version: version,
             retryOn401: true,
-            extendedTimeout: false
+            extendedTimeout: false,
+            skipAuth: false
         )
     }
 
@@ -67,9 +68,10 @@ public actor APIClient: HTTPClientProtocol {
         method: String = "GET",
         body: (any Encodable & Sendable)? = nil,
         headers: [String: String]? = nil,
-        version: String? = nil,  // Override version cho request cụ thể
-        retryOn401: Bool = true,  // Cho phép tắt retry khi gọi refresh token
-        extendedTimeout: Bool = false
+        version: String? = nil,
+        retryOn401: Bool = true,
+        extendedTimeout: Bool = false,
+        skipAuth: Bool = false
     ) async throws -> T {
         var retryAttempted = false
         let urlSession = extendedTimeout ? longRunningSession : session
@@ -83,19 +85,21 @@ public actor APIClient: HTTPClientProtocol {
             request.httpMethod = method
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue(version ?? apiVersion, forHTTPHeaderField: "API-Version")
-            
+
             headers?.forEach { key, value in
                 request.setValue(value, forHTTPHeaderField: key)
             }
 
-            let bearer: String?
-            if let override = tokenOverride {
-                bearer = override
-            } else {
-                bearer = await tokenStore?.getToken()
-            }
-            if let token = bearer, !token.isEmpty {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            if !skipAuth {
+                let bearer: String?
+                if let override = tokenOverride {
+                    bearer = override
+                } else {
+                    bearer = await tokenStore?.getToken()
+                }
+                if let token = bearer, !token.isEmpty {
+                    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                }
             }
 
             if let body = body {

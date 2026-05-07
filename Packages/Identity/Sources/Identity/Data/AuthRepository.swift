@@ -29,7 +29,8 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             body: req,
             headers: nil,
             version: nil,
-            retryOn401: false  // 401 = sai mật khẩu, không retry refresh; giữ message từ backend
+            retryOn401: false,
+            skipAuth: true
         )
     }
 
@@ -42,7 +43,8 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             body: req,
             headers: nil,
             version: nil,
-            retryOn401: false
+            retryOn401: false,
+            skipAuth: true
         )
     }
 
@@ -53,7 +55,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             method: "POST",
             body: req,
             headers: ["X-Registration-Token": token],
-            version: nil
+            version: nil,
+            retryOn401: false,
+            skipAuth: true
         )
         Logger.info("Đăng ký thành công", category: "Auth")
     }
@@ -117,7 +121,8 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
                 body: RefreshTokenRequest(refreshToken: storedRefreshToken),
                 headers: nil,
                 version: nil,
-                retryOn401: false
+                retryOn401: false,
+                skipAuth: true
             )
 
             // Save new tokens immediately to prevent race conditions on concurrent 401s.
@@ -164,7 +169,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             method: "POST",
             body: req,
             headers: nil,
-            version: nil
+            version: nil,
+            retryOn401: false,
+            skipAuth: true
         )
     }
 
@@ -178,7 +185,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             method: "POST",
             body: req,
             headers: nil,
-            version: nil
+            version: nil,
+            retryOn401: false,
+            skipAuth: true
         )
         return response
     }
@@ -190,7 +199,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             method: "POST",
             body: req,
             headers: ["X-Reset-Token": token],
-            version: nil
+            version: nil,
+            retryOn401: false,
+            skipAuth: true
         )
         Logger.info("Đặt lại mật khẩu thành công", category: "Auth")
     }
@@ -203,7 +214,9 @@ public final class AuthRepository: AuthRepositoryProtocol, Sendable {
             method: "POST",
             body: req,
             headers: nil,
-            version: nil
+            version: nil,
+            retryOn401: false,
+            skipAuth: true
         )
         return response
     }
