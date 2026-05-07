@@ -10,6 +10,7 @@ import Dashboard
 import FinFlowCore
 import Identity
 import SwiftUI
+import Transaction
 
 @main
 @MainActor
@@ -32,6 +33,26 @@ struct FinFlowIosApp: App {
                         isFirstLaunch = false
                     }
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .transactionDidSave)) { _ in
+                    Task { await updateWidgetSummary() }
+                }
+        }
+    }
+
+    // MARK: - Widget Update
+
+    private func updateWidgetSummary() async {
+        guard router.isAuthenticated else { return }
+        do {
+            let summary = try await GetTransactionSummaryUseCase(
+                repository: container.transactionRepository
+            ).execute()
+            WidgetUpdateHelper.updateTodaySummary(
+                expense: summary.totalExpense,
+                income: summary.totalIncome
+            )
+        } catch {
+            // Silent fail — widget sẽ hiển thị data cũ
         }
     }
 }
@@ -45,6 +66,7 @@ struct AppRootView: View {
     @State private var lastBackgroundDate: Date?
     @State private var isPrivacyBlurVisible = false
     @State private var hasUnreadBotSuggestion = true
+    @State private var pendingWidgetURL: URL?
 
     // Constants
     private let backgroundTimeout: TimeInterval = 60  // 1 minute
@@ -154,6 +176,18 @@ struct AppRootView: View {
                 container.resetCachedHomeViewModel()
                 container.resetCachedTransactionListViewModel()
                 container.resetCachedWealthListViewModel()
+            } else if let url = pendingWidgetURL {
+                // Dashboard vừa xuất hiện, xử lý pending widget URL
+                handleWidgetURL(url)
+                pendingWidgetURL = nil
+            }
+        }
+        .onOpenURL { url in
+            if router.root == .dashboard {
+                handleWidgetURL(url)
+            } else {
+                // Chưa authenticated, lưu lại xử lý sau
+                pendingWidgetURL = url
             }
         }
     }
@@ -197,6 +231,24 @@ struct AppRootView: View {
         }
     }
 
+    // MARK: - Widget URL Handling
+
+    private func handleWidgetURL(_ url: URL) {
+        guard url.scheme == "finflow",
+              url.host == "quickadd",
+              let modeStr = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                  .queryItems?.first(where: { $0.name == "mode" })?.value,
+              let mode = WidgetInputMode(rawValue: modeStr) else { return }
+
+        Task { @MainActor in
+            if router.presentedSheet != nil {
+                router.dismissSheet()
+                try? await Task.sleep(for: .milliseconds(350))
+            }
+            router.presentSheet(.addTransaction(autoTriggerMode: mode))
+        }
+    }
+
     // MARK: - View Factories (Router Factory Pattern)
 
     @ViewBuilder
@@ -229,8 +281,8 @@ struct AppRootView: View {
             container.makeChangePasswordView(hasPassword: hasPassword, router: router)
         case .createPIN(let email):
             container.makeCreatePINView(email: email, router: router)
-        case .addTransaction:
-            container.makeAddTransactionView(router: router)
+        case .addTransaction(let autoTriggerMode):
+            container.makeAddTransactionView(router: router, autoTriggerMode: autoTriggerMode)
         case .editTransaction(let transaction):
             container.makeAddTransactionView(router: router, transactionToEdit: transaction)
         case .categoryList:

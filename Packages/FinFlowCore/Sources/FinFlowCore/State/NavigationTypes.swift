@@ -74,7 +74,7 @@ public enum AppRoute: Hashable, Sendable {
     case updateProfile(UserProfile)
     case changePassword(hasPassword: Bool)
     case createPIN(email: String)
-    case addTransaction
+    case addTransaction(autoTriggerMode: WidgetInputMode? = nil)
     case editTransaction(TransactionResponse)
     case categoryList
     case addBudget
@@ -101,7 +101,7 @@ extension AppRoute: Identifiable {
         case .updateProfile(let p):           return "updateProfile-\(p.id)"
         case .changePassword(let has):        return "changePassword-\(has)"
         case .createPIN(let email):           return "createPIN-\(email)"
-        case .addTransaction:                 return "addTransaction"
+        case .addTransaction(let mode):       return "addTransaction-\(mode?.rawValue ?? "none")"
         case .editTransaction(let t):         return "editTransaction-\(t.id)"
         case .categoryList:                   return "categoryList"
         case .addBudget:                      return "addBudget"
