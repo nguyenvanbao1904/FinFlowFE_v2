@@ -53,7 +53,8 @@ final class TransactionInputAssistant {
                 self?.speechErrorMessage = message
             },
             onAutoSubmit: { [weak self] finalText in
-                self?.speechManager.stopListening()
+                // KHÔNG gọi stopListening() ở đây vì onAutoSubmit trong beginRecognition đã set isListening = false
+                // và audio engine sẽ tự stop khi isFinal. Gọi stopListening() sẽ cancel task → trigger error.
                 self?.submitTextForAnalysis(finalText, mirrorToInput: true, analyze: analyze, alertAfter: alertAfter)
             }
         )

@@ -102,5 +102,11 @@ public struct LockScreenView: View {
                 await viewModel.handlePINEntry(newPin)
             }
         }
+        .onChange(of: viewModel.errorMessage) { _, error in
+            // Restore focus after error (PIN was cleared)
+            if error != nil && viewModel.pin.isEmpty {
+                isFocused = true
+            }
+        }
     }
 }

@@ -260,7 +260,7 @@ public final class TransactionListViewModel {
     }
 
     public func presentAddTransaction() {
-        router.presentSheet(.addTransaction)
+        router.presentSheet(.addTransaction())
     }
 
     public func presentCategoryList() {

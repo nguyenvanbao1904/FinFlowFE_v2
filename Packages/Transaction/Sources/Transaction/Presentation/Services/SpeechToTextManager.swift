@@ -49,7 +49,8 @@ final class SpeechToTextManager {
                     onAutoSubmit: { finalText in
                         Task { @MainActor [weak self] in
                             guard let self else { return }
-                            self.isListening = false
+                            // Gracefully end audio so recognition finishes with isFinal = true, not an error
+                            self.endListeningGracefully()
                             self.latestTranscript = finalText
                             if !finalText.isEmpty {
                                 onAutoSubmit(finalText)
@@ -67,6 +68,11 @@ final class SpeechToTextManager {
     func stopListening() {
         isListening = false
         Task { await audio.stop() }
+    }
+
+    func endListeningGracefully() {
+        isListening = false
+        Task { await audio.endAudioGracefully() }
     }
 }
 
@@ -210,18 +216,30 @@ private actor SpeechAudioActor {
     func stop() {
         stopInternal()
     }
-    
+
+    func endAudioGracefully() {
+        // Signal end of audio without cancelling task → recognition finishes with isFinal = true
+        recognitionRequest?.endAudio()
+
+        if let engine = audioEngine {
+            if engine.isRunning { engine.stop() }
+            engine.inputNode.removeTap(onBus: 0)
+        }
+
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
     private func stopInternal() {
         recognitionTask?.cancel()
         recognitionTask = nil
         recognitionRequest?.endAudio()
         recognitionRequest = nil
-        
+
         if let engine = audioEngine {
             if engine.isRunning { engine.stop() }
             engine.inputNode.removeTap(onBus: 0)
         }
-        
+
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }
