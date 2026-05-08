@@ -114,7 +114,7 @@ public struct WealthListView: View {
         .task { await viewModel.loadData() }
         .refreshable { await viewModel.loadData(force: true) }
         .onReceive(NotificationCenter.default.publisher(for: .wealthAccountDidSave)) { _ in
-            Task { await viewModel.loadData(force: true) }
+            Task { @MainActor in await viewModel.loadData(force: true) }
         }
         .alertHandler($viewModel.loadError)
         // swiftlint:disable:next no_direct_sheet_or_cover
@@ -127,7 +127,7 @@ public struct WealthListView: View {
                         sessionManager: viewModel.sessionManager,
                         onSuccess: {
                             activeSheet = nil
-                            Task { await viewModel.loadData(force: true) }
+                            Task { @MainActor in await viewModel.loadData(force: true) }
                         }
                     )
                 )
@@ -145,7 +145,7 @@ public struct WealthListView: View {
                         existingAccount: account,
                         onSuccess: {
                             accountToEdit = nil
-                            Task { await viewModel.loadData(force: true) }
+                            Task { @MainActor in await viewModel.loadData(force: true) }
                         }
                     )
                 )
@@ -157,7 +157,7 @@ public struct WealthListView: View {
             }
             Button("Xóa", role: .destructive) {
                 if let account = accountToDelete {
-                    Task { await viewModel.deleteAccount(account) }
+                    Task { @MainActor in await viewModel.deleteAccount(account) }
                 }
                 accountToDelete = nil
             }

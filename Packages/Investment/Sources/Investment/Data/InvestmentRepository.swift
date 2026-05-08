@@ -4,7 +4,7 @@ import FinFlowCore
 public actor InvestmentRepository: InvestmentRepositoryProtocol {
     private let client: any HTTPClientProtocol
 
-    private nonisolated(unsafe) static let dateFormatter: DateFormatter = {
+    private nonisolated static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
