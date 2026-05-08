@@ -31,28 +31,36 @@ struct FinFlowIosApp: App {
                     if isFirstLaunch {
                         await container.sessionManager.restoreSession()
                         isFirstLaunch = false
+                        // Write widget data right after session restore completes
+                        await updateWidgetSummary()
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .transactionDidSave)) { _ in
                     Task { await updateWidgetSummary() }
                 }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        Task { await updateWidgetSummary() }
+                    }
+                }
         }
     }
+
+    @Environment(\.scenePhase) private var scenePhase
 
     // MARK: - Widget Update
 
     private func updateWidgetSummary() async {
-        guard router.isAuthenticated else { return }
+        let state = container.sessionManager.state
+        guard state.isAuthenticated else { return }
         do {
-            let summary = try await GetTransactionSummaryUseCase(
-                repository: container.transactionRepository
-            ).execute()
+            let summary = try await container.transactionRepository.getMonthlySummary(month: nil)
             WidgetUpdateHelper.updateTodaySummary(
                 expense: summary.totalExpense,
                 income: summary.totalIncome
             )
         } catch {
-            // Silent fail — widget sẽ hiển thị data cũ
+            Logger.warning("Widget monthly summary update failed: \(error)", category: "App")
         }
     }
 }
@@ -243,9 +251,14 @@ struct AppRootView: View {
         Task { @MainActor in
             if router.presentedSheet != nil {
                 router.dismissSheet()
-                try? await Task.sleep(for: .milliseconds(350))
+                // Phải đợi đủ lâu (600ms) để sheet cũ dismiss HOÀN TOÀN. 
+                // Nếu gọi presentSheet quá nhanh cùng ID, SwiftUI sẽ huỷ lệnh dismiss và giữ nguyên View cũ.
+                try? await Task.sleep(for: .milliseconds(600))
+            } else {
+                // Đảm bảo app đã active hoàn toàn từ background trước khi gọi presentSheet
+                try? await Task.sleep(for: .milliseconds(250))
             }
-            router.presentSheet(.addTransaction(autoTriggerMode: mode))
+            router.presentSheet(.addTransaction(autoTriggerMode: mode, widgetSessionId: UUID().uuidString))
         }
     }
 
@@ -281,7 +294,7 @@ struct AppRootView: View {
             container.makeChangePasswordView(hasPassword: hasPassword, router: router)
         case .createPIN(let email):
             container.makeCreatePINView(email: email, router: router)
-        case .addTransaction(let autoTriggerMode):
+        case .addTransaction(let autoTriggerMode, _):
             container.makeAddTransactionView(router: router, autoTriggerMode: autoTriggerMode)
         case .editTransaction(let transaction):
             container.makeAddTransactionView(router: router, transactionToEdit: transaction)
