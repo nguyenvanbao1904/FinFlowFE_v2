@@ -117,8 +117,9 @@ public struct AddTransactionView: View {
             // Đợi categories load xong
             await viewModel.fetchCategories()
 
-            // Delay nhỏ để UI render xong
-            try? await Task.sleep(for: .milliseconds(300))
+            // Delay để UI render xong và animation của sheet mở lên hoàn tất (khoảng 500ms)
+            // Nếu gọi quá sớm, iOS sẽ drop sheet camera vì sheet cha đang trong quá trình animate.
+            try? await Task.sleep(for: .milliseconds(650))
 
             await MainActor.run {
                 switch mode {
@@ -210,7 +211,10 @@ public struct AddTransactionView: View {
         .onChange(of: assistant.selectedPhotoItem) { _, newItem in
             assistant.handlePhotoSelected(newItem, analyze: { await viewModel.analyzeText(input: $0) }, alertAfter: { viewModel.alert != nil })
         }
-        .onDisappear { assistant.stopListening() }
+        .onDisappear {
+            assistant.stopListening()
+            hasTriggeredAutoMode = false
+        }
     }
 
     // MARK: - Core UI Sections

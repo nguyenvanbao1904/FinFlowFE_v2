@@ -348,17 +348,16 @@ extension DependencyContainer {
     }
 
     @MainActor
-    func makeAddTransactionView(
+    func makeAddTransactionViewModel(
         router: any AppRouterProtocol,
-        transactionToEdit: TransactionResponse? = nil,
-        autoTriggerMode: WidgetInputMode? = nil
-    ) -> some View {
+        transactionToEdit: TransactionResponse? = nil
+    ) -> AddTransactionViewModel {
         let addUseCase = AddTransactionUseCase(repository: transactionRepository)
         let updateUseCase = UpdateTransactionUseCase(repository: transactionRepository)
         let getCategoriesUseCase = GetCategoriesUseCase(repository: transactionRepository)
         let analyzeUseCase = AnalyzeTextUseCase(repository: transactionRepository)
         let getWealthAccountsUseCase = GetWealthAccountsUseCase(repository: wealthAccountRepository)
-        let viewModel = AddTransactionViewModel(
+        return AddTransactionViewModel(
             addUseCase: addUseCase,
             updateUseCase: updateUseCase,
             getCategoriesUseCase: getCategoriesUseCase,
@@ -368,7 +367,17 @@ extension DependencyContainer {
             sessionManager: sessionManager,
             transactionToEdit: transactionToEdit
         )
-        return AddTransactionView(viewModel: viewModel, autoTriggerMode: autoTriggerMode)
+    }
+
+    func makeAddTransactionView(
+        router: any AppRouterProtocol,
+        transactionToEdit: TransactionResponse? = nil,
+        autoTriggerMode: WidgetInputMode? = nil
+    ) -> some View {
+        StableAddTransactionView(
+            viewModel: makeAddTransactionViewModel(router: router, transactionToEdit: transactionToEdit),
+            autoTriggerMode: autoTriggerMode
+        )
     }
 
     /// Một `TransactionListViewModel` cho cả phiên dashboard (cache trên `DependencyContainer`).
