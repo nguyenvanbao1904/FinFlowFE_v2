@@ -61,6 +61,7 @@ public final class AddTransactionViewModel {
         accounts.filter { $0.accountType.transactionEligible }
     }
 
+    @MainActor
     public func fetchCategories() async {
         if !categories.isEmpty && !accounts.isEmpty { return }
 
@@ -78,10 +79,8 @@ public final class AddTransactionViewModel {
             defer { self.isLoading = false }
 
             do {
-                async let categoriesTask = self.getCategoriesUseCase.execute()
-                async let accountsTask = self.getWealthAccountsUseCase.execute()
-
-                let (fetchedCategories, allAccounts) = try await (categoriesTask, accountsTask)
+                let fetchedCategories = try await self.getCategoriesUseCase.execute()
+                let allAccounts = try await self.getWealthAccountsUseCase.execute()
 
                 self.categories = fetchedCategories
                 self.accounts = allAccounts
@@ -169,19 +168,19 @@ public final class AddTransactionViewModel {
     }
 
     public func analyzeText(input: String) async {
-        guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
 
-        // Must have local category/account rows before matching AI UUIDs (avoids race with `.task` fetch).
         await fetchCategories()
 
         do {
-            let response = try await analyzeUseCase.execute(text: input)
+            let response = try await analyzeUseCase.execute(text: trimmed)
 
             if let amountValue = response.amount {
                 self.amount = String(format: "%.0f", amountValue)
             }
             self.isIncome = response.type == .income
-            self.note = response.note ?? input
+            self.note = response.note ?? trimmed
 
             if let suggestedCategoryId = response.suggestedCategoryId,
                 let cat = categories.first(where: { $0.id == suggestedCategoryId }) {

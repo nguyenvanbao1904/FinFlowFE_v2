@@ -26,8 +26,8 @@ final class TransactionInputAssistant {
     func submitTextForAnalysis(
         _ text: String,
         mirrorToInput: Bool,
-        analyze: @escaping (String) async -> Void,
-        alertAfter: @escaping () -> Bool
+        analyze: @escaping @MainActor (String) async -> Void,
+        alertAfter: @escaping @MainActor () -> Bool
     ) {
         let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return }
@@ -35,7 +35,7 @@ final class TransactionInputAssistant {
         triggerAIAnalysis(text: normalized, analyze: analyze, alertAfter: alertAfter)
     }
 
-    func toggleVoiceInput(analyze: @escaping (String) async -> Void, alertAfter: @escaping () -> Bool) {
+    func toggleVoiceInput(analyze: @escaping @MainActor (String) async -> Void, alertAfter: @escaping @MainActor () -> Bool) {
         if speechManager.isListening {
             let finalText = speechManager.latestTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
             speechManager.stopListening()
@@ -47,7 +47,9 @@ final class TransactionInputAssistant {
 
         speechManager.startListening(
             onPartialText: { [weak self] partialText in
-                self?.aiInputText = partialText
+                if self?.aiInputText != partialText {
+                    self?.aiInputText = partialText
+                }
             },
             onError: { [weak self] message in
                 self?.speechErrorMessage = message
@@ -65,14 +67,16 @@ final class TransactionInputAssistant {
         showCameraOptions = true
     }
 
-    func handleImagePicked(_ image: UIImage, analyze: @escaping (String) async -> Void, alertAfter: @escaping () -> Bool) {
+    func handleImagePicked(_ image: UIImage, analyze: @escaping @MainActor (String) async -> Void, alertAfter: @escaping @MainActor () -> Bool) {
         selectedImage = image
-        Task { await runOCRAndAnalyze(analyze: analyze, alertAfter: alertAfter) }
+        Task { @MainActor in
+            await runOCRAndAnalyze(analyze: analyze, alertAfter: alertAfter)
+        }
     }
 
-    func handlePhotoSelected(_ item: PhotosPickerItem?, analyze: @escaping (String) async -> Void, alertAfter: @escaping () -> Bool) {
+    func handlePhotoSelected(_ item: PhotosPickerItem?, analyze: @escaping @MainActor (String) async -> Void, alertAfter: @escaping @MainActor () -> Bool) {
         guard let item else { return }
-        Task {
+        Task { @MainActor in
             do {
                 if let data = try await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
@@ -96,34 +100,31 @@ final class TransactionInputAssistant {
 
     private func triggerAIAnalysis(
         text: String,
-        analyze: @escaping (String) async -> Void,
-        alertAfter: @escaping () -> Bool
+        analyze: @escaping @MainActor (String) async -> Void,
+        alertAfter: @escaping @MainActor () -> Bool
     ) {
+        guard !isAnalyzing else { return }
+
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { isAnalyzing = true }
 
-        Task {
+        Task { @MainActor in
             await analyze(text)
 
-            await MainActor.run {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) { isAnalyzing = false }
-            }
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) { isAnalyzing = false }
 
-            guard !alertAfter() else { return }
+            let hasAlert = alertAfter()
+            guard !hasAlert else { return }
 
-            await MainActor.run {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                    showMagicEffect = true
-                    aiInputText = ""
-                }
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
+                showMagicEffect = true
+                aiInputText = ""
             }
             try? await Task.sleep(for: .seconds(1))
-            await MainActor.run {
-                withAnimation { showMagicEffect = false }
-            }
+            withAnimation { showMagicEffect = false }
         }
     }
 
-    private func runOCRAndAnalyze(analyze: @escaping (String) async -> Void, alertAfter: @escaping () -> Bool) async {
+    private func runOCRAndAnalyze(analyze: @escaping @MainActor (String) async -> Void, alertAfter: @escaping @MainActor () -> Bool) async {
         guard let image = selectedImage, !isOCRing else { return }
         isOCRing = true
         defer {
