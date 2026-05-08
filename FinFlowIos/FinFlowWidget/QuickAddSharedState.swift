@@ -16,11 +16,11 @@ enum WidgetInputMode: String, Codable, Sendable {
 }
 
 enum QuickAddSharedState: Sendable {
-    static let appGroupID = "group.nvb.FinFlowIos.widget"
+    nonisolated(unsafe) static let appGroupID = "group.nvb.FinFlowIos.widget"
 
-    private static let pendingInputModeKey = "widget.pendingInputMode"
-    private static let todayExpenseKey = "widget.todayExpense"
-    private static let todayIncomeKey = "widget.todayIncome"
+    nonisolated(unsafe) private static let pendingInputModeKey = "widget.pendingInputMode"
+    nonisolated(unsafe) private static let todayExpenseKey = "widget.todayExpense"
+    nonisolated(unsafe) private static let todayIncomeKey = "widget.todayIncome"
 
     private nonisolated static var sharedDefaults: UserDefaults? {
         UserDefaults(suiteName: appGroupID)

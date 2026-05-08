@@ -2,8 +2,9 @@
 //  QuickAddWidget.swift
 //  FinFlowWidget
 //
-//  Widget nhập giao dịch nhanh: Voice, Text, OCR.
-//  Dùng Link(destination:) — cách Apple khuyến nghị để deep link từng nút trong widget.
+//  Widget hiện thu chi tháng + 3 nút nhập nhanh.
+//  Small: logo + số chi/thu + 3 nút icon nhỏ.
+//  Medium: cột chi/thu bên trái + 3 nút full text bên phải.
 //
 
 import SwiftUI
@@ -25,7 +26,7 @@ struct QuickAddProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuickAddEntry) -> Void) {
-        completion(currentEntry())
+        completion(context.isPreview ? placeholder(in: context) : currentEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuickAddEntry>) -> Void) {
@@ -50,180 +51,157 @@ struct QuickAddWidgetView: View {
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        switch family {
-        case .systemSmall:
-            smallView
-        default:
-            mediumView
+        Group {
+            if family == .systemSmall {
+                smallView
+            } else {
+                mediumView
+            }
         }
+        .containerBackground(.background, for: .widget)
     }
 
-    // MARK: - Small: 3 link-buttons + chi hôm nay
+    // MARK: - Small
 
     private var smallView: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
+            HStack(spacing: 5) {
                 Image("AppLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 16, height: 16)
                 Text("FinFlow")
-                    .font(.caption2.weight(.semibold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
             }
 
-            if entry.todayExpense > 0 || entry.todayIncome > 0 {
-                VStack(alignment: .leading, spacing: 2) {
+            // Amounts
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 3) {
                     Text(formatAmount(entry.todayExpense))
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(.red.opacity(0.9))
-                        .minimumScaleFactor(0.6)
                         .lineLimit(1)
-                    Text("chi hôm nay")
+                        .minimumScaleFactor(0.7)
+                    Text("chi")
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                 }
+                HStack(spacing: 3) {
+                    Text(formatAmount(entry.todayIncome))
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.green.opacity(0.9))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text("thu")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+                Text("Tháng này")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.tertiary)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            HStack(spacing: 8) {
-                actionLink(
-                    systemImage: "mic.fill",
-                    label: "Nói",
-                    tint: .blue,
-                    url: "finflow://quickadd?mode=voice"
-                )
-                actionLink(
-                    systemImage: "keyboard",
-                    label: "Nhập",
-                    tint: .purple,
-                    url: "finflow://quickadd?mode=text"
-                )
-                actionLink(
-                    systemImage: "camera.viewfinder",
-                    label: "Chụp",
-                    tint: .orange,
-                    url: "finflow://quickadd?mode=ocr"
-                )
+            // 3 nút icon nhỏ (phù hợp small)
+            HStack(spacing: 6) {
+                iconButton(icon: "mic.fill",          tint: .blue,   url: "finflow://quickadd?mode=voice", label: "Nói")
+                iconButton(icon: "keyboard",          tint: .purple, url: "finflow://quickadd?mode=text",  label: "Nhập")
+                iconButton(icon: "camera.viewfinder", tint: .orange, url: "finflow://quickadd?mode=ocr",   label: "Chụp")
             }
         }
-        .padding(14)
-        .containerBackground(.background, for: .widget)
+        .padding(13)
     }
 
-    // MARK: - Medium: summary bên trái + 3 link-rows bên phải
+    // MARK: - Medium
 
     private var mediumView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
+            // Trái: chi/thu — chiều rộng cố định để không tranh chỗ với nút
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     Image("AppLogo")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 18, height: 18)
                     Text("FinFlow")
-                        .font(.caption.weight(.semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
-
-                Spacer()
-
+                Spacer(minLength: 0)
                 VStack(alignment: .leading, spacing: 6) {
                     summaryRow(label: "Chi", amount: entry.todayExpense, color: .red)
-                    summaryRow(label: "Thu", amount: entry.todayIncome, color: .green)
+                    summaryRow(label: "Thu", amount: entry.todayIncome,  color: .green)
                 }
-
-                Spacer()
-
-                Text("Hôm nay")
+                Spacer(minLength: 0)
+                Text("Tháng này")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity)
+            .frame(width: 105)  // Cố định — không tranh chỗ cột nút
 
-            Divider().padding(.vertical, 8)
+            Divider().padding(.vertical, 6)
 
-            VStack(spacing: 8) {
-                bigActionLink(
-                    systemImage: "mic.fill",
-                    label: "Giọng nói",
-                    tint: .blue,
-                    url: "finflow://quickadd?mode=voice"
-                )
-                bigActionLink(
-                    systemImage: "keyboard",
-                    label: "Nhập văn bản",
-                    tint: .purple,
-                    url: "finflow://quickadd?mode=text"
-                )
-                bigActionLink(
-                    systemImage: "camera.viewfinder",
-                    label: "Chụp ảnh",
-                    tint: .orange,
-                    url: "finflow://quickadd?mode=ocr"
-                )
+            // Phải: 3 nút full text — lấy toàn bộ phần còn lại
+            VStack(spacing: 6) {
+                actionRow(icon: "mic.fill",          label: "Giọng nói",    tint: .blue,   url: "finflow://quickadd?mode=voice")
+                actionRow(icon: "keyboard",          label: "Nhập văn bản", tint: .purple, url: "finflow://quickadd?mode=text")
+                actionRow(icon: "camera.viewfinder", label: "Chụp hoá đơn", tint: .orange, url: "finflow://quickadd?mode=ocr")
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(16)
-        .containerBackground(.background, for: .widget)
+        .padding(14)
     }
 
     // MARK: - Sub-components
 
-    private func actionLink(
-        systemImage: String,
-        label: String,
-        tint: Color,
-        url: String
-    ) -> some View {
-        Link(destination: URL(string: url)!) {
+    /// Nút icon vuông nhỏ cho small widget
+    private func iconButton(icon: String, tint: Color, url: String, label: String) -> some View {
+        Link(destination: URL(string: url) ?? URL(string: "finflow://")!) {
             VStack(spacing: 3) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 16, weight: .semibold))
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(tint)
-                    .frame(width: 34, height: 34)
-                    .background(tint.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
+                    .frame(width: 32, height: 32)
+                    .background(tint.opacity(0.13))
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
                 Text(label)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.secondary)
             }
+            // FIX: contentShape đảm bảo toàn bộ vùng VStack đều tappable
+            .contentShape(Rectangle())
         }
     }
 
-    private func bigActionLink(
-        systemImage: String,
-        label: String,
-        tint: Color,
-        url: String
-    ) -> some View {
-        Link(destination: URL(string: url)!) {
+    /// Hàng nút full text cho medium widget
+    private func actionRow(icon: String, label: String, tint: Color, url: String) -> some View {
+        Link(destination: URL(string: url) ?? URL(string: "finflow://")!) {
             HStack(spacing: 8) {
-                Image(systemName: systemImage)
+                Image(systemName: icon)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(tint)
-                    .frame(width: 28, height: 28)
-                    .background(tint.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-
+                    .frame(width: 26, height: 26)
+                    .background(tint.opacity(0.13))
+                    .clipShape(RoundedRectangle(cornerRadius: 7))
                 Text(label)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.primary)
-
-                Spacer()
-
+                    .lineLimit(1)
+                Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 6)
             .background(.quaternary.opacity(0.5))
             .clipShape(RoundedRectangle(cornerRadius: 9))
+            // FIX: contentShape đảm bảo vùng Spacer() cũng tappable → không miss tap
+            .contentShape(Rectangle())
         }
     }
 
@@ -238,8 +216,8 @@ struct QuickAddWidgetView: View {
             Text(formatAmount(amount))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(color.opacity(0.9))
-                .minimumScaleFactor(0.6)
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
     }
 
@@ -248,8 +226,7 @@ struct QuickAddWidgetView: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 0
-        let formatted = formatter.string(from: NSNumber(value: amount)) ?? "0"
-        return "\(formatted) ₫"
+        return (formatter.string(from: NSNumber(value: amount)) ?? "0") + " ₫"
     }
 }
 
@@ -262,8 +239,8 @@ struct QuickAddWidget: Widget {
         StaticConfiguration(kind: kind, provider: QuickAddProvider()) { entry in
             QuickAddWidgetView(entry: entry)
         }
-        .configurationDisplayName("Nhập Giao Dịch Nhanh")
-        .description("Nhập thu chi bằng giọng nói, văn bản AI, hoặc chụp hoá đơn ngay từ màn hình chính.")
+        .configurationDisplayName("Thu Chi Tháng Này")
+        .description("Xem chi tiêu và thu nhập tháng này, nhập nhanh giao dịch mới.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
