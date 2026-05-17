@@ -1,4 +1,3 @@
-import BotChat
 import Charts
 import FinFlowCore
 import SwiftUI
@@ -12,7 +11,7 @@ struct InvestmentPortfolioTabContent: View {
     var onDeletePortfolio: () -> Void = {}
     var onShowHistory: () -> Void = {}
     var onAskAI: ((String) -> Void)?
-    var gateway: BotChatGateway?
+    var portfolioRepository: PortfolioRepository?
 
     var body: some View {
         @Bindable var viewModel = viewModel
@@ -191,10 +190,10 @@ struct InvestmentPortfolioTabContent: View {
                     }
                 }
 
-                if let gateway {
+                if let portfolioRepository {
                     PortfolioAssessmentCard(
                         viewModel: viewModel,
-                        gateway: gateway,
+                        repository: portfolioRepository,
                         onAskAI: onAskAI
                     )
                 }

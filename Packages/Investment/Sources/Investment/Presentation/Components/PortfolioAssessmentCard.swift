@@ -1,10 +1,9 @@
-import BotChat
 import FinFlowCore
 import SwiftUI
 
 struct PortfolioAssessmentCard: View {
     let viewModel: InvestmentPortfolioViewModel
-    let gateway: BotChatGateway
+    let repository: PortfolioRepository
     var onAskAI: ((String) -> Void)?
 
     @State private var insights: [PortfolioInsight] = []
@@ -129,91 +128,25 @@ struct PortfolioAssessmentCard: View {
         fetchedPortfolioId = portfolio.id
 
         do {
-            let thread = try await gateway.createThread(title: nil)
-            let result = try await gateway.sendMessage(buildPrompt(portfolioName: portfolio.name), threadId: thread.id)
-            Logger.info("got response len=\(result.content.count)", category: "PortfolioAssessmentCard")
-            insights = parseInsights(from: result.content)
+            let response = try await repository.getPortfolioInsights(portfolioId: portfolio.id)
+            Logger.info("got \(response.insights.count) insights", category: "PortfolioAssessmentCard")
+            insights = response.insights.compactMap { item in
+                let category: PortfolioInsight.Category
+                switch item.category {
+                case "nhan_xet": category = .nhanXet
+                case "canh_bao": category = .canhBao
+                case "loi_khuyen": category = .loiKhuyen
+                default:
+                    Logger.error("Unknown category '\(item.category)'", category: "PortfolioAssessmentCard")
+                    return nil
+                }
+                return PortfolioInsight(category: category, message: item.message)
+            }
         } catch {
             Logger.error("fetch failed: \(error.localizedDescription)", category: "PortfolioAssessmentCard")
             fetchedPortfolioId = nil
         }
 
         isLoading = false
-    }
-
-    private func parseInsights(from text: String) -> [PortfolioInsight] {
-        Logger.debug("parseInsights raw text: \(text.prefix(200))", category: "PortfolioAssessmentCard")
-
-        guard let data = text.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [[String: String]]
-        else {
-            Logger.error("Failed to parse JSON, falling back to single insight", category: "PortfolioAssessmentCard")
-            return [PortfolioInsight(category: .nhanXet, message: text)]
-        }
-
-        Logger.debug("Parsed \(json.count) insights from JSON", category: "PortfolioAssessmentCard")
-
-        // Fallback: nếu LLM không trả đúng category, dùng thứ tự để map
-        let expectedCategories: [PortfolioInsight.Category] = [.nhanXet, .canhBao, .loiKhuyen]
-
-        return json.enumerated().compactMap { index, item in
-            guard let msg = item["message"] else {
-                Logger.error("Missing message in item: \(item)", category: "PortfolioAssessmentCard")
-                return nil
-            }
-
-            let cat = item["category"] ?? ""
-            let category: PortfolioInsight.Category
-
-            switch cat {
-            case "nhan_xet": category = .nhanXet
-            case "canh_bao": category = .canhBao
-            case "loi_khuyen": category = .loiKhuyen
-            default:
-                // Fallback: dùng thứ tự nếu LLM không trả đúng category
-                if index < expectedCategories.count {
-                    category = expectedCategories[index]
-                    Logger.debug("Using fallback category for index \(index): \(category)", category: "PortfolioAssessmentCard")
-                } else {
-                    Logger.error("Unknown category '\(cat)' at index \(index)", category: "PortfolioAssessmentCard")
-                    category = .nhanXet
-                }
-            }
-
-            Logger.debug("Parsed insight[\(index)]: category=\(category) msg=\(msg.prefix(50))", category: "PortfolioAssessmentCard")
-            return PortfolioInsight(category: category, message: msg)
-        }
-    }
-
-    private func buildPrompt(portfolioName: String) -> String {
-        var fsiNote = ""
-        let expenses = viewModel.monthlyExpensesProvider()
-        if expenses > 0 {
-            let runway = viewModel.liquidAssetsProvider() / expenses
-            if runway < 3 {
-                fsiNote += " Quỹ dự phòng còn \(String(format: "%.1f", runway)) tháng (dưới mức an toàn 3 tháng)."
-            }
-        }
-        if let ratio = viewModel.monthlyInvestRatio, ratio > 0.80 {
-            fsiNote += " ~\(Int(round(ratio * 100)))% thu nhập thặng dư đang đổ vào đầu tư."
-        }
-
-        return """
-        Dùng get_portfolio_analysis và get_personal_finance_report để lấy dữ liệu, rồi đưa ra đánh giá về danh mục "\(portfolioName)".\(fsiNote)
-
-        Trả lời bằng JSON array với ĐÚNG 3 mục theo thứ tự:
-        1. "nhan_xet" — Tình trạng tổng thể: danh mục đang lãi/lỗ bao nhiêu, có ổn không (1 câu ngắn)
-        2. "canh_bao" — Rủi ro chính: tập trung quá cao, thiếu đa dạng hóa, hoặc vấn đề tài chính cá nhân (1 câu ngắn)
-        3. "loi_khuyen" — Hành động cụ thể: nên làm gì tiếp theo để cải thiện (1 câu ngắn)
-
-        Format:
-        [
-          {"category": "nhan_xet", "message": "Danh mục đang lãi 3.26 triệu (9.2%), tình hình tốt"},
-          {"category": "canh_bao", "message": "VCB và HPG chiếm 60% danh mục — rủi ro tập trung cao"},
-          {"category": "loi_khuyen", "message": "Xây dựng quỹ dự phòng 3-6 tháng chi tiêu trước khi tăng đầu tư"}
-        ]
-
-        Chỉ trả JSON, không thêm text nào khác. Mỗi message ngắn gọn, có số liệu cụ thể.
-        """
     }
 }

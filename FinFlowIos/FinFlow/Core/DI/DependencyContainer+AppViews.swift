@@ -256,7 +256,7 @@ extension DependencyContainer {
                         // Không hiện lỗi — FSI badge chỉ không hiện nếu không có data
                     }
                 },
-                gateway: botChatGateway
+                portfolioRepository: portfolioRepository as? PortfolioRepository
             )
         )
         view.onAskAI = { [weak router] prompt in
