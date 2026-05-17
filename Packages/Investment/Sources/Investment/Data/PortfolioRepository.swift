@@ -144,4 +144,14 @@ public actor PortfolioRepository: PortfolioRepositoryProtocol {
         return response["monthlyNetBuy"] ?? 0
     }
 
+    public func getPortfolioInsights(portfolioId: String) async throws -> PortfolioInsightsResponse {
+        try await client.request(
+            endpoint: "/investments/portfolios/\(portfolioId)/insights",
+            method: "GET",
+            body: nil as String?,
+            headers: nil,
+            version: nil
+        )
+    }
+
 }

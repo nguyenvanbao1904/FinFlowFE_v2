@@ -504,3 +504,27 @@ public struct DividendDataPoint: Identifiable, Equatable, Sendable {
         self.issueDate = issueDate
     }
 }
+
+// MARK: - Portfolio Insights
+public struct PortfolioInsightItem: Codable, Sendable, Identifiable {
+    public let id = UUID()
+    public let category: String  // "nhan_xet", "canh_bao", "loi_khuyen"
+    public let message: String
+
+    enum CodingKeys: String, CodingKey {
+        case category, message
+    }
+
+    public init(category: String, message: String) {
+        self.category = category
+        self.message = message
+    }
+}
+
+public struct PortfolioInsightsResponse: Codable, Sendable {
+    public let insights: [PortfolioInsightItem]
+
+    public init(insights: [PortfolioInsightItem]) {
+        self.insights = insights
+    }
+}
