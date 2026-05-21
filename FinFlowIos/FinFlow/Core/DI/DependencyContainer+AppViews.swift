@@ -121,10 +121,13 @@ extension DependencyContainer {
             getBudgets: GetBudgetsUseCase(repository: budgetRepository),
             getPortfolios: GetPortfoliosUseCase(repository: portfolioRepository),
             getPortfolioAssets: GetPortfolioAssetsUseCase(repository: portfolioRepository),
-            getPortfolioHealth: GetPortfolioHealthUseCase(repository: portfolioRepository)
+            getPortfolioHealth: GetPortfolioHealthUseCase(repository: portfolioRepository),
+            getWealthAccounts: GetWealthAccountsUseCase(repository: wealthAccountRepository)
         )
+        let homeInsightService = HomeInsightServiceImpl(client: apiClient)
         let vm = HomeViewModel(
             dashboardService: homeDashboardService,
+            insightService: homeInsightService,
             sessionManager: sessionManager
         )
         cachedHomeViewModel = vm
@@ -147,13 +150,18 @@ extension DependencyContainer {
             planningPath: $observableRouter.planningPath,
             wealthPath: $observableRouter.wealthPath,
             investmentPath: $observableRouter.investmentPath,
-            homeView: HomeView(router: router, viewModel: homeViewModelForDashboard()),
+            homeView: makeHomeView(router: router),
             transactionView: makeTransactionListView(router: router),
             planningView: makePlanningView(router: router),
             wealthView: makeWealthView(router: router),
             investmentView: makeInvestmentView(router: router),
             destinationFactory: destinationFactory
         )
+    }
+
+    @MainActor
+    func makeHomeView(router: any AppRouterProtocol) -> some View {
+        HomeView(router: router, viewModel: homeViewModelForDashboard())
     }
 
     @MainActor
@@ -228,6 +236,7 @@ extension DependencyContainer {
                 getPortfolioHealthUseCase: GetPortfolioHealthUseCase(repository: portfolioRepository),
                 getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase(repository: portfolioRepository),
                 getTradeTransactionsUseCase: GetTradeTransactionsUseCase(repository: portfolioRepository),
+                getWealthAccountsUseCase: GetWealthAccountsUseCase(repository: wealthAccountRepository),
                 sessionManager: sessionManager,
                 liquidAssetsProvider: { [weak wealthVM] in
                     wealthVM?.accounts

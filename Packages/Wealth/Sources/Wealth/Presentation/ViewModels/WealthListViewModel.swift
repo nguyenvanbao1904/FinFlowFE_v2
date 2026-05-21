@@ -39,7 +39,7 @@ public final class WealthListViewModel {
     // MARK: - Computed
 
     public var netWorth: Double {
-        accounts.filter { $0.includeInNetWorth }.reduce(0) { $0 + $1.balance }
+        accounts.filter { $0.includeInNetWorth }.reduce(0) { $0 + $1.effectiveBalance }
     }
 
     /// Accounts grouped by `group` field, ordered: LIQUID → INVESTMENT → ASSET → DEBT.
@@ -56,7 +56,7 @@ public final class WealthListViewModel {
         "LIQUID": "Thanh khoản",
         "INVESTMENT": "Đầu tư",
         "ASSET": "Tài sản",
-        "DEBT": "Nợ",
+        "DEBT": "Nợ"
     ]
 
     // MARK: - Actions

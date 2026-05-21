@@ -9,7 +9,4 @@ public protocol TokenStoreProtocol: Sendable {
     func setRefreshToken(_ token: String?) async
     func getRefreshToken() async -> String?
     func clearRefreshToken() async
-
-    // Debug helper (no-op by default)
-    func logTokenStatus() async
 }

@@ -41,9 +41,10 @@ public final class AddWealthAccountViewModel {
         if let existing = existingAccount {
             self.name = existing.name
             // Format số dư hiện tại thành string cho text field (giữ dấu âm nếu có)
-            let absBalance = abs(existing.balance)
+            let effectiveBalance = existing.effectiveBalance
+            let absBalance = abs(effectiveBalance)
             let formatted = CurrencyFormatter.format(absBalance).replacingOccurrences(of: " ₫", with: "")
-            self.amount = existing.balance < 0 ? "-" + formatted : formatted
+            self.amount = effectiveBalance < 0 ? "-" + formatted : formatted
             self.includeInNetWorth = existing.includeInNetWorth
         }
     }

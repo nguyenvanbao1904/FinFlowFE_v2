@@ -60,7 +60,4 @@ public protocol UserDefaultsManagerProtocol: Sendable {
     
     /// Save full user profile (including biometric settings)
     func saveUserInfo(_ user: UserProfile) async
-    
-    /// Log all data for debugging
-    func logAllData() async
 }

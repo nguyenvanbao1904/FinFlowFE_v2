@@ -139,23 +139,12 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
     /// Check xem refresh token còn hợp lệ không
     /// - Returns: true nếu còn hợp lệ, false nếu đã hết hạn hoặc không tồn tại
     public func isRefreshTokenValid() async -> Bool {
-        Logger.debug("🔍 ========== CHECKING REFRESH TOKEN VALIDITY ==========", category: "Storage")
-
         guard let expiryDate = await getRefreshTokenExpiryTime() else {
-            Logger.warning("❌ Refresh token expiry not found in UserDefaults", category: "Storage")
             return false
         }
 
         let now = Date()
-        let isValid = expiryDate > now
-
-        Logger.info("📅 Current time: \(Self.formatISO8601(now))", category: "Storage")
-        Logger.info("⏰ Expiry time: \(Self.formatISO8601(expiryDate))", category: "Storage")
-        Logger.info(
-            "✅ Is valid: \(isValid) (time remaining: \(expiryDate.timeIntervalSince(now)) seconds)",
-            category: "Storage")
-
-        return isValid
+        return expiryDate > now
     }
 
     /// Xóa thời gian hết hạn của refresh token
@@ -184,32 +173,5 @@ public actor UserDefaultsManager: UserDefaultsManagerProtocol {
         defaults.synchronize()
 
         Logger.info("🗑️ Cleared user info from UserDefaults", category: "Storage")
-    }
-
-    // MARK: - Debug Logging
-
-    /// Log tất cả thông tin trong UserDefaults để debug
-    public func logAllData() async {
-        let info = await getUserInfo()
-        let refreshTokenExpiry = await getRefreshTokenExpiryTime()
-        let isValid = await isRefreshTokenValid()
-
-        let expiryString: String
-        if let expiry = refreshTokenExpiry {
-            expiryString = "\(Self.formatISO8601(expiry)) (Valid: \(isValid ? "✅" : "❌"))"
-        } else {
-            expiryString = "nil"
-        }
-
-        Logger.debug(
-            """
-            📊 UserDefaults Data:
-            - First Name: \(info.firstName ?? "nil")
-            - Last Name: \(info.lastName ?? "nil")
-            - Email: \(info.email ?? "nil")
-            - Username: \(info.username ?? "nil")
-            - User ID: \(await getUserId() ?? "nil")
-            - Refresh Token Expiry: \(expiryString)
-            """, category: "Storage")
     }
 }

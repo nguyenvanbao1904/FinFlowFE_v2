@@ -171,15 +171,46 @@ private struct AccountRowView: View {
     let account: WealthAccountResponse
 
     var body: some View {
-        IconTitleTrailingRow(
-            icon: account.accountType.icon,
-            color: Color(hex: account.accountType.color),
-            title: account.name,
-            subtitle: nil,
-            trailing: {
-                BalanceLabel(balance: account.balance)
-                    .font(AppTypography.headline)
+        HStack(spacing: Spacing.sm) {
+            accountIcon
+
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(account.name)
+                    .font(AppTypography.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
+
+                Text(account.accountType.displayName)
+                    .font(AppTypography.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
-        )
+
+            Spacer(minLength: Spacing.sm)
+
+            BalanceLabel(balance: account.effectiveBalance)
+                .font(AppTypography.subheadline)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .layoutPriority(1)
+        }
+        .padding(.vertical, Spacing.xs)
+    }
+
+    private var accountIcon: some View {
+        Image(systemName: account.accountType.icon)
+            .font(AppTypography.iconMedium)
+            .foregroundStyle(accountColor)
+            .frame(width: Spacing.touchTarget, height: Spacing.touchTarget)
+            .background(accountColor.opacity(OpacityLevel.ultraLight))
+            .clipShape(.circle)
+            .accessibilityHidden(true)
+    }
+
+    private var accountColor: Color {
+        Color(hex: account.accountType.color)
     }
 }

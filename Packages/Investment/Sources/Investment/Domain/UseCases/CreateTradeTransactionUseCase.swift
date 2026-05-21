@@ -15,6 +15,8 @@ public struct CreateTradeTransactionUseCase: Sendable {
         portfolioId: String,
         tradeType: TradeType,
         amount: Double,
+        sourceAccountId: String? = nil,
+        destinationAccountId: String? = nil,
         feePercent: Double? = nil,
         taxPercent: Double? = nil,
         transactionDate: Date
@@ -25,6 +27,8 @@ public struct CreateTradeTransactionUseCase: Sendable {
             quantity: nil,
             price: nil,
             amount: amount,
+            sourceAccountId: sourceAccountId,
+            destinationAccountId: destinationAccountId,
             feePercent: feePercent,
             taxPercent: taxPercent,
             transactionDate: Self.formatDate(transactionDate)

@@ -75,17 +75,17 @@ public struct MainTabView<
             }
             .tag(AppTab.transaction)
 
-            tabRoot(path: $planningPath, content: planningView)
-            .tabItem {
-                Label("Kế hoạch", systemImage: "target")
-            }
-            .tag(AppTab.planning)
-
             tabRoot(path: $wealthPath, content: wealthView)
             .tabItem {
                 Label("Tài sản", systemImage: "chart.pie.fill")
             }
             .tag(AppTab.wealth)
+
+            tabRoot(path: $planningPath, content: planningView)
+            .tabItem {
+                Label("Kế hoạch", systemImage: "target")
+            }
+            .tag(AppTab.planning)
 
             tabRoot(path: $investmentPath, content: investmentView)
             .tabItem {

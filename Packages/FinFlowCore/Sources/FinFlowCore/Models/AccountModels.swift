@@ -61,6 +61,10 @@ public struct WealthAccountResponse: Codable, Sendable, Identifiable, Hashable {
         self.isSynced = isSynced
         self.includeInNetWorth = includeInNetWorth
     }
+
+    public var effectiveBalance: Double {
+        accountType.debt ? -abs(balance) : balance
+    }
 }
 
 // MARK: - Create / Update Wealth Account Request

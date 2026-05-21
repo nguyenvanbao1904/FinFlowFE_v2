@@ -47,7 +47,6 @@ public final class CreatePINViewModel {
     /// Tạo mã PIN
     public func createPIN() async {
         guard canSubmit else {
-            Logger.debug("CreatePIN: cannot submit (pinValid=\(isPINValid), confirmValid=\(isConfirmPINValid), loading=\(isProcessing))", category: "PIN")
             return
         }
 
@@ -60,7 +59,6 @@ public final class CreatePINViewModel {
         }
 
         isProcessing = true
-        Logger.info("CreatePIN: saving PIN for \(email)", category: "PIN")
 
         do {
             // Lưu PIN vào keychain

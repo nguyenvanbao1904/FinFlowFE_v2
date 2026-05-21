@@ -20,6 +20,7 @@ public class DependencyContainer {
     public static let shared = DependencyContainer()
 
     // 1. Hạ tầng (Infrastructure)
+    let apiClient: any HTTPClientProtocol
     let tokenStore: any TokenStoreProtocol
     let cacheService: any CacheServiceProtocol
 
@@ -73,6 +74,7 @@ public class DependencyContainer {
             apiVersion: config.apiVersion
                 // refreshHandler và onUnauthorized sẽ được config sau để tránh vòng phụ thuộc
         )
+        self.apiClient = apiClient
 
         let concreteAuthRepository = AuthRepository(
             client: apiClient,

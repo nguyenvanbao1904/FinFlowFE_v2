@@ -119,7 +119,7 @@ struct QuickAddWidgetView: View {
     // MARK: - Medium
 
     private var mediumView: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             // Trái: chi/thu — chiều rộng cố định để không tranh chỗ với nút
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 5) {
@@ -140,8 +140,10 @@ struct QuickAddWidgetView: View {
                 Text("Tháng này")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
-            .frame(width: 105)  // Cố định — không tranh chỗ cột nút
+            .frame(width: 94, alignment: .leading)
+            .layoutPriority(0)
 
             Divider().padding(.vertical, 6)
 
@@ -152,8 +154,10 @@ struct QuickAddWidgetView: View {
                 actionRow(icon: "camera.viewfinder", label: "Chụp hoá đơn", tint: .orange, url: "finflow://quickadd?mode=ocr")
             }
             .frame(maxWidth: .infinity)
+            .layoutPriority(1)
         }
-        .padding(14)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 14)
     }
 
     // MARK: - Sub-components
@@ -191,6 +195,8 @@ struct QuickAddWidgetView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+                    .allowsTightening(true)
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
                     .font(.system(size: 9, weight: .semibold))
@@ -217,7 +223,7 @@ struct QuickAddWidgetView: View {
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(color.opacity(0.9))
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.62)
         }
     }
 

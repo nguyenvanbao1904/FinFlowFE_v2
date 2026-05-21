@@ -22,10 +22,9 @@ struct TransactionAnalyticsAIInsightsSection: View {
 
     var body: some View {
         Section {
-            ForEach(insights) { insight in
-                insightRow(insight)
-                    .padding(.vertical, AppSpacing.xs)
-            }
+            AIInsightCard(items: insights.map(\.cardItem))
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
         } header: {
             HStack(spacing: AppSpacing.sm) {
                 Image(systemName: "sparkles")
@@ -37,29 +36,17 @@ struct TransactionAnalyticsAIInsightsSection: View {
             .textCase(nil)
         }
     }
+}
 
-    private func insightRow(_ insight: TransactionAIInsight) -> some View {
-        HStack(alignment: .top, spacing: AppSpacing.sm) {
-            Circle()
-                .fill(insight.color.opacity(OpacityLevel.light))
-                .frame(width: AppSpacing.iconMedium, height: AppSpacing.iconMedium)
-                .overlay {
-                    Image(systemName: insight.icon)
-                        .foregroundStyle(insight.color)
-                        .font(AppTypography.caption)
-                }
-
-            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                Text(insight.title)
-                    .font(AppTypography.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-                Text(insight.message)
-                    .font(AppTypography.caption)
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(AppSpacing.xs / 2)
-            }
-        }
+private extension TransactionAIInsight {
+    var cardItem: AIInsightCardItem {
+        AIInsightCardItem(
+            id: id,
+            title: title,
+            message: message,
+            systemImage: icon,
+            tint: color
+        )
     }
 }
 

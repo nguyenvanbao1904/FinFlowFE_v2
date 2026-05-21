@@ -102,7 +102,6 @@ public final class InvestmentPortfolioViewModel {
     }
 
     public func loadAll(force: Bool = false) async {
-        Logger.info("loadAll start | force=\(force)", category: "Investment")
         let showPortfolioLoadingOverlay = portfolios.isEmpty
         let previousSelectedPortfolioID = selectedPortfolio?.id
         if showPortfolioLoadingOverlay {
@@ -116,27 +115,17 @@ public final class InvestmentPortfolioViewModel {
 
         do {
             portfolios = try await getPortfoliosUseCase.execute()
-            Logger.info("loadAll portfolios fetched | count=\(portfolios.count)", category: "Investment")
+            NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
             if let current = selectedPortfolio, portfolios.contains(where: { $0.id == current.id }) {
                 // keep selection
             } else {
                 selectedPortfolio = portfolios.first
             }
-            Logger.info(
-                "loadAll selectedPortfolio after sync | id=\(selectedPortfolio?.id ?? "nil") name=\(selectedPortfolio?.name ?? "nil")",
-                category: "Investment"
-            )
             if selectedPortfolio?.id == previousSelectedPortfolioID {
                 await loadAssetsForSelectedPortfolio()
-            } else {
-                Logger.debug(
-                    "loadAll skip direct asset load | selection changed and will be handled by onChange",
-                    category: "Investment"
-                )
             }
         } catch {
             if error is CancellationError {
-                Logger.debug("loadAll cancelled", category: "Investment")
                 return
             }
             Logger.error("loadAll failed | error=\(error.localizedDescription)", category: "Investment")
@@ -147,6 +136,7 @@ public final class InvestmentPortfolioViewModel {
     public func createPortfolio(name: String) async {
         do {
             _ = try await createPortfolioUseCase.execute(request: CreatePortfolioRequest(name: name))
+            NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
             await loadAll(force: true)
         } catch {
             errorAlert = error.toHandledAlert(sessionManager: sessionManager, defaultTitle: "Lỗi tạo danh mục")
@@ -179,17 +169,12 @@ public final class InvestmentPortfolioViewModel {
 
     public func loadAssetsForSelectedPortfolio() async {
         guard let selectedPortfolio else {
-            Logger.info("loadAssetsForSelectedPortfolio skipped | no selected portfolio", category: "Investment")
             assets = []
             portfolioHealth = nil
             portfolioBenchmark = nil
             await recomputeAllPortfoliosTotalValue()
             return
         }
-        Logger.info(
-            "loadAssetsForSelectedPortfolio start | id=\(selectedPortfolio.id) name=\(selectedPortfolio.name)",
-            category: "Investment"
-        )
         let requestID = UUID()
         latestPortfolioLoadRequestID = requestID
         let selectedPortfolioID = selectedPortfolio.id
@@ -198,45 +183,24 @@ public final class InvestmentPortfolioViewModel {
         do {
             let fetchedAssets = try await getPortfolioAssetsUseCase.execute(portfolioId: selectedPortfolioID)
             guard requestID == latestPortfolioLoadRequestID else {
-                Logger.debug(
-                    "loadAssetsForSelectedPortfolio ignored stale request after assets fetch | id=\(selectedPortfolioID)",
-                    category: "Investment"
-                )
                 return
             }
-            Logger.info("assets fetched | count=\(fetchedAssets.count)", category: "Investment")
 
             let fetchedHealth = try? await getPortfolioHealthUseCase.execute(
                 portfolioId: selectedPortfolioID,
                 quarters: 12
             )
             guard requestID == latestPortfolioLoadRequestID else {
-                Logger.debug(
-                    "loadAssetsForSelectedPortfolio ignored stale request after health fetch | id=\(selectedPortfolioID)",
-                    category: "Investment"
-                )
                 return
             }
-            Logger.info(
-                "health fetched | totalClose=\(fetchedHealth?.current.totalValueClose ?? -1) stockClose=\(fetchedHealth?.current.stockValueClose ?? -1)",
-                category: "Investment"
-            )
 
             let fetchedBenchmark = try? await getPortfolioVsMarketUseCase.execute(
                 portfolioId: selectedPortfolioID,
                 code: "VNINDEX"
             )
             guard requestID == latestPortfolioLoadRequestID else {
-                Logger.debug(
-                    "loadAssetsForSelectedPortfolio ignored stale request after benchmark fetch | id=\(selectedPortfolioID)",
-                    category: "Investment"
-                )
                 return
             }
-            Logger.info(
-                "benchmark fetched | available=\(fetchedBenchmark != nil)",
-                category: "Investment"
-            )
 
             assets = fetchedAssets
             portfolioHealth = fetchedHealth
@@ -245,24 +209,15 @@ public final class InvestmentPortfolioViewModel {
 
             await prefetchIndustries(for: fetchedAssets)
             guard requestID == latestPortfolioLoadRequestID else {
-                Logger.debug(
-                    "loadAssetsForSelectedPortfolio ignored stale request before recompute | id=\(selectedPortfolioID)",
-                    category: "Investment"
-                )
                 return
             }
             await recomputeAllPortfoliosTotalValue()
-            Logger.info(
-                "portfolio computed | market=\(selectedPortfolioMarketValue) cost=\(portfolioCostBasis) pnl=\(unrealizedPnLValue) pnlPct=\(unrealizedPnLPct ?? -1)",
-                category: "Investment"
-            )
             isLoadingSelectedPortfolioDetails = false
         } catch {
             if requestID == latestPortfolioLoadRequestID {
                 isLoadingSelectedPortfolioDetails = false
             }
             if error is CancellationError {
-                Logger.debug("loadAssetsForSelectedPortfolio cancelled", category: "Investment")
                 return
             }
             Logger.error(
@@ -276,18 +231,26 @@ public final class InvestmentPortfolioViewModel {
     /// Cộng giá trị từng danh mục (tiền mặt + cổ phiếu); gọi song song theo từng portfolio.
     private func recomputeAllPortfoliosTotalValue() async {
         allPortfoliosTotalValue = portfolios.reduce(0) { partial, portfolio in
-            partial + (portfolio.totalCostBasis ?? portfolio.cashBalance)
+            partial + (portfolio.totalMarketValueClose ?? portfolio.totalCostBasis ?? portfolio.cashBalance)
         }
     }
 
-    public func createCashTransaction(tradeType: TradeType, amount: Double, transactionDate: Date) async throws {
+    public func createCashTransaction(
+        tradeType: TradeType,
+        amount: Double,
+        transferAccountId: String,
+        transactionDate: Date
+    ) async throws {
         guard let selectedPortfolio else { return }
         try await createTradeTransactionUseCase.executeCash(
             portfolioId: selectedPortfolio.id,
             tradeType: tradeType,
             amount: amount,
+            sourceAccountId: tradeType == .DEPOSIT ? transferAccountId : nil,
+            destinationAccountId: tradeType == .WITHDRAW ? transferAccountId : nil,
             transactionDate: transactionDate
         )
+        NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
         await loadAll(force: true)
     }
 
@@ -310,6 +273,7 @@ public final class InvestmentPortfolioViewModel {
             taxPercent: tradeType == .SELL ? 0.1 : nil,
             transactionDate: transactionDate
         )
+        NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
         await loadAll(force: true)
     }
 
@@ -323,6 +287,7 @@ public final class InvestmentPortfolioViewModel {
             portfolioId: selectedPortfolio.id,
             request: ImportPortfolioSnapshotRequest(cashBalance: cashBalance, holdings: holdings)
         )
+        NotificationCenter.default.post(name: .wealthAccountDidSave, object: nil)
         await loadAll(force: true)
     }
 
@@ -367,14 +332,17 @@ public final class InvestmentPortfolioViewModel {
 
     /// Giá vốn danh mục = tiền mặt + giá vốn cổ phiếu.
     public var portfolioCostBasis: Double {
-        portfolioTotalValue
+        guard loadedPortfolioDetailsID == selectedPortfolio?.id else {
+            return selectedPortfolio?.totalCostBasis ?? portfolioTotalValue
+        }
+        return portfolioTotalValue
     }
 
     /// Giá trị hiện tại theo market close của danh mục đang chọn.
     /// Fallback sang giá vốn nếu chưa có dữ liệu health.
     public var selectedPortfolioMarketValue: Double {
         guard loadedPortfolioDetailsID == selectedPortfolio?.id else {
-            return portfolioTotalValue
+            return selectedPortfolio?.totalMarketValueClose ?? selectedPortfolio?.totalCostBasis ?? portfolioTotalValue
         }
         if let closeValue = portfolioHealth?.current.totalValueClose, closeValue > 0 {
             return closeValue

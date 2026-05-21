@@ -18,6 +18,7 @@ public struct InvestmentViewDependencies {
     let getPortfolioHealthUseCase: GetPortfolioHealthUseCase
     let getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase
     let getTradeTransactionsUseCase: GetTradeTransactionsUseCase
+    let getWealthAccountsUseCase: GetWealthAccountsUseCase
     let sessionManager: any SessionManagerProtocol
     /// Tổng tài sản thanh khoản (tài khoản nhóm LIQUID) — dùng cho FSI survival runway.
     let liquidAssetsProvider: @MainActor () -> Double
@@ -46,6 +47,7 @@ public struct InvestmentViewDependencies {
         getPortfolioHealthUseCase: GetPortfolioHealthUseCase,
         getPortfolioVsMarketUseCase: GetPortfolioVsMarketUseCase,
         getTradeTransactionsUseCase: GetTradeTransactionsUseCase,
+        getWealthAccountsUseCase: GetWealthAccountsUseCase,
         sessionManager: any SessionManagerProtocol,
         liquidAssetsProvider: @escaping @MainActor () -> Double = { 0 },
         monthlyExpensesProvider: @escaping @MainActor () -> Double = { 0 },
@@ -68,6 +70,7 @@ public struct InvestmentViewDependencies {
         self.getPortfolioHealthUseCase = getPortfolioHealthUseCase
         self.getPortfolioVsMarketUseCase = getPortfolioVsMarketUseCase
         self.getTradeTransactionsUseCase = getTradeTransactionsUseCase
+        self.getWealthAccountsUseCase = getWealthAccountsUseCase
         self.sessionManager = sessionManager
         self.liquidAssetsProvider = liquidAssetsProvider
         self.monthlyExpensesProvider = monthlyExpensesProvider
@@ -103,13 +106,14 @@ public struct InvestmentView: View {
 
     private let suggestCompaniesUseCase: SuggestCompaniesUseCase
     private let getFairValueUseCase: GetFairValueUseCase
+    private let getWealthAccountsUseCase: GetWealthAccountsUseCase
     private let monthlySummaryLoader: @MainActor () async -> Void
     private let portfolioRepository: PortfolioRepository?
 
     public init(dependencies: InvestmentViewDependencies) {
-        Logger.debug("InvestmentView init", category: "InvestmentView")
         self.suggestCompaniesUseCase = dependencies.suggestCompaniesUseCase
         self.getFairValueUseCase = dependencies.getFairValueUseCase
+        self.getWealthAccountsUseCase = dependencies.getWealthAccountsUseCase
         self.monthlySummaryLoader = dependencies.monthlySummaryLoader
         self.portfolioRepository = dependencies.portfolioRepository
 
@@ -197,7 +201,6 @@ public struct InvestmentView: View {
 
     @ViewBuilder
     private var portfolioTab: some View {
-        let _ = Logger.debug("portfolioTab | isLoading=\(portfolioVM.isLoadingPortfolios) portfolioCount=\(portfolioVM.portfolios.count)", category: "InvestmentView")
         if portfolioVM.isLoadingPortfolios {
             portfolioListLoadingView
         } else if portfolioVM.portfolios.isEmpty {
@@ -264,10 +267,17 @@ public struct InvestmentView: View {
                 onImportPortfolio: { activeSheet = .importPortfolio }
             )
         case .addCashTransaction:
-            if portfolioVM.selectedPortfolio != nil {
-                AddCashTransactionSheet { tradeType, amount, date in
+            if let selectedPortfolio = portfolioVM.selectedPortfolio {
+                AddCashTransactionSheet(
+                    getWealthAccountsUseCase: getWealthAccountsUseCase,
+                    portfolioWealthAccountId: selectedPortfolio.wealthAccountId
+                ) { tradeType, amount, transferAccountId, date in
                     try await portfolioVM.createCashTransaction(
-                        tradeType: tradeType, amount: amount, transactionDate: date)
+                        tradeType: tradeType,
+                        amount: amount,
+                        transferAccountId: transferAccountId,
+                        transactionDate: date
+                    )
                 }
             }
         case .addStockTrade:

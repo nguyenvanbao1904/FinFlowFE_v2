@@ -6,23 +6,29 @@ import Foundation
 public struct PortfolioResponse: Codable, Sendable, Identifiable, Hashable {
     public let id: String
     public let name: String
+    public let wealthAccountId: String?
     public let cashBalance: Double
     public let totalCostBasis: Double?
+    public let totalMarketValueClose: Double?
     public let createdAt: String?
     public let updatedAt: String?
 
     public init(
         id: String,
         name: String,
+        wealthAccountId: String? = nil,
         cashBalance: Double,
         totalCostBasis: Double? = nil,
+        totalMarketValueClose: Double? = nil,
         createdAt: String? = nil,
         updatedAt: String? = nil
     ) {
         self.id = id
         self.name = name
+        self.wealthAccountId = wealthAccountId
         self.cashBalance = cashBalance
         self.totalCostBasis = totalCostBasis
+        self.totalMarketValueClose = totalMarketValueClose
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -30,9 +36,11 @@ public struct PortfolioResponse: Codable, Sendable, Identifiable, Hashable {
 
 public struct CreatePortfolioRequest: Codable, Sendable {
     public let name: String
+    public let wealthAccountId: String?
 
-    public init(name: String) {
+    public init(name: String, wealthAccountId: String? = nil) {
         self.name = name
+        self.wealthAccountId = wealthAccountId
     }
 }
 
@@ -117,6 +125,8 @@ public struct CreateTradeTransactionRequest: Codable, Sendable {
 
     // DEPOSIT/WITHDRAW
     public let amount: Double?
+    public let sourceAccountId: String?
+    public let destinationAccountId: String?
 
     // percent fields: e.g. 0.1 means 0.1%
     public let feePercent: Double?
@@ -131,6 +141,8 @@ public struct CreateTradeTransactionRequest: Codable, Sendable {
         quantity: Double? = nil,
         price: Double? = nil,
         amount: Double? = nil,
+        sourceAccountId: String? = nil,
+        destinationAccountId: String? = nil,
         feePercent: Double? = nil,
         taxPercent: Double? = nil,
         transactionDate: String? = nil
@@ -140,6 +152,8 @@ public struct CreateTradeTransactionRequest: Codable, Sendable {
         self.quantity = quantity
         self.price = price
         self.amount = amount
+        self.sourceAccountId = sourceAccountId
+        self.destinationAccountId = destinationAccountId
         self.feePercent = feePercent
         self.taxPercent = taxPercent
         self.transactionDate = transactionDate

@@ -419,21 +419,4 @@ public final class SessionManager: SessionManagerProtocol {
         // Set state to unauthenticated or sessionExpired so router switches to Login
         state = .unauthenticated
     }
-
-    // MARK: - Debug Logging
-
-    /// Log tất cả thông tin storage để debug
-    public func logAllStorageData() async {
-        Logger.debug(String(repeating: "=", count: 50), category: "Storage")
-        Logger.debug("📊 STORAGE DEBUG LOG", category: "Storage")
-        Logger.debug(String(repeating: "=", count: 50), category: "Storage")
-
-        // UserDefaults
-        await userDefaultsManager.logAllData()
-
-        // Keychain - Tokens
-        await tokenStore.logTokenStatus()
-
-        Logger.debug(String(repeating: "=", count: 50), category: "Storage")
-    }
 }

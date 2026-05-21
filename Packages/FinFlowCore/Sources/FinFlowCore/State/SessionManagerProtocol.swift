@@ -82,7 +82,4 @@ public protocol SessionManagerProtocol: AnyObject, Sendable {
     
     /// Unlock the session
     func unlockSession() async
-    
-    /// Debug helper to log storage
-    func logAllStorageData() async
 }

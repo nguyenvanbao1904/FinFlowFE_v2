@@ -26,6 +26,8 @@ public struct HomeView: View {
             } else if let snapshot = viewModel.snapshot {
                 HomeDashboardContentView(
                     snapshot: snapshot,
+                    insight: viewModel.insight,
+                    isLoadingInsight: viewModel.isLoadingInsight,
                     onSelectTab: { router.selectTab($0) }
                 )
             } else {
@@ -45,7 +47,7 @@ public struct HomeView: View {
             await viewModel.load()
         }
         .navigationTitle("Tổng quan")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

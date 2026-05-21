@@ -9,6 +9,10 @@ import Foundation
 
 /// Aggregated figures for the home screen; safe to use from any feature module.
 public struct HomeDashboardSnapshot: Sendable, Equatable {
+    public let netWorth: Double
+    public let liquidAssets: Double
+    public let debtTotal: Double
+    public let investmentAssets: Double
     public let totalBalance: Double
     public let totalIncome: Double
     public let totalExpense: Double
@@ -21,6 +25,10 @@ public struct HomeDashboardSnapshot: Sendable, Equatable {
     public let investmentTotalValue: Double
 
     public init(
+        netWorth: Double,
+        liquidAssets: Double,
+        debtTotal: Double,
+        investmentAssets: Double,
         totalBalance: Double,
         totalIncome: Double,
         totalExpense: Double,
@@ -31,6 +39,10 @@ public struct HomeDashboardSnapshot: Sendable, Equatable {
         primaryPortfolioName: String?,
         investmentTotalValue: Double
     ) {
+        self.netWorth = netWorth
+        self.liquidAssets = liquidAssets
+        self.debtTotal = debtTotal
+        self.investmentAssets = investmentAssets
         self.totalBalance = totalBalance
         self.totalIncome = totalIncome
         self.totalExpense = totalExpense
@@ -46,6 +58,22 @@ public struct HomeDashboardSnapshot: Sendable, Equatable {
 /// Loads a home dashboard snapshot without coupling Dashboard to feature modules.
 public protocol HomeDashboardService: Sendable {
     func loadSnapshot() async throws -> HomeDashboardSnapshot
+}
+
+/// Short AI narrative shown directly on Home. The Dashboard package only knows this contract;
+/// the app layer decides whether the source is LLM, cache, or a deterministic fallback.
+public struct HomeInsight: Sendable, Equatable {
+    public let title: String
+    public let message: String
+
+    public init(title: String, message: String) {
+        self.title = title
+        self.message = message
+    }
+}
+
+public protocol HomeInsightService: Sendable {
+    func loadInsight(for snapshot: HomeDashboardSnapshot) async throws -> HomeInsight
 }
 
 /// Thrown when loading the home snapshot exceeds the allowed time window.

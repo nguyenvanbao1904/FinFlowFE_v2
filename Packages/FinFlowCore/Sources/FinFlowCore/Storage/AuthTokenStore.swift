@@ -42,14 +42,7 @@ public actor AuthTokenStore: TokenStoreProtocol {
     }
 
     public func getRefreshToken() async -> String? {
-        Logger.debug("🔍 Getting refresh token from Keychain...", category: "Storage")
-        let token = await keychain.retrieve(for: KeychainKey.refreshToken)
-        if let token = token {
-            Logger.info("✅ Refresh token found: \(token.prefix(10))...", category: "Storage")
-        } else {
-            Logger.warning("❌ Refresh token NOT found in Keychain", category: "Storage")
-        }
-        return token
+        return await keychain.retrieve(for: KeychainKey.refreshToken)
     }
 
     public func clearRefreshToken() async {
@@ -62,22 +55,5 @@ public actor AuthTokenStore: TokenStoreProtocol {
     public func clearAll() async {
         await clearToken()
         await clearRefreshToken()
-    }
-
-    // MARK: - Debug Logging
-
-    /// Log token status trong Keychain để debug (CHỈ log existence + prefix, KHÔNG log full token)
-    public func logTokenStatus() async {
-        let accessToken = await getToken()
-        let refreshToken = await getRefreshToken()
-
-        Logger.debug(
-            """
-            🔑 Token Status in Keychain:
-            - Access Token: \(accessToken.map { "✅ Exists (\(String($0.prefix(20)))...)" } ?? "❌ Not Found")
-            - Refresh Token: \(refreshToken.map { "✅ Exists (\(String($0.prefix(20)))...)" } ?? "❌ Not Found")
-            - Access Token Length: \(accessToken?.count ?? 0) chars
-            - Refresh Token Length: \(refreshToken?.count ?? 0) chars
-            """, category: "Storage")
     }
 }

@@ -15,36 +15,46 @@ struct HomeDashboardServiceImpl: HomeDashboardService {
     private let getPortfolios: GetPortfoliosUseCase
     private let getPortfolioAssets: GetPortfolioAssetsUseCase
     private let getPortfolioHealth: GetPortfolioHealthUseCase
+    private let getWealthAccounts: GetWealthAccountsUseCase
 
     init(
         getTransactionSummary: GetTransactionSummaryUseCase,
         getBudgets: GetBudgetsUseCase,
         getPortfolios: GetPortfoliosUseCase,
         getPortfolioAssets: GetPortfolioAssetsUseCase,
-        getPortfolioHealth: GetPortfolioHealthUseCase
+        getPortfolioHealth: GetPortfolioHealthUseCase,
+        getWealthAccounts: GetWealthAccountsUseCase
     ) {
         self.getTransactionSummary = getTransactionSummary
         self.getBudgets = getBudgets
         self.getPortfolios = getPortfolios
         self.getPortfolioAssets = getPortfolioAssets
         self.getPortfolioHealth = getPortfolioHealth
+        self.getWealthAccounts = getWealthAccounts
     }
 
     func loadSnapshot() async throws -> HomeDashboardSnapshot {
         async let summary = try getTransactionSummary.execute()
         async let budgets = try getBudgets.execute()
         async let portfolios = try getPortfolios.execute()
+        async let wealthAccounts = try getWealthAccounts.execute()
 
         let s = try await summary
         let b = try await budgets
         let p = try await portfolios
+        let accounts = try await wealthAccounts
 
         let targetTotal = b.reduce(0.0) { $0 + $1.targetAmount }
         let spentTotal = b.reduce(0.0) { $0 + ($1.spentAmount ?? 0) }
         let cashTotal = p.reduce(0.0) { $0 + $1.cashBalance }
         let marketSnapshot = await computeMarketSnapshot(portfolios: p)
+        let wealthSnapshot = computeWealthSnapshot(accounts: accounts)
 
         return HomeDashboardSnapshot(
+            netWorth: wealthSnapshot.netWorth,
+            liquidAssets: wealthSnapshot.liquidAssets,
+            debtTotal: wealthSnapshot.debtTotal,
+            investmentAssets: wealthSnapshot.investmentAssets,
             totalBalance: s.totalBalance,
             totalIncome: s.totalIncome,
             totalExpense: s.totalExpense,
@@ -55,6 +65,27 @@ struct HomeDashboardServiceImpl: HomeDashboardService {
             primaryPortfolioName: marketSnapshot.primaryPortfolioName,
             investmentTotalValue: marketSnapshot.totalValue
         )
+    }
+
+    private func computeWealthSnapshot(accounts: [WealthAccountResponse]) -> (
+        netWorth: Double,
+        liquidAssets: Double,
+        debtTotal: Double,
+        investmentAssets: Double
+    ) {
+        let included = accounts.filter(\.includeInNetWorth)
+        let netWorth = included.reduce(0.0) { $0 + $1.effectiveBalance }
+        let liquidAssets = included
+            .filter { $0.accountType.group == "LIQUID" }
+            .reduce(0.0) { $0 + $1.effectiveBalance }
+        let investmentAssets = included
+            .filter { $0.accountType.group == "INVESTMENT" }
+            .reduce(0.0) { $0 + $1.effectiveBalance }
+        let debtTotal = included
+            .filter { $0.accountType.debt || $0.balance < 0 }
+            .reduce(0.0) { $0 + abs($1.effectiveBalance) }
+
+        return (netWorth, liquidAssets, debtTotal, investmentAssets)
     }
 
     /// Home dùng giá trị hiện tại (market close) nếu có; fallback sang cash + giá vốn khi health lỗi.
