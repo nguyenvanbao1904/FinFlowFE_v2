@@ -7,20 +7,6 @@ public struct FinFlowBotChatMessageRow: View {
 
     private var isBot: Bool { message.sender == .bot }
 
-    private var citationSummary: String? {
-        let normalized = message.citations
-            .compactMap { citation -> String? in
-                let title = citation.sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !title.isEmpty else { return nil }
-                if let page = citation.pageNumber { return "\(title) · tr.\(page)" }
-                return title
-            }
-        guard !normalized.isEmpty else { return nil }
-        let head = normalized.prefix(2).joined(separator: " • ")
-        let tailCount = max(0, normalized.count - 2)
-        return "Nguồn: \(head)\(tailCount > 0 ? " +\(tailCount)" : "")"
-    }
-
     public init(message: FinFlowBotChatMessage) {
         self.message = message
     }
@@ -43,12 +29,6 @@ public struct FinFlowBotChatMessageRow: View {
         VStack(alignment: .leading, spacing: Spacing.xs / 2) {
             MarkdownWithTables(text: message.text)
             timeLabel
-            if let citationSummary {
-                Text(citationSummary)
-                    .font(AppTypography.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Spacing.xs)
